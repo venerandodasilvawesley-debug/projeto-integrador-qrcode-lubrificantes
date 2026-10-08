@@ -156,6 +156,25 @@ table.resumo button.link{text-align:left}
 .cartao details{box-shadow:none;padding:6px 0;margin-top:6px}
 #i-msg,#i-checklist,#i-visor,#i-info{scroll-margin-top:84px}
 @media (min-width:900px){#i-visor,#i-info{scroll-margin-top:12px}}
+/* tela de escolha: primeira tela depois de ler o QR Code */
+#escolha{display:none}
+.escolhendo #escolha{display:flex;flex-direction:column;justify-content:center;min-height:100vh;min-height:100dvh;
+  padding:24px 16px;color:#fff;
+  background:linear-gradient(rgba(10,30,50,.35),rgba(10,30,50,.55)),#123a5c url(/fundo.jpg) center/cover no-repeat}
+.escolhendo header,.escolhendo .abas,.escolhendo main{display:none}
+#escolha>div{width:100%;max-width:720px;margin:0 auto}
+#escolha h1{margin:0;font-size:2.4rem;letter-spacing:.5px;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+#escolha p{margin:6px 0 22px;font-size:1.1rem;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.escolha-botoes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.escolha-botoes{grid-template-columns:1fr}}
+.escolha-botoes a{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:1.5rem;line-height:1.15;
+  padding:26px 10px;border:3px solid #fff;border-radius:16px;background:rgba(18,58,92,.88);color:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.escolha-botoes a:first-child{background:#fff;color:#123a5c}
+.escolha-botoes a small{display:block;font-weight:600;font-size:1rem;opacity:.9}
+.escolha-botoes a:focus-visible{outline:3px solid #e0a100}
+a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;
+  border:2px solid rgba(255,255,255,.7);border-radius:8px;padding:5px 10px}
 </style>
 </head>
 <body>
@@ -249,11 +268,14 @@ table.resumo button.link{text-align:left}
     return linhas || '<tr><td colspan="3">Nenhum registro neste aparelho.</td></tr>';
   }
 
-  // O mesmo QR Code abre a ficha com duas abas; o operador escolhe Lubrificação ou Inspeção.
+  // O QR Code abre primeiro a tela de escolha (Lubrificação ou Inspeção); depois, as abas trocam de página.
   function prepararAbas(codigo, e) {
     var inspecao = window.Inspecao.montar(document.getElementById("painel-inspecao"), codigo, e);
     var nomes = ["lubrificacao", "inspecao"];
+    function daHash() { return nomes.indexOf(location.hash.slice(1)) < 0 ? "" : location.hash.slice(1); }
     function mostrar(nome) {
+      document.body.classList.toggle("escolhendo", !nome);
+      if (!nome) { document.title = codigo; return; }
       nomes.forEach(function (n) {
         document.getElementById("painel-" + n).hidden = n !== nome;
         document.getElementById("aba-" + n).setAttribute("aria-selected", String(n === nome));
@@ -270,10 +292,8 @@ table.resumo button.link{text-align:left}
         window.scrollTo(0, 0);
       };
     });
-    window.addEventListener("hashchange", function () {
-      mostrar(location.hash === "#inspecao" ? "inspecao" : "lubrificacao");
-    });
-    mostrar(location.hash === "#inspecao" ? "inspecao" : "lubrificacao");
+    window.addEventListener("hashchange", function () { mostrar(daHash()); window.scrollTo(0, 0); });
+    mostrar(daHash());
   }
 
   function telaFicha(codigo, e) {
@@ -289,7 +309,12 @@ table.resumo button.link{text-align:left}
       '<button type="button" role="tab" id="aba-lubrificacao" aria-controls="painel-lubrificacao">Lubrificação<small>ficha e registro</small></button>' +
       '<button type="button" role="tab" id="aba-inspecao" aria-controls="painel-inspecao">Inspeção<small>modelo 3D e checklist</small></button>' +
       '</div></nav>' : '';
-    app.innerHTML = cabecalho(codigo, e.nome + " · posição " + e.posicao) + abas + '<main>' +
+    var escolha = temInspecao ? '<div id="escolha"><div><h1>' + esc(codigo) + '</h1><p>' +
+      esc(e.nome + " · posição " + e.posicao) + '</p><nav class="escolha-botoes">' +
+      '<a href="#lubrificacao">Lubrificação<small>ficha e registro</small></a>' +
+      '<a href="#inspecao">Inspeção<small>modelo 3D e checklist</small></a>' +
+      '</nav></div></div>' : '';
+    app.innerHTML = escolha + cabecalho(codigo, e.nome + " · posição " + e.posicao) + abas + '<main>' +
       '<div id="painel-lubrificacao" role="tabpanel">' +
       '<div id="mensagem"></div>' +
       '<section class="cartao">' +
@@ -335,7 +360,10 @@ table.resumo button.link{text-align:left}
         '<button class="link" id="csv">Registros deste aparelho (CSV)</button> · ' +
         '<a href="/">Todas as fichas</a></p></div>' +
       '<div id="painel-inspecao" role="tabpanel" hidden></div></main>';
-    if (temInspecao) prepararAbas(codigo, e);
+    if (temInspecao) {
+      document.querySelector("header div").insertAdjacentHTML("afterbegin", '<a class="voltar" href="#">‹ Opções</a>');
+      prepararAbas(codigo, e);
+    }
 
     var qtd = document.getElementById("quantidade");
     var campoQtd = document.getElementById("campo-quantidade");
