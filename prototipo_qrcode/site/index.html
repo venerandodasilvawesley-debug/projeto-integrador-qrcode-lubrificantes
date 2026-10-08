@@ -278,6 +278,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         return '<tr><td>' + esc(r.data_hora) + '</td><td>' + esc(r.tipo) + '<br>' +
           fmt(r.quantidade_ml) + ' mL' +
           (r.temperatura_c != null ? ' · ' + fmt(r.temperatura_c) + ' °C' : '') +
+          (r.horas_oleo != null ? '<br>Óleo com ' + milhar(r.horas_oleo) + ' h' : '') +
           '</td><td>' + esc(r.responsavel) +
           (r.observacao ? '<br><small>' + esc(r.observacao) + '</small>' : '') + '</td></tr>';
       }).join("");
