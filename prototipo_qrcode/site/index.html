@@ -57,6 +57,8 @@ td,th{text-align:left;padding:6px 4px;border-bottom:1px solid #dde3e9;vertical-a
 a,button.link{color:#123a5c}
 button.link{background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer}
 .rodape{margin-top:18px;font-size:.85rem;text-align:center}
+#estado-offline{max-width:560px;margin:0 auto 24px;padding:0 14px;color:#3d4c5a}
+#estado-offline b.pronto{color:#14602f}#estado-offline b.salvando{color:#8a6300}
 /* abas: Lubrificação | Inspeção */
 .abas{position:sticky;top:0;z-index:5;background:#123a5c;padding:0 14px 10px}
 .abas div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -71,7 +73,8 @@ main.larga,.larga .abas div{max-width:1180px}
 .insp-grade{display:grid;gap:0 16px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:900px){
   .insp-grade{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}
-  .insp-3d{position:sticky;top:76px}
+  /* fixo ao rolar; se não couber na tela, rola por dentro (para alcançar a ficha da peça) */
+  .insp-3d{position:sticky;top:76px;max-height:calc(100vh - 88px);overflow-y:auto;overscroll-behavior:contain}
 }
 .visor{position:relative;height:min(80vw,460px);min-height:260px;margin-top:8px;border-radius:10px;overflow:hidden;
   background:linear-gradient(#f5f8fb,#d9e2ea);touch-action:none}
@@ -99,7 +102,8 @@ main.larga,.larga .abas div{max-width:1180px}
 .peca-ficha{display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;margin:8px 0}
 .peca-ficha dt{margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#5b6b7a;padding-top:2px}
 @media (max-width:480px){.peca-ficha{grid-template-columns:1fr}.peca-ficha dt{padding-top:6px}}
-.peca-acoes{margin-top:10px}
+.peca-acoes{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.peca-acoes button.sec{background:#fff;color:#123a5c}
 .peca-acoes button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 14px;border-radius:10px;border:2px solid #123a5c;
   background:#123a5c;color:#fff;cursor:pointer}
 .cartao-det{margin-top:12px}
@@ -150,12 +154,14 @@ details.insp{box-shadow:none;border:1px solid #dde3e9;padding:8px 10px;margin-to
 table.resumo td:first-child{width:55%}
 table.resumo button.link{text-align:left}
 .cartao details{box-shadow:none;padding:6px 0;margin-top:6px}
-#i-msg,#i-checklist,#i-visor{scroll-margin-top:84px}
+#i-msg,#i-checklist,#i-visor,#i-info{scroll-margin-top:84px}
+@media (min-width:900px){#i-visor,#i-info{scroll-margin-top:12px}}
 </style>
 </head>
 <body>
 <div id="offline">Sem internet – a ficha continua funcionando</div>
 <div id="app"><main><div class="cartao">Carregando…</div></main></div>
+<p id="estado-offline" class="rodape"></p>
 <script src="/inspecao.js"></script>
 
 <script>
@@ -409,7 +415,31 @@ table.resumo button.link{text-align:left}
   window.addEventListener("offline", atualizarRede);
   atualizarRede();
 
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+  // Mostra se a ficha já está salva no aparelho para abrir pelo QR Code sem internet.
+  var estado = document.getElementById("estado-offline");
+  var ehIos = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var dicaIos = ehIos ? '<br>No iPhone o QR Code abre no <b>Safari</b>: abra a ficha uma vez pelo Safari com internet. ' +
+    'Se o aparelho ficar muitos dias sem abrir a ficha, o iPhone pode apagar a cópia; basta abrir de novo com internet.' : '';
+  function conferirOffline(tentativa) {
+    if (!("caches" in window)) return;
+    var busca = { ignoreVary: true, ignoreSearch: true };
+    Promise.all(["/", "/equipamentos.json", "/inspecao.js"].map(function (a) { return caches.match(a, busca); }))
+      .then(function (r) {
+        var ok = r.every(Boolean);
+        estado.innerHTML = (ok ? '<b class="pronto">✓ Ficha salva neste aparelho: abre pelo QR Code mesmo sem internet.</b>'
+          : '<b class="salvando">Salvando a ficha para uso sem internet… mantenha a internet ligada.</b>') + dicaIos;
+        if (!ok && tentativa < 20) setTimeout(function () { conferirOffline(tentativa + 1); }, 1500);
+      }).catch(function () {});
+  }
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(function () {});
+    conferirOffline(0);
+    // pede ao navegador para não apagar a cópia salva (Safari 17+, Chrome)
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+  } else {
+    estado.textContent = "Este navegador não guarda a ficha para uso sem internet.";
+  }
 
   fetch("/equipamentos.json").then(function (r) { return r.json(); }).then(iniciar)
     .catch(function () {
