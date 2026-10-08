@@ -22,6 +22,9 @@
       { "temp_c": 85, "horas": 10000 },
       { "temp_c": 90, "horas": 7500 }
     ],
+    "horimetro": false,
+    "regime": { "h_dia": 24, "dias_semana": 7 },
+    "data_ultima_troca": "2026-10-01",
     "periodicidade": "Troca conforme a temperatura do óleo: 15.000 h (80 °C); 10.000 h (85 °C); 7.500 h (90 °C). Avaliar o óleo nas primeiras 500 h.",
     "epis": "Luvas nitrílicas e óculos de proteção",
     "alertas": [

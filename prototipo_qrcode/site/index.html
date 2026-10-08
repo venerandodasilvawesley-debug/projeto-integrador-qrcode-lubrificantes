@@ -153,6 +153,7 @@ main.larga,.larga .abas div{max-width:1180px}
 .parecer.st-c{background:#d9f2e1;border-color:#1c8a45}.parecer.st-a{background:#fff3cd;border-color:#e0a100}
 .parecer.st-nc{background:#fbdcdc;border-color:#c22525}
 /* vida útil do óleo */
+#vida-status .parecer{margin-top:6px}#vida-resumo .grande{font-size:1.3rem}
 .vida-barra{position:relative;height:14px;margin-top:14px;border-radius:7px;overflow:hidden;
   background:linear-gradient(90deg,#bfe6cb 0 80%,#ffe69a 80% 100%)}
 .vida-barra i{display:block;height:100%;width:0;background:#1c8a45}
@@ -339,6 +340,13 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<div id="mensagem"></div>' +
       (e.vida_util_oleo ? '<section class="cartao" id="vida">' +
         '<div class="rotulo">Vida útil do óleo</div>' +
+        '<div id="vida-status"></div>' +
+        '<div class="duplo" id="vida-resumo"></div>' +
+        '<div class="vida-barra"><i id="vida-fill"></i></div>' +
+        '<div class="vida-escala"><span>0 h</span><span id="vida-80"></span><span id="vida-100"></span></div>' +
+        '<details id="vida-ajuste"><summary>Ajustar a contagem (só se precisar)</summary>' +
+        '<p class="dica">A ficha calcula sozinha: conta os dias desde a última troca registrada, com a máquina no regime de trabalho abaixo. ' +
+          'Mexa aqui só para corrigir a data, descontar uma parada ou mudar a temperatura de trabalho.</p>' +
         '<label style="margin-top:6px">Como contar as horas</label>' +
         '<div class="tipos dois">' +
           '<label><input type="radio" name="modo-oleo" value="horimetro"><span>Com horímetro<small>leitura do aparelho</small></span></label>' +
@@ -361,9 +369,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           return '<label><input type="radio" name="limite-oleo" value="' + v.horas + '"><span>' +
             (v.temp_c === e.vida_util_oleo[0].temp_c ? 'até ' : '') + v.temp_c + ' °C<small>' + milhar(v.horas) + ' h</small></span></label>';
         }).join("") + '</div>' +
-        '<div class="vida-barra"><i id="vida-fill"></i></div>' +
-        '<div class="vida-escala"><span>0 h</span><span id="vida-80"></span><span id="vida-100"></span></div>' +
-        '<div id="vida-status"></div>' +
+        '</details>' +
       '</section>' : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
@@ -436,7 +442,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     // Vida útil do óleo: verde até 80 % do limite, amarelo nos últimos 20 %, vermelho depois do limite.
     var vida = { horas: null, limite: null };
     var horasEl = document.getElementById("horas-oleo");
+    var resumir = null, proxTroca = null;
     function atualizarVida() {
+      if (resumir) resumir();
       var st = document.getElementById("vida-status"), fill = document.getElementById("vida-fill");
       var lim = vida.limite, h = vida.horas;
       document.getElementById("vida-80").textContent = "80 % = " + milhar(lim * 0.8) + " h";
@@ -444,8 +452,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       if (h == null) {
         fill.style.width = "0";
         st.innerHTML = '<div class="parecer st-nv" style="background:#e3e8ed;border-color:#5b6b7a">' +
-          (vida.modo === "estimado" ? 'Informe a data da última troca e a jornada de trabalho para ver a situação do óleo.'
-            : 'Informe as horas do horímetro para ver a situação do óleo.') + '</div>';
+          (vida.modo === "estimado" ? 'Informe abaixo a data da última troca de óleo (só na primeira vez). Depois a ficha calcula sozinha.'
+            : 'Informe abaixo as horas do horímetro para ver a situação do óleo.') + '</div>';
         return;
       }
       var pct = Math.round(h / lim * 100), classe, titulo, fazer;
@@ -461,7 +469,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         classe = "st-a";
         titulo = "AMARELO – últimos 20 % da vida útil (" + pct + " %). Faltam " + milhar(lim - h) + " h para o limite.";
         fazer = "Programar a troca: separar " + oleo + " (ou equivalente de mesma base), agendar a parada com bloqueio (LOTO) " +
-          "e trocar antes de " + milhar(lim) + " h.";
+          "e trocar " + (proxTroca ? "até " + proxTroca : "antes de " + milhar(lim) + " h") + ".";
       } else {
         classe = "st-c";
         titulo = "VERDE – óleo dentro da vida útil (" + pct + " %). Faltam " + milhar(lim * 0.8 - h) + " h para a faixa de atenção.";
@@ -479,20 +487,64 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       try { vida = JSON.parse(localStorage.getItem("vida_oleo_" + codigo)) || vida; } catch (err) {}
       var limites = e.vida_util_oleo.map(function (v) { return v.horas; });
       if (limites.indexOf(vida.limite) < 0) vida.limite = limites[0];
+      // Nada para digitar: o regime vem do cadastro do equipamento (contínuo, 24 h/7 dias, se não informado)
+      // e a data vem da última Troca registrada neste aparelho ou, na falta dela, do cadastro.
+      var regime = e.regime || { h_dia: 24, dias_semana: 7 };
+      if (vida.v !== 2) {
+        vida.h_dia = regime.h_dia; vida.dias_semana = regime.dias_semana;
+        if (vida.modo !== "estimado" && vida.horas == null) vida.modo = e.horimetro ? "horimetro" : "estimado";
+        vida.v = 2;
+      }
       if (vida.modo !== "estimado") vida.modo = "horimetro";
-      // regime contínuo (24 h, 7 dias) como padrão: a máquina só para em parada programada ou emergencial
-      if (vida.h_dia == null) vida.h_dia = 24;
-      if (vida.dias_semana == null) vida.dias_semana = 7;
       if (vida.paradas_h == null) vida.paradas_h = 0;
+      if (!vida.data_troca) {
+        var trocas = lerRegistros().filter(function (r) { return r.codigo === codigo && r.tipo === "Troca"; });
+        var u = trocas.length ? /^(\d{2})\/(\d{2})\/(\d{4})/.exec(trocas[trocas.length - 1].data_hora) : null;
+        vida.data_troca = u ? u[3] + "-" + u[2] + "-" + u[1] : (e.data_ultima_troca || null);
+      }
       var dataEl = document.getElementById("oleo-data"), hdiaEl = document.getElementById("oleo-hdia"),
         diasEl = document.getElementById("oleo-dias"), paradasEl = document.getElementById("oleo-paradas");
-      // Sem horímetro: horas = dias corridos desde a troca × (dias por semana ÷ 7) × horas por dia − horas de parada.
+      var dataDe = function (iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+        return m ? new Date(+m[1], +m[2] - 1, +m[3], 12) : null;
+      };
+      var dataBr = function (d) {
+        return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+      };
+      var diasDesde = function (t) { var h = new Date(); h.setHours(12, 0, 0, 0); return Math.round((h - t) / 864e5); };
+      // horas trabalhadas por dia corrido
+      var taxa = function () {
+        return vida.h_dia > 0 && vida.h_dia <= 24 && vida.dias_semana >= 1 && vida.dias_semana <= 7
+          ? vida.h_dia * vida.dias_semana / 7 : null;
+      };
+      // Sem horímetro: horas = dias corridos desde a troca × horas por dia corrido − horas de parada.
       var estimar = function () {
-        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(vida.data_troca || "");
-        if (!m || !(vida.h_dia > 0 && vida.h_dia <= 24) || !(vida.dias_semana >= 1 && vida.dias_semana <= 7)) return null;
-        var hoje = new Date(); hoje.setHours(12, 0, 0, 0);
-        var dias = Math.round((hoje - new Date(+m[1], +m[2] - 1, +m[3], 12)) / 864e5);
-        return dias < 0 ? null : Math.max(0, Math.round(dias * vida.dias_semana / 7 * vida.h_dia - (vida.paradas_h || 0)));
+        var t = dataDe(vida.data_troca), x = taxa();
+        if (!t || !x || diasDesde(t) < 0) return null;
+        return Math.max(0, Math.round(diasDesde(t) * x - (vida.paradas_h || 0)));
+      };
+      // o que o mecânico lê ao abrir a ficha: quando foi a última troca e quando é a próxima
+      resumir = function () {
+        var el = document.getElementById("vida-resumo"), t = dataDe(vida.data_troca), x = taxa();
+        var bloco = function (rot, val, sub) {
+          return '<div><div class="rotulo">' + rot + '</div><div class="grande">' + esc(val) + '</div><div class="dica">' + esc(sub) + '</div></div>';
+        };
+        proxTroca = null;
+        if (vida.horas == null) { el.innerHTML = ""; return; }
+        if (vida.modo === "estimado" && t && x) {
+          var dias = diasDesde(t), total = Math.ceil((vida.limite + (vida.paradas_h || 0)) / x);
+          var prox = new Date(t); prox.setDate(prox.getDate() + total);
+          var falta = total - dias;
+          proxTroca = dataBr(prox);
+          el.innerHTML = bloco("Última troca", dataBr(t), (dias === 0 ? "hoje" : "há " + dias + (dias === 1 ? " dia" : " dias")) +
+              " · cerca de " + milhar(vida.horas) + " h") +
+            bloco("Próxima troca", dataBr(prox), falta >= 0 ? "faltam " + milhar(falta) + (falta === 1 ? " dia" : " dias")
+              : "atrasada " + milhar(-falta) + (falta === -1 ? " dia" : " dias"));
+        } else {
+          el.innerHTML = bloco("Horas do óleo", milhar(vida.horas) + " h", "desde a última troca") +
+            bloco(vida.horas > vida.limite ? "Passou do limite" : "Faltam", milhar(Math.abs(vida.limite - vida.horas)) + " h",
+              "limite " + milhar(vida.limite) + " h");
+        }
       };
       var aplicarModo = function () {
         var est = vida.modo === "estimado";
@@ -528,6 +580,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         guardarVida(); atualizarVida();
       });
       aplicarModo();
+      if (vida.horas == null) document.getElementById("vida-ajuste").open = true;
       // a aba Inspeção soma as horas rodadas e avisa por este evento
       window.addEventListener("vida-oleo", function () {
         try { vida = JSON.parse(localStorage.getItem("vida_oleo_" + codigo)) || vida; } catch (err) {}
