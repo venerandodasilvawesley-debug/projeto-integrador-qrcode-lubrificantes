@@ -37,10 +37,11 @@ summary{font-weight:700;cursor:pointer}
 dl{margin:8px 0 0}dt{font-weight:700;margin-top:8px}dd{margin:0}
 h2{font-size:1.15rem;margin:0 0 10px}
 label{display:block;font-weight:600;margin-top:12px}
-input[type=text]{width:100%;font-size:1.15rem;padding:12px;margin-top:4px;
+input[type=text],input[type=date]{width:100%;font-size:1.15rem;padding:12px;margin-top:4px;
   border:2px solid #b8c4cf;border-radius:10px}
 .tipos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
-.tipos label{margin:0}
+.tipos label{margin:0}.tipos.dois{grid-template-columns:1fr 1fr}
+#oleo-estimado .duplo{margin-top:0}input[readonly]{background:#eef1f4;color:#3d4c5a}
 .tipos input{position:absolute;opacity:0}
 .tipos span{display:block;text-align:center;padding:14px 4px;border:2px solid #b8c4cf;
   border-radius:10px;font-weight:700;background:#fff}
@@ -338,9 +339,21 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<div id="mensagem"></div>' +
       (e.vida_util_oleo ? '<section class="cartao" id="vida">' +
         '<div class="rotulo">Vida útil do óleo</div>' +
-        '<label style="margin-top:6px">Horas trabalhadas desde a última troca (horímetro)' +
+        '<label style="margin-top:6px">Como contar as horas</label>' +
+        '<div class="tipos dois">' +
+          '<label><input type="radio" name="modo-oleo" value="horimetro"><span>Com horímetro<small>leitura do aparelho</small></span></label>' +
+          '<label><input type="radio" name="modo-oleo" value="estimado"><span>Sem horímetro<small>calcula pela jornada</small></span></label>' +
+        '</div>' +
+        '<div id="oleo-estimado" style="display:none">' +
+          '<label>Data da última troca de óleo<input type="date" id="oleo-data"></label>' +
+          '<div class="duplo">' +
+            '<label>Horas por dia<input type="text" inputmode="decimal" id="oleo-hdia" maxlength="4"></label>' +
+            '<label>Dias por semana<input type="text" inputmode="numeric" id="oleo-dias" maxlength="1"></label>' +
+          '</div>' +
+        '</div>' +
+        '<label>Horas trabalhadas desde a última troca' +
           '<input type="text" inputmode="numeric" id="horas-oleo" maxlength="7"></label>' +
-        '<p class="dica">Preenchido sozinho: a cada inspeção com horímetro, as horas rodadas desde a inspeção anterior são somadas aqui.</p>' +
+        '<p class="dica" id="horas-dica"></p>' +
         '<label>Temperatura de trabalho do óleo</label>' +
         '<div class="tipos">' + e.vida_util_oleo.map(function (v) {
           return '<label><input type="radio" name="limite-oleo" value="' + v.horas + '"><span>' +
@@ -429,7 +442,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       if (h == null) {
         fill.style.width = "0";
         st.innerHTML = '<div class="parecer st-nv" style="background:#e3e8ed;border-color:#5b6b7a">' +
-          'Informe as horas do horímetro para ver a situação do óleo.</div>';
+          (vida.modo === "estimado" ? 'Informe a data da última troca e a jornada de trabalho para ver a situação do óleo.'
+            : 'Informe as horas do horímetro para ver a situação do óleo.') + '</div>';
         return;
       }
       var pct = Math.round(h / lim * 100), classe, titulo, fazer;
@@ -463,7 +477,38 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       try { vida = JSON.parse(localStorage.getItem("vida_oleo_" + codigo)) || vida; } catch (err) {}
       var limites = e.vida_util_oleo.map(function (v) { return v.horas; });
       if (limites.indexOf(vida.limite) < 0) vida.limite = limites[0];
-      horasEl.value = vida.horas == null ? "" : milhar(vida.horas);
+      if (vida.modo !== "estimado") vida.modo = "horimetro";
+      if (vida.h_dia == null) vida.h_dia = 8;
+      if (vida.dias_semana == null) vida.dias_semana = 5;
+      var dataEl = document.getElementById("oleo-data"), hdiaEl = document.getElementById("oleo-hdia"),
+        diasEl = document.getElementById("oleo-dias");
+      // Sem horímetro: horas = dias corridos desde a troca × (dias por semana ÷ 7) × horas por dia.
+      var estimar = function () {
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(vida.data_troca || "");
+        if (!m || !(vida.h_dia > 0 && vida.h_dia <= 24) || !(vida.dias_semana >= 1 && vida.dias_semana <= 7)) return null;
+        var hoje = new Date(); hoje.setHours(12, 0, 0, 0);
+        var dias = Math.round((hoje - new Date(+m[1], +m[2] - 1, +m[3], 12)) / 864e5);
+        return dias < 0 ? null : Math.round(dias * vida.dias_semana / 7 * vida.h_dia);
+      };
+      var aplicarModo = function () {
+        var est = vida.modo === "estimado";
+        document.getElementById("oleo-estimado").style.display = est ? "block" : "none";
+        horasEl.readOnly = est;
+        if (est) vida.horas = estimar();
+        horasEl.value = vida.horas == null ? "" : milhar(vida.horas);
+        document.getElementById("horas-dica").textContent = est
+          ? "Estimativa calculada sozinha a cada abertura da ficha: dias desde a troca × jornada. Ao registrar uma Troca, a data volta para hoje."
+          : "Preenchido sozinho: a cada inspeção com horímetro, as horas rodadas desde a inspeção anterior são somadas aqui.";
+        guardarVida(); atualizarVida();
+      };
+      document.querySelectorAll("input[name=modo-oleo]").forEach(function (r) {
+        r.checked = r.value === vida.modo;
+        r.addEventListener("change", function () { vida.modo = r.value; aplicarModo(); });
+      });
+      dataEl.value = vida.data_troca || ""; hdiaEl.value = fmt(vida.h_dia); diasEl.value = vida.dias_semana;
+      dataEl.addEventListener("input", function () { vida.data_troca = dataEl.value || null; aplicarModo(); });
+      hdiaEl.addEventListener("input", function () { vida.h_dia = numero(hdiaEl.value); aplicarModo(); });
+      diasEl.addEventListener("input", function () { vida.dias_semana = numero(diasEl.value); aplicarModo(); });
       document.querySelectorAll("input[name=limite-oleo]").forEach(function (r) {
         r.checked = Number(r.value) === vida.limite;
         r.addEventListener("change", function () { vida.limite = Number(r.value); guardarVida(); atualizarVida(); });
@@ -473,7 +518,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         vida.horas = d ? Number(d) : null;
         guardarVida(); atualizarVida();
       });
-      atualizarVida();
+      aplicarModo();
       // a aba Inspeção soma as horas rodadas e avisa por este evento
       window.addEventListener("vida-oleo", function () {
         try { vida = JSON.parse(localStorage.getItem("vida_oleo_" + codigo)) || vida; } catch (err) {}
@@ -530,7 +575,12 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       }
       document.getElementById("historico").innerHTML = linhasHistorico(codigo);
       // óleo novo: a contagem de horas recomeça
-      if (horasEl && tipo === "Troca") { vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida(); }
+      if (horasEl && tipo === "Troca") {
+        var d = new Date();
+        vida.data_troca = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+        document.getElementById("oleo-data").value = vida.data_troca;
+        vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida();
+      }
       temp.value = ""; obs.value = ""; conf.checked = false;
       avisoTemp.style.display = "none";
       avisar("ok", "Registro salvo neste aparelho.");

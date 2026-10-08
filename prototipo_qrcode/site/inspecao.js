@@ -387,7 +387,7 @@
         } else {
           var v = lerVida();
           t = "Rodou " + fmt(d) + " h desde a última inspeção (" + u.data_hora.slice(0, 10) + " · " + fmt(u.horimetro) + " h)." +
-            (v && v.horas != null && d > 0 ? " Óleo: " + fmt(v.horas) + " h → " + fmt(Math.round(v.horas + d)) + " h desde a última troca." : "");
+            (v && v.modo !== "estimado" && v.horas != null && d > 0 ? " Óleo: " + fmt(v.horas) + " h → " + fmt(Math.round(v.horas + d)) + " h desde a última troca." : "");
         }
         document.getElementById("i-rodou").innerHTML = '<div class="ref">' + esc(t) + '</div>';
       }
@@ -587,7 +587,7 @@
       // as horas rodadas entram sozinhas na vida útil do óleo (aba Lubrificação)
       var oleo = "";
       var v = lerVida();
-      if (rodou > 0 && v && v.horas != null) {
+      if (rodou > 0 && v && v.modo !== "estimado" && v.horas != null) {
         v.horas = Math.round(v.horas + rodou);
         try {
           localStorage.setItem("vida_oleo_" + codigo, JSON.stringify(v));
