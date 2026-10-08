@@ -1,7 +1,7 @@
 // Service worker: guarda a ficha no aparelho para funcionar sem internet.
 // Com rede, busca a versão mais nova; sem rede (ou rede lenta), usa a cópia salva.
-const CACHE = "ficha-lubrificacao-v3";
-const ARQUIVOS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg",
+const CACHE = "ficha-lubrificacao-v4";
+const ARQUIVOS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/fundo.jpg",
   "/inspecao.js", "/redutor3d.js", "/vendor/three.module.min.js", "/vendor/OrbitControls.js"];
 const ESPERA_MS = 3000;
 
