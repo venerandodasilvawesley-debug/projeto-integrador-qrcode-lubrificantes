@@ -143,10 +143,15 @@
           return '<button type="button" class="link" data-ir="' + esc(it.id) + '">' + esc(it.titulo) + '</button>';
         }).join(", ") : "") +
         '<div class="peca-acoes"><button type="button" data-isolar="' + (isolada ? '' : esc(id)) + '">' +
-          (isolada ? 'Mostrar todas as peças' : 'Ver só esta peça') + '</button></div>';
+          (isolada ? 'Mostrar todas as peças' : 'Ver só esta peça') + '</button>' +
+          '<button type="button" class="sec" data-voltar>↑ Voltar ao modelo 3D</button></div>';
     }
 
     elInfo.addEventListener("click", function (ev) {
+      if (ev.target.closest("[data-voltar]")) {
+        document.getElementById("i-visor").scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
       var iso = ev.target.closest("[data-isolar]");
       if (iso && visor) {
         var alvo = iso.getAttribute("data-isolar");
@@ -184,7 +189,11 @@
         var faixa = document.getElementById("i-explosao");
         var bExp = document.getElementById("i-b-explodir");
         visor = mod.criarVisualizador(caixa, {
-          aoSelecionar: mostrarPeca,
+          // ao tocar num número ou numa peça, a tela desce até a ficha dela
+          aoSelecionar: function (id) {
+            mostrarPeca(id);
+            if (id) elInfo.scrollIntoView({ behavior: "smooth", block: "start" });
+          },
           aoExplodir: function (t) { faixa.value = Math.round(t * 100); }
         });
         pecasModelo = mod.PECAS;

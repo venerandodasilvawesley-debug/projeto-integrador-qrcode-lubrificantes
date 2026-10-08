@@ -1,12 +1,22 @@
 // Service worker: guarda a ficha no aparelho para funcionar sem internet.
 // Com rede, busca a versão mais nova; sem rede (ou rede lenta), usa a cópia salva.
-const CACHE = "ficha-lubrificacao-v4";
-const ARQUIVOS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/fundo.jpg",
-  "/inspecao.js", "/redutor3d.js", "/vendor/three.module.min.js", "/vendor/OrbitControls.js"];
+const CACHE = "ficha-lubrificacao-v6";
+// Sem estes a ficha não abre: a instalação só termina se todos forem salvos.
+const ESSENCIAIS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/inspecao.js"];
+// O modelo 3D é grande: é salvo em seguida, sem impedir a ficha de funcionar sem internet.
+const EXTRAS = ["/redutor3d.js", "/vendor/three.module.min.js", "/vendor/OrbitControls.js",
+  "/fundo.jpg", "/apple-touch-icon.png", "/icone-192.png"];
 const ESPERA_MS = 3000;
+// O Safari (iPhone) pode não achar a cópia por causa do cabeçalho Vary; ignorar é seguro aqui.
+const BUSCA = { ignoreVary: true, ignoreSearch: true };
 
 self.addEventListener("install", (ev) => {
-  ev.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  ev.waitUntil(
+    caches.open(CACHE)
+      .then((c) => c.addAll(ESSENCIAIS).then(() =>
+        Promise.all(EXTRAS.map((a) => c.add(a).catch(() => null)))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (ev) => {
@@ -17,14 +27,25 @@ self.addEventListener("activate", (ev) => {
   );
 });
 
-function daRede(pedido, chave) {
-  return fetch(pedido).then((resposta) => {
-    if (resposta.ok) {
-      const copia = resposta.clone();
-      caches.open(CACHE).then((c) => c.put(chave, copia));
-    }
-    return resposta;
-  });
+// O Safari recusa abrir uma página entregue pelo service worker se a resposta veio de um
+// redirecionamento; nesse caso devolve uma cópia "limpa" da mesma resposta.
+function semRedirecionamento(resposta) {
+  if (!resposta || !resposta.redirected) return Promise.resolve(resposta);
+  return resposta.blob().then((corpo) => new Response(corpo, {
+    status: resposta.status, statusText: resposta.statusText, headers: resposta.headers
+  }));
+}
+
+function daRede(pedido, chave, pagina) {
+  return fetch(pedido)
+    .then((resposta) => (pagina ? semRedirecionamento(resposta) : resposta))
+    .then((resposta) => {
+      if (resposta.ok) {
+        const copia = resposta.clone();
+        caches.open(CACHE).then((c) => c.put(chave, copia));
+      }
+      return resposta;
+    });
 }
 
 self.addEventListener("fetch", (ev) => {
@@ -32,16 +53,18 @@ self.addEventListener("fetch", (ev) => {
   const url = new URL(pedido.url);
   if (pedido.method !== "GET" || url.origin !== location.origin) return;
 
-  // /e/RED-001 e a página inicial usam a mesma página guardada em "/"
+  // /e/RED-001 (endereço do QR Code) e a página inicial usam a mesma página guardada em "/"
   const ehFicha = pedido.mode === "navigate" && (url.pathname === "/" || url.pathname.startsWith("/e/"));
   const chave = ehFicha ? "/" : pedido;
 
   ev.respondWith(
-    caches.match(chave).then((salvo) => {
-      const rede = daRede(pedido, chave);
-      if (!salvo) return rede;
-      const limite = new Promise((ok) => setTimeout(() => ok(salvo), ESPERA_MS));
-      return Promise.race([rede.catch(() => salvo), limite]);
-    })
+    caches.match(chave, BUSCA)
+      .then((salvo) => (ehFicha ? semRedirecionamento(salvo) : salvo))
+      .then((salvo) => {
+        const rede = daRede(pedido, chave, ehFicha);
+        if (!salvo) return rede;
+        const limite = new Promise((ok) => setTimeout(() => ok(salvo), ESPERA_MS));
+        return Promise.race([rede.catch(() => salvo), limite]);
+      })
   );
 });
