@@ -93,8 +93,9 @@
           '</div>' +
           '<div class="info-peca" id="i-info">Arraste para girar, use dois dedos para aproximar. Toque numa peça ou num número para ver o que inspecionar.</div>' +
           '<details class="legenda"><summary>Lista de peças</summary><div class="rolar"><table class="bom">' +
-            '<thead><tr><th>Nº</th><th>Peça e tipo</th><th>Qtd.</th></tr></thead><tbody id="i-legenda"></tbody></table></div>' +
-            '<p class="dica">Especificações típicas para redutores deste porte. Antes de comprar reposição, ' +
+            '<thead><tr><th>Nº</th><th>Peça e tipo</th><th>Qtd.</th><th>Tags</th></tr></thead><tbody id="i-legenda"></tbody></table></div>' +
+            '<p class="dica">Tag completo = código do equipamento + código da peça, ex.: <code>' + esc(codigo) + '-COR-01</code>. ' +
+            'Especificações típicas para redutores deste porte. Antes de comprar reposição, ' +
             'confira o código gravado na peça ou a lista de peças do fabricante.</p></details>' +
         '</section>' +
         '<div class="insp-col">' +
@@ -121,7 +122,10 @@
     }
 
     // ficha da peça: tipo, material, quantidade, especificação, função, inspeção e falhas comuns
-    function mostrarPeca(id) {
+    // "COR-01" -> "RED-001-COR-01"; "PAR-01 a PAR-04" -> "RED-001-PAR-01 a RED-001-PAR-04"
+    function tagCompleto(t) { return String(t).replace(/[A-Z]{3}-\d{2}/g, function (x) { return codigo + "-" + x; }); }
+
+    function mostrarPeca(id, tagTocado) {
       if (!id) {
         elInfo.innerHTML = "Toque numa peça ou num número para ver a ficha dela. " +
           "Use “Por dentro” para ver as peças internas.";
@@ -132,8 +136,14 @@
       var rel = itens.filter(function (it) { return it.pecas.indexOf(id) >= 0; });
       var isolada = visor && visor.isolada === id;
       function linha(rot, txt) { return '<dt>' + rot + '</dt><dd>' + esc(txt) + '</dd>'; }
+      var unidades = visor ? visor.unidades(id) : [];
+      var tags = '<ul class="tags">' + unidades.map(function (u) {
+        return '<li' + (u.tag === tagTocado ? ' class="atual"' : '') + '><code>' + esc(tagCompleto(u.tag)) + '</code> ' + esc(u.local) + '</li>';
+      }).join("") + '</ul>';
       elInfo.innerHTML = '<div class="peca-topo"><b>' + (i + 1) + '. ' + esc(p.nome) + '</b>' +
         (p.interna ? '<span class="chip st-nv">peça interna</span>' : '') + '</div>' +
+        (tagTocado ? '<div class="tag-grande">Tag <code>' + esc(tagCompleto(tagTocado)) + '</code></div>' : '') +
+        '<div class="rotulo">' + (unidades.length > 1 ? 'Tags das unidades' : 'Tag') + '</div>' + tags +
         '<dl class="peca-ficha">' +
           linha("Tipo", p.tipo) + linha("Material", p.material) + linha("Quantidade", p.qtd) +
           linha("Especificação", p.espec) + linha("Função", p.funcao) +
@@ -190,8 +200,8 @@
         var bExp = document.getElementById("i-b-explodir");
         visor = mod.criarVisualizador(caixa, {
           // ao tocar num número ou numa peça, a tela desce até a ficha dela
-          aoSelecionar: function (id) {
-            mostrarPeca(id);
+          aoSelecionar: function (id, tag) {
+            mostrarPeca(id, tag);
             if (id) elInfo.scrollIntoView({ behavior: "smooth", block: "start" });
           },
           aoExplodir: function (t) { faixa.value = Math.round(t * 100); }
@@ -199,7 +209,8 @@
         pecasModelo = mod.PECAS;
         document.getElementById("i-legenda").innerHTML = pecasModelo.map(function (p, i) {
           return '<tr><td>' + (i + 1) + '</td><td><button type="button" class="link" data-peca="' + esc(p.id) + '">' +
-            esc(p.nome) + '</button><br><small>' + esc(p.tipo) + '</small></td><td>' + esc(p.qtd) + '</td></tr>';
+            esc(p.nome) + '</button><br><small>' + esc(p.tipo) + '</small></td><td>' + esc(p.qtd) + '</td><td class="tags-col">' +
+            visor.unidades(p.id).map(function (u) { return '<code>' + esc(u.tag) + '</code>'; }).join(" ") + '</td></tr>';
         }).join("");
         document.querySelector(".legenda > summary").textContent = "Lista de peças (" + pecasModelo.length + ")";
         document.getElementById("i-legenda").addEventListener("click", function (ev) {
