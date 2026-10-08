@@ -81,18 +81,27 @@ main.larga,.larga .abas div{max-width:1180px}
 .baloes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .balao{position:absolute;left:0;top:0;width:26px;height:26px;padding:0;border-radius:50%;border:2px solid #123a5c;
   background:#fff;color:#123a5c;font:700 12px/22px system-ui,sans-serif;text-align:center;pointer-events:auto;cursor:pointer}
+.chamadas{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.chamadas line{stroke:#123a5c;stroke-width:1.5}.chamadas circle{fill:#123a5c}
 .balao.ativo{background:#e0a100;border-color:#7a5600;color:#14202b}
 .balao.apagado{opacity:.35}
 .visor-ctrl{margin-top:10px}
 .faixa{display:flex;align-items:center;gap:8px;margin:0;font-size:.85rem;font-weight:600}
 .faixa input{flex:1;min-width:0;height:28px}
-.botoes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.botoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin-top:8px}
 .botoes button,.nav button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 4px;border-radius:10px;
   border:2px solid #123a5c;background:#fff;color:#123a5c;cursor:pointer}
 .botoes button[aria-pressed=true]{background:#123a5c;color:#fff}
 .info-peca{margin-top:10px;background:#eef1f4;border-radius:10px;padding:10px;font-size:.92rem}
 .legenda{box-shadow:none;padding:6px 0 0;margin-top:6px}
-.legenda ol{margin:6px 0 0;padding-left:28px;columns:2;column-gap:18px;font-size:.9rem}
+.legenda table.bom{font-size:.88rem}.bom td:first-child{font-weight:800;width:2em}.bom button.link{text-align:left;font-weight:700}
+.peca-topo{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.peca-ficha{display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;margin:8px 0}
+.peca-ficha dt{margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#5b6b7a;padding-top:2px}
+@media (max-width:480px){.peca-ficha{grid-template-columns:1fr}.peca-ficha dt{padding-top:6px}}
+.peca-acoes{margin-top:10px}
+.peca-acoes button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 14px;border-radius:10px;border:2px solid #123a5c;
+  background:#123a5c;color:#fff;cursor:pointer}
 .cartao-det{margin-top:12px}
 .ficha dt{font-size:.8rem;color:#5b6b7a;text-transform:uppercase;letter-spacing:.4px}
 .progresso .barra{height:6px;background:#dde3e9;border-radius:3px;overflow:hidden}

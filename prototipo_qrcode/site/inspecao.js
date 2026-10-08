@@ -79,19 +79,23 @@
     painel.innerHTML =
       '<div class="insp-grade">' +
         '<section class="cartao insp-3d">' +
-          '<div class="rotulo">Modelo 3D – vista explodida</div>' +
+          '<div class="rotulo">Modelo 3D – vista explodida e em corte</div>' +
           '<div class="visor" id="i-visor"><div class="visor-msg">Carregando o modelo 3D…</div></div>' +
           '<div class="visor-ctrl">' +
             '<label class="faixa"><span>Montado</span><input type="range" id="i-explosao" min="0" max="100" value="100" aria-label="Montado ou explodido"><span>Explodido</span></label>' +
             '<div class="botoes">' +
               '<button type="button" id="i-b-explodir">Montar</button>' +
+              '<button type="button" id="i-b-corte" aria-pressed="false">Por dentro</button>' +
               '<button type="button" id="i-b-girar" aria-pressed="false">Girar</button>' +
               '<button type="button" id="i-b-num" aria-pressed="true">Números</button>' +
               '<button type="button" id="i-b-vista">Vista inicial</button>' +
             '</div>' +
           '</div>' +
           '<div class="info-peca" id="i-info">Arraste para girar, use dois dedos para aproximar. Toque numa peça ou num número para ver o que inspecionar.</div>' +
-          '<details class="legenda"><summary>Lista de peças</summary><ol id="i-legenda"></ol></details>' +
+          '<details class="legenda"><summary>Lista de peças</summary><div class="rolar"><table class="bom">' +
+            '<thead><tr><th>Nº</th><th>Peça e tipo</th><th>Qtd.</th></tr></thead><tbody id="i-legenda"></tbody></table></div>' +
+            '<p class="dica">Especificações típicas para redutores deste porte. Antes de comprar reposição, ' +
+            'confira o código gravado na peça ou a lista de peças do fabricante.</p></details>' +
         '</section>' +
         '<div class="insp-col">' +
           '<details class="cartao-det" open><summary>Ficha técnica – ' + esc(cfg.ficha_tecnica[2][1]) + '</summary><dl class="ficha">' + ficha + '</dl></details>' +
@@ -116,22 +120,41 @@
       return p ? p.nome : id;
     }
 
+    // ficha da peça: tipo, material, quantidade, especificação, função, inspeção e falhas comuns
     function mostrarPeca(id) {
       if (!id) {
-        elInfo.innerHTML = "Toque numa peça ou num número para ver o que inspecionar.";
+        elInfo.innerHTML = "Toque numa peça ou num número para ver a ficha dela. " +
+          "Use “Por dentro” para ver as peças internas.";
         return;
       }
       var i = pecasModelo.map(function (p) { return p.id; }).indexOf(id);
       var p = pecasModelo[i];
       var rel = itens.filter(function (it) { return it.pecas.indexOf(id) >= 0; });
-      elInfo.innerHTML = '<b>' + (i + 1) + '. ' + esc(p.nome) + '</b><br>' + esc(p.funcao) +
-        '<br><span class="rotulo">Inspecionar:</span> ' + esc(p.inspecao) +
-        (rel.length ? '<br><span class="rotulo">No checklist:</span> ' + rel.map(function (it) {
+      var isolada = visor && visor.isolada === id;
+      function linha(rot, txt) { return '<dt>' + rot + '</dt><dd>' + esc(txt) + '</dd>'; }
+      elInfo.innerHTML = '<div class="peca-topo"><b>' + (i + 1) + '. ' + esc(p.nome) + '</b>' +
+        (p.interna ? '<span class="chip st-nv">peça interna</span>' : '') + '</div>' +
+        '<dl class="peca-ficha">' +
+          linha("Tipo", p.tipo) + linha("Material", p.material) + linha("Quantidade", p.qtd) +
+          linha("Especificação", p.espec) + linha("Função", p.funcao) +
+          linha("O que inspecionar", p.inspecao) + linha("Falhas comuns", p.falhas) +
+        '</dl>' +
+        (rel.length ? '<span class="rotulo">No checklist:</span> ' + rel.map(function (it) {
           return '<button type="button" class="link" data-ir="' + esc(it.id) + '">' + esc(it.titulo) + '</button>';
-        }).join(", ") : "");
+        }).join(", ") : "") +
+        '<div class="peca-acoes"><button type="button" data-isolar="' + (isolada ? '' : esc(id)) + '">' +
+          (isolada ? 'Mostrar todas as peças' : 'Ver só esta peça') + '</button></div>';
     }
 
     elInfo.addEventListener("click", function (ev) {
+      var iso = ev.target.closest("[data-isolar]");
+      if (iso && visor) {
+        var alvo = iso.getAttribute("data-isolar");
+        var atual = visor.isolada;
+        visor.isolar(alvo || null);
+        mostrarPeca(alvo || atual);
+        return;
+      }
       var b = ev.target.closest("[data-ir]");
       if (!b) return;
       var idx = itens.map(function (it) { return it.id; }).indexOf(b.getAttribute("data-ir"));
@@ -144,6 +167,7 @@
       if (!visor) return;
       var p = rascunho ? rascunho.passo : 0;
       var it = p >= 1 && p <= itens.length ? itens[p - 1] : null;
+      if (visor.isolada) visor.isolar(null);
       visor.destacar(it ? it.pecas : []);
       mostrarPeca(null);
       if (it) elInfo.innerHTML = '<span class="rotulo">Etapa atual:</span> <b>' + esc(it.titulo) + '</b> – peças em destaque: ' +
@@ -164,9 +188,11 @@
           aoExplodir: function (t) { faixa.value = Math.round(t * 100); }
         });
         pecasModelo = mod.PECAS;
-        document.getElementById("i-legenda").innerHTML = pecasModelo.map(function (p) {
-          return '<li><button type="button" class="link" data-peca="' + esc(p.id) + '">' + esc(p.nome) + '</button></li>';
+        document.getElementById("i-legenda").innerHTML = pecasModelo.map(function (p, i) {
+          return '<tr><td>' + (i + 1) + '</td><td><button type="button" class="link" data-peca="' + esc(p.id) + '">' +
+            esc(p.nome) + '</button><br><small>' + esc(p.tipo) + '</small></td><td>' + esc(p.qtd) + '</td></tr>';
         }).join("");
+        document.querySelector(".legenda > summary").textContent = "Lista de peças (" + pecasModelo.length + ")";
         document.getElementById("i-legenda").addEventListener("click", function (ev) {
           var b = ev.target.closest("[data-peca]");
           if (!b) return;
@@ -184,6 +210,7 @@
         bExp.onclick = function () {
           var alvo = visor.explosao > 0.5 ? 0 : 1;
           visor.explodir(alvo, true);
+          visor.vistaInicial(true);
           bExp.textContent = alvo ? "Montar" : "Explodir";
         };
         var bGirar = document.getElementById("i-b-girar");
@@ -198,7 +225,19 @@
           bNum.setAttribute("aria-pressed", String(sim));
           visor.baloes(sim);
         };
-        document.getElementById("i-b-vista").onclick = function () { visor.vistaInicial(); };
+        var bCorte = document.getElementById("i-b-corte");
+        bCorte.onclick = function () {
+          var sim = bCorte.getAttribute("aria-pressed") !== "true";
+          bCorte.setAttribute("aria-pressed", String(sim));
+          visor.corte(sim);
+          // o corte é visto com o redutor montado
+          if (sim) { visor.explodir(0, true); bExp.textContent = "Explodir"; }
+          visor.vistaInicial(true);
+        };
+        document.getElementById("i-b-vista").onclick = function () {
+          if (visor.isolada) { visor.isolar(null); mostrarPeca(null); }
+          visor.vistaInicial(true);
+        };
         destacarPasso();
       }).catch(function () {
         caixa.innerHTML = '<div class="visor-msg">Não foi possível exibir o modelo 3D neste aparelho ' +

@@ -5,36 +5,95 @@
 import * as THREE from "./vendor/three.module.min.js";
 import { OrbitControls } from "./vendor/OrbitControls.js";
 
-// Peças com número de balão, nome e o que observar na inspeção.
+// Peças com número de balão e ficha: tipo, material, quantidade, especificação típica,
+// função, o que inspecionar e falhas comuns. "interna" = fica dentro da carcaça.
+// As especificações são as usuais para redutores deste porte; o código exato de cada
+// peça de reposição deve ser conferido na própria peça ou na lista de peças do fabricante.
 export const PECAS = [
-  { id: "carcaca", nome: "Carcaça", funcao: "Aloja e alinha os eixos e guarda o óleo.",
-    inspecao: "Trincas, aquecimento, vazamentos e fixação na base." },
-  { id: "respiro", nome: "Respiro", funcao: "Equaliza a pressão interna quando o óleo aquece.",
-    inspecao: "Deve estar limpo e desobstruído." },
-  { id: "bujoes", nome: "Bujões de nível e dreno", funcao: "Verificação do nível e drenagem do óleo (posição ilustrativa).",
-    inspecao: "Sem vazamento; usar para conferir o nível e coletar amostra." },
-  { id: "coroa", nome: "Coroa (bronze)", funcao: "Engrenagem movida; recebe o movimento da rosca sem fim.",
-    inspecao: "Desgaste, pitting e partículas de bronze no óleo." },
-  { id: "eixo-saida", nome: "Eixo de saída Ø 14 mm", funcao: "Transmite o movimento reduzido (1:7,5) à máquina.",
-    inspecao: "Folga axial e radial, riscos na pista do retentor." },
-  { id: "chavetas", nome: "Chavetas", funcao: "Travam a coroa e os acoplamentos nos eixos.",
-    inspecao: "Folga ou marcas de cisalhamento." },
-  { id: "rolamentos-saida", nome: "Rolamentos do eixo de saída", funcao: "Apoiam o eixo de saída nos dois lados da carcaça.",
-    inspecao: "Ruído, aquecimento localizado e folga." },
-  { id: "juntas", nome: "Juntas (anéis O) das tampas", funcao: "Vedam o encosto das tampas na carcaça.",
-    inspecao: "Marcas de óleo em volta das tampas." },
-  { id: "tampas-saida", nome: "Tampas do eixo de saída", funcao: "Fecham a carcaça e posicionam os rolamentos da coroa.",
-    inspecao: "Aperto dos parafusos e vazamento." },
-  { id: "rosca", nome: "Rosca sem fim / eixo de entrada Ø 11 mm", funcao: "Recebe o motor e aciona a coroa.",
-    inspecao: "Desgaste dos filetes, folga e giro suave." },
-  { id: "rolamentos-entrada", nome: "Rolamentos da rosca sem fim", funcao: "Apoiam a rosca sem fim e absorvem o esforço axial.",
-    inspecao: "Ruído, aquecimento localizado e folga." },
-  { id: "tampas-entrada", nome: "Tampas da rosca sem fim", funcao: "Fecham a carcaça e posicionam os rolamentos da rosca.",
-    inspecao: "Aperto dos parafusos e vazamento." },
-  { id: "retentores", nome: "Retentores dos eixos", funcao: "Vedam a passagem dos eixos de entrada e de saída.",
-    inspecao: "Vazamento e lábio ressecado ou cortado." },
-  { id: "parafusos", nome: "Parafusos e arruelas", funcao: "Fixam as tampas na carcaça.",
-    inspecao: "Aperto e corrosão." }
+  { id: "carcaca", nome: "Carcaça", tipo: "Carcaça monobloco com base de fixação (pés)",
+    material: "Ferro fundido cinzento, pintado (confirmar no catálogo do tamanho 28)", qtd: "1",
+    espec: "Furos usinados para os mancais da coroa (eixo de saída) e da rosca sem fim, a 28 mm de distância entre centros.",
+    funcao: "Aloja e alinha os eixos, guarda o óleo e dissipa o calor.",
+    inspecao: "Trincas, aquecimento, vazamentos e fixação na base.",
+    falhas: "Trinca por sobrecarga ou aperto irregular da base; pintura queimada por superaquecimento." },
+  { id: "respiro", nome: "Respiro", tipo: "Bujão respiro (com furo de alívio e filtro)",
+    material: "Latão ou plástico técnico", qtd: "1",
+    espec: "Rosca igual à do furo superior da carcaça; montado sempre na posição mais alta.",
+    funcao: "Equaliza a pressão interna quando o óleo aquece, evitando que ele seja empurrado pelos retentores.",
+    inspecao: "Deve estar limpo e desobstruído.",
+    falhas: "Entupido por poeira ou tinta, fazendo o óleo vazar pelos retentores." },
+  { id: "bujoes", nome: "Bujões de nível e dreno", tipo: "Bujão sextavado com rosca e arruela de vedação",
+    material: "Aço zincado; arruela de cobre, alumínio ou fibra", qtd: "2 (posição ilustrativa)",
+    espec: "A posição varia com a forma de montagem (M1 a M6). Confirmar no redutor instalado.",
+    funcao: "Conferir o nível (bujão de nível) e escoar o óleo usado (bujão de dreno).",
+    inspecao: "Sem vazamento; usar para conferir o nível e coletar amostra.",
+    falhas: "Arruela de vedação reutilizada ou rosca espanada por aperto excessivo." },
+  { id: "coroa", nome: "Coroa (bronze)", tipo: "Coroa para rosca sem fim (engrenagem helicoidal côncava)",
+    material: "Aro de bronze (liga cobre-estanho) com cubo de aço", qtd: "1", interna: true,
+    espec: "30 dentes. Com a rosca de 4 entradas: 30 ÷ 4 = redução 1:7,5. Fixada no eixo de saída por chaveta.",
+    funcao: "Engrenagem movida: recebe o movimento da rosca sem fim e gira o eixo de saída 7,5 vezes mais devagar.",
+    inspecao: "Desgaste, pitting e partículas de bronze no óleo.",
+    falhas: "Desgaste por óleo errado ou degradado, pitting (pequenas crateras) por sobrecarga, dente quebrado por choque." },
+  { id: "eixo-saida", nome: "Eixo de saída Ø 14 mm", tipo: "Eixo maciço com rasgo de chaveta",
+    material: "Aço carbono (ex.: SAE 1045)", qtd: "1", interna: true,
+    espec: "Ponta Ø 14 mm para acoplar a máquina; apoiado em dois rolamentos.",
+    funcao: "Transmite o movimento reduzido (1:7,5) e o torque à máquina.",
+    inspecao: "Folga axial e radial, riscos na pista do retentor.",
+    falhas: "Pista do retentor riscada (vazamento), rasgo de chaveta deformado, empeno por esforço radial excessivo." },
+  { id: "chavetas", nome: "Chavetas", tipo: "Chaveta paralela DIN 6885 forma A",
+    material: "Aço carbono trefilado (ex.: C45)", qtd: "3", interna: true,
+    espec: "Eixo Ø 14 mm (coroa e ponta de saída): 5 × 5 mm. Eixo Ø 11 mm (entrada): 4 × 4 mm.",
+    funcao: "Travam a coroa no eixo e os acoplamentos nas pontas dos eixos, transmitindo o torque.",
+    inspecao: "Folga ou marcas de cisalhamento.",
+    falhas: "Folga no rasgo (batida na partida), chaveta cisalhada por travamento." },
+  { id: "rolamentos-saida", nome: "Rolamentos do eixo de saída", tipo: "Rolamento rígido de esferas, uma carreira",
+    material: "Aço cromo para rolamentos, gaiola de aço", qtd: "2", interna: true,
+    espec: "A designação (ex.: série 62xx) está gravada no anel externo; anotar antes de comprar a reposição.",
+    funcao: "Apoiam o eixo de saída nos dois lados da carcaça e suportam as cargas radiais e axiais da coroa.",
+    inspecao: "Ruído, aquecimento localizado e folga.",
+    falhas: "Ruído áspero por contaminação ou falta de óleo, folga interna, pista marcada por montagem com martelo." },
+  { id: "juntas", nome: "Juntas (anéis O) das tampas", tipo: "Anel O-ring (anel de vedação estático)",
+    material: "Borracha nitrílica (NBR)", qtd: "4",
+    espec: "Medida = diâmetro interno × espessura do cordão. Trocar sempre que a tampa for aberta.",
+    funcao: "Vedam o encosto das tampas na carcaça.",
+    inspecao: "Marcas de óleo em volta das tampas.",
+    falhas: "Ressecado, cortado na montagem ou esmagado por aperto desigual dos parafusos." },
+  { id: "tampas-saida", nome: "Tampas do eixo de saída", tipo: "Tampa flangeada (com furo para o eixo) e tampa cega",
+    material: "Ferro fundido ou alumínio, pintadas", qtd: "2",
+    espec: "Encaixe (rebaixo) centraliza a tampa no furo da carcaça; a tampa com furo aloja o retentor.",
+    funcao: "Fecham a carcaça e posicionam axialmente os rolamentos da coroa.",
+    inspecao: "Aperto dos parafusos e vazamento.",
+    falhas: "Vazamento por junta danificada ou parafusos frouxos." },
+  { id: "rosca", nome: "Rosca sem fim / eixo de entrada Ø 11 mm", tipo: "Rosca sem fim de 4 entradas, integrada ao eixo de entrada",
+    material: "Aço liga cementado, temperado e retificado (ex.: SAE 8620)", qtd: "1", interna: true,
+    espec: "Ponta de entrada maciça Ø 11 mm com chaveta 4 × 4, para motor de até 0,77 cv.",
+    funcao: "Recebe o giro do motor e aciona a coroa; 1 volta da rosca avança 4 dentes da coroa.",
+    inspecao: "Desgaste dos filetes, folga e giro suave.",
+    falhas: "Filetes riscados ou desgastados por óleo contaminado; aquecimento por atrito excessivo." },
+  { id: "rolamentos-entrada", nome: "Rolamentos da rosca sem fim", tipo: "Rolamento rígido de esferas (ou de contato angular)",
+    material: "Aço cromo para rolamentos", qtd: "2", interna: true,
+    espec: "Suportam o empuxo axial gerado pela rosca. Designação gravada no anel externo.",
+    funcao: "Apoiam a rosca sem fim e absorvem o esforço axial.",
+    inspecao: "Ruído, aquecimento localizado e folga.",
+    falhas: "Desgaste pelo empuxo axial, contaminação e falta de lubrificação." },
+  { id: "tampas-entrada", nome: "Tampas da rosca sem fim", tipo: "Tampa com furo para o eixo de entrada e tampa cega",
+    material: "Ferro fundido ou alumínio, pintadas", qtd: "2",
+    espec: "A tampa com furo aloja o retentor do eixo de entrada.",
+    funcao: "Fecham a carcaça e posicionam os rolamentos da rosca.",
+    inspecao: "Aperto dos parafusos e vazamento.",
+    falhas: "Vazamento por junta danificada ou parafusos frouxos." },
+  { id: "retentores", nome: "Retentores dos eixos", tipo: "Retentor radial de lábio com mola (DIN 3760)",
+    material: "Borracha nitrílica (NBR) com armação de aço", qtd: "2",
+    espec: "Um para o eixo de saída (Ø 14 mm) e um para o de entrada (Ø 11 mm). Medida gravada: eixo × alojamento × largura.",
+    funcao: "Vedam a passagem dos eixos girantes, segurando o óleo e barrando poeira e água.",
+    inspecao: "Vazamento e lábio ressecado ou cortado.",
+    falhas: "Lábio ressecado por calor, cortado na montagem ou gasto pelo eixo riscado." },
+  { id: "parafusos", nome: "Parafusos e arruelas", tipo: "Parafuso cabeça cilíndrica com sextavado interno (Allen) ISO 4762 + arruela",
+    material: "Aço classe 8.8, zincado", qtd: "16 (4 por tampa)",
+    espec: "Apertar em cruz, com torque uniforme, para não deformar a tampa nem esmagar a junta.",
+    funcao: "Fixam as tampas na carcaça.",
+    inspecao: "Aperto e corrosão.",
+    falhas: "Afrouxamento por vibração, rosca espanada por aperto excessivo." }
 ];
 
 const PI = Math.PI;
@@ -46,7 +105,7 @@ function materiais() {
     furo: m({ color: 0x14240f, roughness: 1, metalness: 0 }),
     aco: m({ color: 0xc3c9cf, roughness: 0.28, metalness: 0.85 }),
     acoEscuro: m({ color: 0x6d757d, roughness: 0.4, metalness: 0.8 }),
-    bronze: m({ color: 0xd2895a, roughness: 0.32, metalness: 0.8 }),
+    bronze: m({ color: 0xd8915e, roughness: 0.38, metalness: 0.55 }),
     borracha: m({ color: 0x1f2124, roughness: 0.85, metalness: 0 }),
     parafuso: m({ color: 0x2c3035, roughness: 0.45, metalness: 0.6 }),
     laranja: m({ color: 0xe8a317, roughness: 0.5, metalness: 0.1 })
@@ -277,9 +336,9 @@ function rosca(M) {
   cil(7.2, 40, 0);          // núcleo da rosca
   cil(6, 22, 30);           // apoio do rolamento dianteiro
   cil(5.5, 52, 67);         // ponta de entrada Ø 11 (motor)
-  // filetes da rosca (duas entradas)
-  [0, PI].forEach((f) => {
-    const geo = new THREE.TubeGeometry(new Helice(7.8, 14, 2.4, -16.8, f), 160, 1.7, 10, false);
+  // filetes da rosca: 4 entradas (30 dentes da coroa ÷ 4 = redução 1:7,5)
+  [0, PI / 2, PI, 3 * PI / 2].forEach((f) => {
+    const geo = new THREE.TubeGeometry(new Helice(7.7, 16.8, 2, -16.8, f), 160, 1.3, 10, false);
     g.add(malha(geo, M.aco));
   });
   // rasgo de chaveta na ponta de entrada
@@ -347,6 +406,7 @@ export function criarVisualizador(caixa, opcoes) {
   const camera = new THREE.PerspectiveCamera(32, 1, 1, 5000);
   const render = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   render.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  render.localClippingEnabled = true;
   caixa.appendChild(render.domElement);
 
   cena.add(new THREE.HemisphereLight(0xffffff, 0x7d8a99, 1.5));
@@ -364,7 +424,7 @@ export function criarVisualizador(caixa, opcoes) {
     if (m.isMesh) {
       m.material = m.material.clone();
       m.userData.peca = o.userData.peca;
-      m.userData.opacidade = m.material.opacity;
+      m.userData.raiz = o;
       malhas.push(m);
     }
   }));
@@ -373,6 +433,9 @@ export function criarVisualizador(caixa, opcoes) {
   const camadaBaloes = document.createElement("div");
   camadaBaloes.className = "baloes";
   caixa.appendChild(camadaBaloes);
+  const linhas = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  linhas.setAttribute("class", "chamadas");
+  camadaBaloes.appendChild(linhas);
   const baloes = PECAS.map((p, i) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -388,10 +451,37 @@ export function criarVisualizador(caixa, opcoes) {
   });
 
   let explosao = 0, alvoExplosao = 1, destaque = [], selecionada = null, mostrarBaloes = true;
+  let corte = false, isolada = null;
+  const internas = PECAS.filter((p) => p.interna).map((p) => p.id);
+
+  // Vista em corte: tira o quarto da carcaça e das tampas voltado para a câmera (x > 0 e z > 0),
+  // deixando à mostra a coroa, a rosca sem fim, os rolamentos e os eixos.
+  const CASCA = ["carcaca", "tampas-saida", "tampas-entrada", "juntas", "retentores", "parafusos", "bujoes"];
+  const planosCorte = [new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)];
+  const cortado = (m, p) => corte && CASCA.indexOf(m.userData.peca) >= 0 && p.x > 0 && p.z > 0;
+  function aplicarCorte(sim) {
+    corte = sim;
+    malhas.forEach((m) => {
+      if (CASCA.indexOf(m.userData.peca) < 0) return;
+      m.material.clippingPlanes = sim ? planosCorte : null;
+      m.material.clipIntersection = true;
+      m.material.side = sim ? THREE.DoubleSide : THREE.FrontSide;
+      m.material.needsUpdate = true;
+    });
+  }
+
+  // Mostra só uma peça (todas as unidades dela) e aproxima a câmera.
+  function isolar(id) {
+    isolada = id || null;
+    objetos.forEach((o) => { o.visible = !isolada || o.userData.peca === isolada; });
+    if (isolada) selecionada = isolada;
+    vistaInicial(true);
+  }
   const controles = new OrbitControls(camera, render.domElement);
   controles.enableDamping = true;
   controles.dampingFactor = 0.08;
   controles.autoRotateSpeed = 1.2;
+  controles.addEventListener("start", () => { camAlvo = null; });
 
   function aplicarExplosao() {
     const k = suave(explosao);
@@ -399,11 +489,12 @@ export function criarVisualizador(caixa, opcoes) {
   }
 
   // enquadra o conjunto (montado ou explodido) na mesma direção da figura de referência
-  function vistaInicial() {
+  let camAlvo = null;
+  function vistaInicial(animar) {
     const salvo = explosao;
     explosao = alvoExplosao; aplicarExplosao();
     const pontos = [];
-    objetos.forEach((o) => {
+    objetos.filter((o) => o.visible).forEach((o) => {
       const c = new THREE.Box3().setFromObject(o);
       for (let i = 0; i < 8; i++) {
         pontos.push(new THREE.Vector3(i & 1 ? c.max.x : c.min.x, i & 2 ? c.max.y : c.min.y, i & 4 ? c.max.z : c.min.z));
@@ -423,10 +514,13 @@ export function criarVisualizador(caixa, opcoes) {
       const x = Math.abs(r.dot(direita)), y = Math.abs(r.dot(cima)), z = r.dot(dir);
       d = Math.max(d, z + x / tx, z + y / ty);
     });
-    controles.target.copy(centro);
-    camera.position.copy(centro).addScaledVector(dir, d);
+    const pos = centro.clone().addScaledVector(dir, d);
     camera.near = d / 50; camera.far = d * 6; camera.updateProjectionMatrix();
     controles.minDistance = d * 0.2; controles.maxDistance = d * 3;
+    if (animar) { camAlvo = { pos, centro }; return; }
+    camAlvo = null;
+    controles.target.copy(centro);
+    camera.position.copy(pos);
     controles.update();
   }
 
@@ -443,7 +537,8 @@ export function criarVisualizador(caixa, opcoes) {
   vistaInicial();
 
   function atualizarMateriais(tempo) {
-    const foco = selecionada ? [selecionada] : destaque;
+    // peça isolada aparece com a cor natural, sem o brilho de destaque
+    const foco = isolada ? [] : selecionada ? [selecionada] : destaque;
     const brilho = 0.35 + 0.25 * Math.sin(tempo / 260);
     malhas.forEach((m) => {
       const ativo = foco.indexOf(m.userData.peca) >= 0;
@@ -457,18 +552,48 @@ export function criarVisualizador(caixa, opcoes) {
 
   const v = new THREE.Vector3();
   function atualizarBaloes() {
-    // montado, os balões se amontoam; aparecem a partir da metade da explosão
-    const visivel = mostrarBaloes && explosao > 0.5;
+    // montado, os balões se amontoam: aparecem com o conjunto explodido, só nas peças
+    // internas na vista em corte, ou só na peça isolada
+    const explodido = explosao > 0.5;
+    const visivel = mostrarBaloes && (explodido || corte || isolada);
     camadaBaloes.style.display = visivel ? "" : "none";
     if (!visivel) return;
     const w = caixa.clientWidth, h = caixa.clientHeight;
     const foco = selecionada ? [selecionada] : destaque;
+    const vis = [];
     baloes.forEach((b) => {
-      v.copy(b.centro).add(b.ancora.position).project(camera);
-      b.el.style.transform = "translate(" + ((v.x + 1) / 2 * w - 13) + "px," + ((1 - v.y) / 2 * h - 13) + "px)";
+      b.el.hidden = isolada ? b.peca !== isolada : !explodido && internas.indexOf(b.peca) < 0;
       b.el.classList.toggle("ativo", foco.indexOf(b.peca) >= 0);
       b.el.classList.toggle("apagado", foco.length > 0 && foco.indexOf(b.peca) < 0);
+      if (b.el.hidden) return;
+      v.copy(b.centro).add(b.ancora.position).project(camera);
+      const ax = (v.x + 1) / 2 * w, ay = (1 - v.y) / 2 * h;
+      vis.push({ b, ax, ay, x: ax, y: ay });
     });
+    // afasta os balões que se sobrepõem; uma linha de chamada liga cada um à sua peça
+    const MIN = 30;
+    for (let it = 0; it < 40; it++) {
+      for (let i = 0; i < vis.length; i++) {
+        for (let j = i + 1; j < vis.length; j++) {
+          const a = vis[i], c = vis[j];
+          let dx = c.x - a.x, dy = c.y - a.y, d = Math.hypot(dx, dy);
+          if (d >= MIN) continue;
+          if (d < 0.01) { dx = j - i; dy = -1; d = Math.hypot(dx, dy); }
+          const f = (MIN - d) / 2 / d;
+          a.x -= dx * f; a.y -= dy * f; c.x += dx * f; c.y += dy * f;
+        }
+      }
+    }
+    let svg = "";
+    vis.forEach((q) => {
+      q.x = Math.min(w - 14, Math.max(14, q.x)); q.y = Math.min(h - 14, Math.max(14, q.y));
+      q.b.el.style.transform = "translate(" + (q.x - 13) + "px," + (q.y - 13) + "px)";
+      if (Math.hypot(q.x - q.ax, q.y - q.ay) > 12) {
+        svg += '<line x1="' + q.ax.toFixed(1) + '" y1="' + q.ay.toFixed(1) + '" x2="' + q.x.toFixed(1) + '" y2="' + q.y.toFixed(1) + '"/>' +
+          '<circle cx="' + q.ax.toFixed(1) + '" cy="' + q.ay.toFixed(1) + '" r="2.5"/>';
+      }
+    });
+    linhas.innerHTML = svg;
   }
 
   // toque/clique numa peça
@@ -480,8 +605,10 @@ export function criarVisualizador(caixa, opcoes) {
     const r = render.domElement.getBoundingClientRect();
     ponteiro.set((ev.clientX - r.left) / r.width * 2 - 1, -(ev.clientY - r.top) / r.height * 2 + 1);
     raio.setFromCamera(ponteiro, camera);
-    const visiveis = malhas.filter((m) => !m.material.transparent);
-    const hit = raio.intersectObjects(visiveis.length ? visiveis : malhas, false)[0];
+    const naCena = malhas.filter((m) => m.userData.raiz.visible);
+    const visiveis = naCena.filter((m) => !m.material.transparent);
+    const hit = raio.intersectObjects(visiveis.length ? visiveis : naCena, false)
+      .filter((h) => !cortado(h.object, h.point))[0];
     selecionar(hit ? hit.object.userData.peca : null, true);
   });
 
@@ -502,6 +629,12 @@ export function criarVisualizador(caixa, opcoes) {
       aplicarExplosao();
       if (opcoes.aoExplodir) opcoes.aoExplodir(explosao);
     }
+    if (camAlvo) {
+      const k = 1 - Math.exp(-dt * 5);
+      camera.position.lerp(camAlvo.pos, k);
+      controles.target.lerp(camAlvo.centro, k);
+      if (camera.position.distanceTo(camAlvo.pos) < 0.5) camAlvo = null;
+    }
     controles.update();
     atualizarMateriais(agora);
     render.render(cena, camera);
@@ -521,6 +654,10 @@ export function criarVisualizador(caixa, opcoes) {
     destacar(ids) { destaque = ids || []; selecionada = null; },
     selecionar(id) { selecionada = id || null; },
     girar(sim) { controles.autoRotate = !!sim; },
+    // vista em corte (por dentro)
+    corte(sim) { aplicarCorte(!!sim); },
+    isolar,
+    get isolada() { return isolada; },
     baloes(sim) { mostrarBaloes = !!sim; },
     vistaInicial,
     destruir() {
