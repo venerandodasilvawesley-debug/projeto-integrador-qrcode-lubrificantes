@@ -60,6 +60,19 @@
 
     function minhas() { return lerInspecoes().filter(function (r) { return r.codigo === codigo; }); }
     function ultima() { var l = minhas(); return l.length ? l[l.length - 1] : null; }
+    // Horas rodadas = horímetro de agora menos o da última inspeção que teve horímetro.
+    function ultimaComHorimetro() {
+      var l = minhas().filter(function (r) { return r.horimetro != null; });
+      return l.length ? l[l.length - 1] : null;
+    }
+    function horasRodadas(h) {
+      var u = ultimaComHorimetro();
+      if (h == null || !u) return null;
+      return Math.round((h - u.horimetro) * 10) / 10;
+    }
+    function lerVida() {
+      try { return JSON.parse(localStorage.getItem("vida_oleo_" + codigo)); } catch (err) { return null; }
+    }
 
     function lerRascunho() {
       try { return JSON.parse(localStorage.getItem(CHAVE_RASCUNHO)); } catch (err) { return null; }
@@ -349,6 +362,7 @@
         '<p>Início: ' + esc(rascunho.inicio) + '</p>' +
         '<label>Responsável<input type="text" id="i-resp" maxlength="60" autocomplete="name" value="' + esc(rascunho.responsavel) + '"></label>' +
         '<label>Horímetro do equipamento (h) – opcional<input type="text" inputmode="decimal" id="i-hor" value="' + esc(fmt(rascunho.horimetro)) + '"></label>' +
+        '<div id="i-rodou"></div>' +
         '<div class="rotulo" style="margin-top:12px">Condição no início</div>' +
         '<div class="opcoes">' + ["Em operação", "Parado"].map(function (o) {
           return '<label><input type="radio" name="i-op" value="' + o + '"' + (rascunho.operacao === o ? ' checked' : '') + '><span>' + o + '</span></label>';
@@ -359,7 +373,26 @@
         '<p class="rodape"><button type="button" class="link" id="i-descartar">Descartar esta inspeção</button></p>';
       var resp = document.getElementById("i-resp"), hor = document.getElementById("i-hor");
       resp.oninput = function () { rascunho.responsavel = resp.value; guardarRascunho(); };
-      hor.oninput = function () { rascunho.horimetro = numero(hor.value); guardarRascunho(); };
+      // calculado enquanto a pessoa digita o horímetro
+      function mostrarRodou() {
+        var u = ultimaComHorimetro(), h = rascunho.horimetro, d = horasRodadas(h), t;
+        if (!u) {
+          t = "Sem horímetro anterior neste aparelho: a contagem das horas rodadas começa nesta inspeção.";
+        } else if (h == null) {
+          t = "Última leitura: " + fmt(u.horimetro) + " h em " + u.data_hora.slice(0, 10) +
+            ". Digite o horímetro e as horas rodadas são calculadas sozinhas.";
+        } else if (d < 0) {
+          t = "Horímetro menor que o da última inspeção (" + fmt(u.horimetro) + " h em " + u.data_hora.slice(0, 10) +
+            "). Confira a leitura; as horas rodadas não serão contadas.";
+        } else {
+          var v = lerVida();
+          t = "Rodou " + fmt(d) + " h desde a última inspeção (" + u.data_hora.slice(0, 10) + " · " + fmt(u.horimetro) + " h)." +
+            (v && v.horas != null && d > 0 ? " Óleo: " + fmt(v.horas) + " h → " + fmt(Math.round(v.horas + d)) + " h desde a última troca." : "");
+        }
+        document.getElementById("i-rodou").innerHTML = '<div class="ref">' + esc(t) + '</div>';
+      }
+      hor.oninput = function () { rascunho.horimetro = numero(hor.value); guardarRascunho(); mostrarRodou(); };
+      mostrarRodou();
       elCheck.querySelectorAll("input[name=i-op]").forEach(function (r) {
         r.onchange = function () { rascunho.operacao = r.value; guardarRascunho(); };
       });
@@ -481,7 +514,9 @@
       elCheck.innerHTML = progresso() +
         '<h2>Resumo e parecer</h2>' +
         '<p>' + esc(rascunho.responsavel) + ' · início ' + esc(rascunho.inicio) +
-        (rascunho.horimetro != null ? ' · ' + fmt(rascunho.horimetro) + ' h' : '') + '</p>' +
+        (rascunho.horimetro != null ? ' · ' + fmt(rascunho.horimetro) + ' h' : '') +
+        (horasRodadas(rascunho.horimetro) >= 0 && horasRodadas(rascunho.horimetro) != null
+          ? ' · rodou ' + fmt(horasRodadas(rascunho.horimetro)) + ' h desde a última inspeção' : '') + '</p>' +
         '<table class="resumo"><tbody>' + linhas + '</tbody></table>' +
         '<div class="parecer ' + STATUS[par.s].cls + '"><span class="rotulo">Parecer geral</span><br><b>' + esc(par.t) + '</b>' +
           '<br><small>' + par.nc + ' não conforme(s) · ' + par.a + ' em atenção</small></div>' +
@@ -530,10 +565,12 @@
       }
       if (!rascunho.responsavel.trim()) return avisar("erro", "Informe o responsável na etapa de identificação.");
       var par = parecer(rascunho.itens);
+      var rodou = horasRodadas(rascunho.horimetro);
+      if (rodou != null && rodou < 0) rodou = null;
       var reg = {
         codigo: codigo, id: Date.now(), inicio: rascunho.inicio, data_hora: agora(),
         responsavel: rascunho.responsavel.trim(), horimetro: rascunho.horimetro,
-        operacao: rascunho.operacao, parecer: par.s, observacao: rascunho.observacao.trim(), itens: {}
+        horas_rodadas: rodou, operacao: rascunho.operacao, parecer: par.s, observacao: rascunho.observacao.trim(), itens: {}
       };
       itens.forEach(function (it) {
         var r = rascunho.itens[it.id];
@@ -547,9 +584,20 @@
       } catch (err) {
         return avisar("erro", "Não foi possível salvar neste aparelho.");
       }
+      // as horas rodadas entram sozinhas na vida útil do óleo (aba Lubrificação)
+      var oleo = "";
+      var v = lerVida();
+      if (rodou > 0 && v && v.horas != null) {
+        v.horas = Math.round(v.horas + rodou);
+        try {
+          localStorage.setItem("vida_oleo_" + codigo, JSON.stringify(v));
+          window.dispatchEvent(new Event("vida-oleo"));
+          oleo = " Horas do óleo atualizadas para " + fmt(v.horas) + " h.";
+        } catch (err) {}
+      }
       rascunho = null; guardarRascunho();
       renderChecklist(); renderHistorico();
-      avisar(par.s === "C" ? "ok" : "alerta", "Inspeção salva neste aparelho. Parecer: " + par.t + ".");
+      avisar(par.s === "C" ? "ok" : "alerta", "Inspeção salva neste aparelho. Parecer: " + par.t + "." + oleo);
     }
 
     function renderChecklist() {
@@ -589,6 +637,7 @@
         }).join("");
         return '<details class="insp"><summary>' + esc(r.data_hora) + ' · ' + esc(r.responsavel) + ' ' + chip(r.parecer) +
           '</summary><p>' + esc(r.operacao) + (r.horimetro != null ? ' · horímetro ' + fmt(r.horimetro) + ' h' : '') +
+          (r.horas_rodadas != null ? ' · rodou ' + fmt(r.horas_rodadas) + ' h' : '') +
           ' · ' + p.nc + ' NC · ' + p.a + ' atenção</p>' +
           (r.observacao ? '<p><b>Recomendações:</b> ' + esc(r.observacao) + '</p>' : '') +
           '<table><tbody>' + linhas + '</tbody></table></details>';
@@ -601,12 +650,12 @@
     }
 
     function baixarCsv() {
-      var linhas = [["codigo", "inspecao", "data_hora", "responsavel", "operacao", "horimetro_h", "parecer",
+      var linhas = [["codigo", "inspecao", "data_hora", "responsavel", "operacao", "horimetro_h", "horas_rodadas_h", "parecer",
         "item", "condicao", "medicao", "unidade", "condicoes_marcadas", "observacao", "recomendacoes"]];
       minhas().forEach(function (r) {
         itens.forEach(function (it) {
           var x = r.itens[it.id] || {};
-          linhas.push([r.codigo, r.id, r.data_hora, r.responsavel, r.operacao, fmt(r.horimetro),
+          linhas.push([r.codigo, r.id, r.data_hora, r.responsavel, r.operacao, fmt(r.horimetro), fmt(r.horas_rodadas),
             STATUS[r.parecer] ? STATUS[r.parecer].t : "", it.titulo, x.status ? STATUS[x.status].t : "",
             fmt(x.valor), it.medida ? it.medida.unidade : "", (x.opcoes || []).join(" | "), x.obs, r.observacao]);
         });

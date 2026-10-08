@@ -108,6 +108,8 @@ main.larga,.larga .abas div{max-width:1180px}
 .tags li.atual code{background:#e0a100;border-color:#7a5600;color:#14202b}
 .tag-grande{margin:8px 0;font-weight:700}.tag-grande code{font-size:1.15rem;background:#e0a100;border-color:#7a5600}
 .tags-col{font-size:.8rem;line-height:1.9}
+.cor-galao{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.cor-galao i{width:34px;height:22px;border-radius:5px;border:2px solid #14202b;flex:none}
 .peca-acoes{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
 .peca-acoes button.sec{background:#fff;color:#123a5c}
 .peca-acoes button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 14px;border-radius:10px;border:2px solid #123a5c;
@@ -338,6 +340,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<div class="rotulo">Vida útil do óleo</div>' +
         '<label style="margin-top:6px">Horas trabalhadas desde a última troca (horímetro)' +
           '<input type="text" inputmode="numeric" id="horas-oleo" maxlength="7"></label>' +
+        '<p class="dica">Preenchido sozinho: a cada inspeção com horímetro, as horas rodadas desde a inspeção anterior são somadas aqui.</p>' +
         '<label>Temperatura de trabalho do óleo</label>' +
         '<div class="tipos">' + e.vida_util_oleo.map(function (v) {
           return '<label><input type="radio" name="limite-oleo" value="' + v.horas + '"><span>' +
@@ -351,6 +354,14 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
         '<div>Padrão de fábrica: <b>' + esc(e.padrao_fabrica) + '</b></div>' +
+        // tag do óleo no mesmo formato dos tags das peças (aba Inspeção): código do equipamento + código do item
+        // cada óleo tem uma cor: a mesma do galão no almoxarifado
+        (e.tag_oleo ? '<div class="ref" style="margin-bottom:0' + (e.cor_oleo ? ';border-left-color:' + esc(e.cor_oleo.hex) : '') + '">' +
+          '<span class="rotulo">Código para pedir no almoxarifado</span>' +
+          '<div class="tag-grande">Tag <code>' + esc(codigo + "-" + e.tag_oleo) + '</code></div>' +
+          (e.cor_oleo ? '<div class="cor-galao"><i style="background:' + esc(e.cor_oleo.hex) + '"></i>Cor do galão: <b>' +
+            esc(e.cor_oleo.nome.toUpperCase()) + '</b></div>' : '') +
+          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + fmt(e.volume_ml) + " mL por troca") + '</div>' : '') +
         '<div class="duplo">' +
           '<div><div class="rotulo">Viscosidade</div><div class="grande">' + esc(e.viscosidade) + '</div></div>' +
           '<div><div class="rotulo">Volume (' + esc(e.posicao) + ')</div><div class="grande">' +
@@ -422,7 +433,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         return;
       }
       var pct = Math.round(h / lim * 100), classe, titulo, fazer;
-      var oleo = fmt(e.volume_ml) + " mL de " + e.padrao_fabrica;
+      var oleo = fmt(e.volume_ml) + " mL de " + e.padrao_fabrica +
+        (e.tag_oleo ? " (pedir no almoxarifado pelo tag " + codigo + "-" + e.tag_oleo +
+          (e.cor_oleo ? ", galão de cor " + e.cor_oleo.nome.toLowerCase() : "") + ")" : "");
       if (h > lim) {
         classe = "st-nc";
         titulo = "VERMELHO – limite ultrapassado em " + milhar(h - lim) + " h (" + pct + " % da vida útil).";
@@ -461,6 +474,12 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         guardarVida(); atualizarVida();
       });
       atualizarVida();
+      // a aba Inspeção soma as horas rodadas e avisa por este evento
+      window.addEventListener("vida-oleo", function () {
+        try { vida = JSON.parse(localStorage.getItem("vida_oleo_" + codigo)) || vida; } catch (err) {}
+        horasEl.value = vida.horas == null ? "" : milhar(vida.horas);
+        atualizarVida();
+      });
     }
 
     function tipoAtual() { return document.querySelector("input[name=tipo]:checked").value; }

@@ -6,6 +6,8 @@
     "posicao": "M1",
     "lubrificante": "Óleo sintético PAO (CLP HC)",
     "padrao_fabrica": "Klübersynth EG4-320",
+    "tag_oleo": "OLE-01",
+    "cor_oleo": { "nome": "Azul", "hex": "#1565c0" },
     "equivalentes": [
       "Mobilgear SHC 632",
       "Shell Omala S4 GX 320",
