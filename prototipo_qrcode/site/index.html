@@ -109,6 +109,18 @@ main.larga,.larga .abas div{max-width:1180px}
 .tags li.atual code{background:#e0a100;border-color:#7a5600;color:#14202b}
 .tag-grande{margin:8px 0;font-weight:700}.tag-grande code{font-size:1.15rem;background:#e0a100;border-color:#7a5600}
 .tags-col{font-size:.8rem;line-height:1.9}
+.sap-fundo{position:fixed;inset:0;background:rgba(20,32,43,.65);z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:10px}
+.sap-doc{background:#fff;border-radius:14px;padding:16px;width:100%;max-width:520px;max-height:92vh;overflow:auto}
+.sap-doc h2{margin:6px 0 0}.sap-doc dt{font-size:.8rem;color:#5b6b7a;text-transform:uppercase;letter-spacing:.4px}
+.sap-selo{display:inline-block;background:#123a5c;color:#fff;border-radius:6px;padding:3px 8px;font-size:.78rem;font-weight:700}
+button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;font-weight:800;border:2px solid #123a5c;
+  border-radius:10px;background:#fff;color:#123a5c;font-family:inherit}
+.foto-campo{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.foto-btn{display:inline-block;margin:0;padding:10px 14px;font-weight:800;border:2px solid #123a5c;border-radius:10px;background:#fff;color:#123a5c;cursor:pointer}
+.foto-btn input{position:absolute;opacity:0;width:1px;height:1px}.foto-btn:focus-within{outline:3px solid #e0a100}
+.foto-mini{display:block;max-width:120px;max-height:120px;border-radius:8px;border:1px solid #b8c4cf}
+.foto-grande{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:8px}
+.levar{margin:6px 0 0;padding-left:1.2em}.levar li{margin:5px 0}
 .cor-galao{display:flex;align-items:center;gap:8px;margin:0 0 6px}
 .cor-galao i{width:34px;height:22px;border-radius:5px;border:2px solid #14202b;flex:none}
 .peca-acoes{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
@@ -237,13 +249,131 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
   }
 
+  // 135 -> "2 min 15 s"
+  function duracao(s) {
+    if (s == null) return "";
+    return s < 60 ? s + " s" : Math.floor(s / 60) + " min " + (s % 60) + " s";
+  }
+
+  // Fotos dos registros: reduzidas e guardadas no próprio aparelho (IndexedDB), como os demais dados.
+  window.Fotos = (function () {
+    var bd = null;
+    function abrir() {
+      return bd || (bd = new Promise(function (ok, erro) {
+        var r = indexedDB.open("fotos_ficha", 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore("fotos"); };
+        r.onsuccess = function () { ok(r.result); };
+        r.onerror = function () { bd = null; erro(r.error); };
+      }));
+    }
+    // reduz para no máximo 1024 px de lado, em JPEG, para ocupar pouco espaço no aparelho
+    function reduzir(arquivo) {
+      return new Promise(function (ok, erro) {
+        var url = URL.createObjectURL(arquivo), img = new Image();
+        img.onload = function () {
+          var k = Math.min(1, 1024 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+          c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url); ok(c.toDataURL("image/jpeg", 0.7));
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); erro(new Error("imagem inválida")); };
+        img.src = url;
+      });
+    }
+    function loja(modo) { return abrir().then(function (b) { return b.transaction("fotos", modo).objectStore("fotos"); }); }
+    var F = {
+      guardar: function (arquivo) {
+        var id = "f" + Date.now() + Math.round(Math.random() * 1e4);
+        return reduzir(arquivo).then(function (dados) {
+          return loja("readwrite").then(function (l) {
+            return new Promise(function (ok, erro) {
+              var q = l.put(dados, id);
+              q.onsuccess = function () { ok(id); }; q.onerror = function () { erro(q.error); };
+            });
+          });
+        });
+      },
+      ler: function (id) {
+        return loja("readonly").then(function (l) {
+          return new Promise(function (ok, erro) {
+            var q = l.get(id);
+            q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { erro(q.error); };
+          });
+        });
+      },
+      apagar: function (id) { return loja("readwrite").then(function (l) { l.delete(id); }).catch(function () {}); },
+      mostrar: function (id) {
+        var antigo = document.getElementById("sap-fundo");
+        if (antigo) antigo.remove();
+        var f = document.createElement("div");
+        f.id = "sap-fundo"; f.className = "sap-fundo";
+        f.innerHTML = '<div class="sap-doc" role="dialog" aria-label="Foto do registro"><img class="foto-grande" alt="Foto do registro">' +
+          '<p class="dica" id="foto-msg"></p><button type="button" class="salvar" id="foto-fechar">Fechar</button></div>';
+        document.body.appendChild(f);
+        f.addEventListener("click", function (ev) { if (ev.target === f) f.remove(); });
+        document.getElementById("foto-fechar").onclick = function () { f.remove(); };
+        F.ler(id).then(function (d) {
+          if (d) f.querySelector("img").src = d;
+          else document.getElementById("foto-msg").textContent = "Foto não encontrada neste aparelho.";
+        }, function () { document.getElementById("foto-msg").textContent = "Não foi possível abrir a foto."; });
+      },
+      // monta o campo "Tirar foto" dentro de el; mudar(id) é chamado quando a foto é guardada ou removida
+      campo: function (el, id, mudar) {
+        function desenhar(aviso) {
+          el.className = "foto-campo";
+          el.innerHTML = '<label class="foto-btn"><input type="file" accept="image/*" capture="environment">' +
+            (id ? 'Trocar foto' : 'Tirar foto – opcional') + '</label>' +
+            (id ? '<img class="foto-mini" alt="Foto do registro"><button type="button" class="link" data-rem>Remover</button>' : '') +
+            '<span class="dica" role="status">' + esc(aviso || "") + '</span>';
+          var inp = el.querySelector("input");
+          inp.onchange = function () {
+            if (!inp.files[0]) return;
+            el.querySelector("span").textContent = "Guardando a foto…";
+            var anterior = id;
+            F.guardar(inp.files[0]).then(function (novo) {
+              if (anterior) F.apagar(anterior);
+              id = novo; mudar(id); desenhar();
+            }, function () { desenhar("Não foi possível guardar a foto neste aparelho."); });
+          };
+          if (!id) return;
+          var img = el.querySelector("img");
+          F.ler(id).then(function (d) { if (d) img.src = d; }, function () {});
+          img.onclick = function () { F.mostrar(id); };
+          el.querySelector("[data-rem]").onclick = function () { F.apagar(id); id = null; mudar(null); desenhar(); };
+        }
+        desenhar();
+      }
+    };
+    return F;
+  })();
+
+  // Proposta de integração com o SAP: o protótipo só monta o documento (reserva de material ou nota de
+  // manutenção) e mostra na tela como ficaria. Nada é enviado ao SAP nesta versão.
+  window.DocSap = function (titulo, modulo, campos) {
+    var antigo = document.getElementById("sap-fundo");
+    if (antigo) antigo.remove();
+    campos = campos.filter(function (c) { return c[1] != null && c[1] !== ""; });
+    var f = document.createElement("div");
+    f.id = "sap-fundo"; f.className = "sap-fundo";
+    f.innerHTML = '<div class="sap-doc" role="dialog" aria-label="' + esc(titulo) + '">' +
+      '<span class="sap-selo">Proposta de integração com SAP ' + esc(modulo) + ' · simulação</span>' +
+      '<h2>' + esc(titulo) + '</h2><dl>' + campos.map(function (c) {
+        return '<dt>' + esc(c[0]) + '</dt><dd>' + esc(c[1]) + '</dd>';
+      }).join("") + '</dl>' +
+      '<p class="dica">Nesta versão nada é enviado ao SAP. Na proposta, este documento seria criado direto no sistema, sem digitação.</p>' +
+      '<button type="button" class="salvar" id="sap-fechar">Fechar</button></div>';
+    document.body.appendChild(f);
+    f.addEventListener("click", function (ev) { if (ev.target === f) f.remove(); });
+    document.getElementById("sap-fechar").onclick = function () { f.remove(); };
+  };
+
   function baixarCsv() {
     if (!lerRegistros().length) return alert("Ainda não há registros neste aparelho.");
     var linhas = [["codigo", "data_hora", "tipo", "quantidade_ml", "temperatura_c",
-      "responsavel", "observacao", "horas_oleo", "limite_oleo_h"]];
+      "responsavel", "observacao", "horas_oleo", "limite_oleo_h", "duracao_s", "foto"]];
     lerRegistros().forEach(function (r) {
       linhas.push([r.codigo, r.data_hora, r.tipo, fmt(r.quantidade_ml), fmt(r.temperatura_c),
-        r.responsavel, r.observacao, r.horas_oleo, r.limite_oleo_h]);
+        r.responsavel, r.observacao, r.horas_oleo, r.limite_oleo_h, r.duracao_s, r.foto ? "sim" : ""]);
     });
     var csv = "﻿" + linhas.map(function (l) {
       return l.map(function (c) { return '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"'; }).join(";");
@@ -283,6 +413,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           fmt(r.quantidade_ml) + ' mL' +
           (r.temperatura_c != null ? ' · ' + fmt(r.temperatura_c) + ' °C' : '') +
           (r.horas_oleo != null ? '<br>Óleo com ' + milhar(r.horas_oleo) + ' h' : '') +
+          (r.duracao_s != null ? '<br>Tempo: ' + duracao(r.duracao_s) : '') +
+          (r.foto ? '<br><button type="button" class="link" data-foto="' + esc(r.foto) + '">Ver foto</button>' : '') +
           '</td><td>' + esc(r.responsavel) +
           (r.observacao ? '<br><small>' + esc(r.observacao) + '</small>' : '') + '</td></tr>';
       }).join("");
@@ -371,6 +503,12 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         }).join("") + '</div>' +
         '</details>' +
       '</section>' : '') +
+      (e.levar ? '<section class="cartao"><div class="rotulo">Leve com você</div><ul class="levar">' +
+        '<li><b>' + esc(fmt(e.volume_ml) + " mL de " + e.padrao_fabrica) + '</b>' +
+          (e.tag_oleo ? ' – tag ' + esc(codigo + "-" + e.tag_oleo) : '') +
+          (e.cor_oleo ? ', galão ' + esc(e.cor_oleo.nome.toLowerCase()) : '') + '</li>' +
+        e.levar.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") +
+        '</ul></section>' : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
@@ -382,7 +520,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           '<div class="tag-grande">Tag <code>' + esc(codigo + "-" + e.tag_oleo) + '</code></div>' +
           (e.cor_oleo ? '<div class="cor-galao"><i style="background:' + esc(e.cor_oleo.hex) + '"></i>Cor do galão: <b>' +
             esc(e.cor_oleo.nome.toUpperCase()) + '</b></div>' : '') +
-          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + fmt(e.volume_ml) + " mL por troca") + '</div>' : '') +
+          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + fmt(e.volume_ml) + " mL por troca") +
+          '<button type="button" class="sap" id="sap-oleo">Pedir óleo ao almoxarifado</button></div>' : '') +
         '<div class="duplo">' +
           '<div><div class="rotulo">Viscosidade</div><div class="grande">' + esc(e.viscosidade) + '</div></div>' +
           '<div><div class="rotulo">Volume (' + esc(e.posicao) + ')</div><div class="grande">' +
@@ -412,6 +551,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<div id="aviso-temp">' + esc(e.aviso_temperatura) + '</div>' +
         '<label>Responsável<input type="text" id="responsavel" maxlength="60" autocomplete="name"></label>' +
         '<label>Observação – opcional<input type="text" id="observacao" maxlength="200"></label>' +
+        '<div id="foto-registro"></div>' +
         '<label class="confirma"><input type="checkbox" id="confirmado">' +
           'Equipamento bloqueado (LOTO) e bocal limpo</label>' +
         '<button type="submit" class="salvar">Salvar registro</button>' +
@@ -435,7 +575,37 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     var resp = document.getElementById("responsavel");
     var obs = document.getElementById("observacao");
     var conf = document.getElementById("confirmado");
+    // foto opcional do registro (vazamento, peça, nível)
+    var fotoReg = null;
+    function campoFoto() {
+      fotoReg = null;
+      window.Fotos.campo(document.getElementById("foto-registro"), null, function (id) { fotoReg = id; });
+    }
+    campoFoto();
+    document.getElementById("historico").addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-foto]") : null;
+      if (b) window.Fotos.mostrar(b.getAttribute("data-foto"));
+    });
     var msg = document.getElementById("mensagem");
+
+    // Tempo da intervenção: do momento em que a ficha foi aberta (leitura do QR Code) até salvar o registro.
+    // Se o aparelho ficou mais de 10 min com a tela apagada ou em outro aplicativo, a contagem recomeça.
+    var inicioFicha = Date.now(), saiuEm = null;
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) saiuEm = Date.now();
+      else if (saiuEm && Date.now() - saiuEm > 6e5) inicioFicha = Date.now();
+    });
+    var pedir = document.getElementById("sap-oleo");
+    if (pedir) pedir.onclick = function () {
+      window.DocSap("Reserva de material", "MM", [
+        ["Material", codigo + "-" + e.tag_oleo + " – " + e.padrao_fabrica + " (" + e.viscosidade + ")"],
+        ["Identificação", e.cor_oleo ? "Galão de cor " + e.cor_oleo.nome.toLowerCase() : ""],
+        ["Quantidade", fmt(e.volume_ml) + " mL"],
+        ["Equipamento", codigo + " – " + e.nome],
+        ["Solicitante", resp.value.trim()],
+        ["Data", agora()]
+      ]);
+    };
 
     // o nome do responsável fica memorizado no aparelho
     try { resp.value = localStorage.getItem("responsavel") || ""; } catch (err) {}
@@ -479,7 +649,19 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       fill.className = classe;
       fill.style.width = Math.min(100, pct) + "%";
       st.innerHTML = '<div class="parecer ' + classe + '"><b>' + esc(titulo) + '</b>' +
-        '<b class="fazer">O que fazer:</b>' + esc(fazer) + '</div>';
+        '<b class="fazer">O que fazer:</b>' + esc(fazer) +
+        (classe !== "st-c" ? '<button type="button" class="sap" id="sap-nota-oleo">Abrir nota de manutenção</button>' : '') + '</div>';
+      var bn = document.getElementById("sap-nota-oleo");
+      if (bn) bn.onclick = function () {
+        window.DocSap("Nota de manutenção", "PM", [
+          ["Equipamento", codigo + " – " + e.nome],
+          ["Descrição", titulo],
+          ["Serviço solicitado", fazer],
+          ["Prioridade", classe === "st-nc" ? "Alta" : "Média"],
+          ["Solicitante", resp.value.trim()],
+          ["Data", agora()]
+        ]);
+      };
     }
     function guardarVida() {
       try { localStorage.setItem("vida_oleo_" + codigo, JSON.stringify(vida)); } catch (err) {}
@@ -629,7 +811,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       var lista = lerRegistros();
       lista.push({ codigo: codigo, data_hora: agora(), tipo: tipo, quantidade_ml: quantidade,
         temperatura_c: temperatura, responsavel: responsavel, observacao: obs.value.trim(),
-        horas_oleo: horasEl ? vida.horas : null, limite_oleo_h: horasEl ? vida.limite : null });
+        horas_oleo: horasEl ? vida.horas : null, limite_oleo_h: horasEl ? vida.limite : null,
+        duracao_s: Date.now() - inicioFicha < 144e5 ? Math.round((Date.now() - inicioFicha) / 1000) : null,
+        foto: fotoReg });
       try {
         gravarRegistros(lista);
         localStorage.setItem("responsavel", responsavel);
@@ -645,9 +829,11 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         vida.paradas_h = 0; document.getElementById("oleo-paradas").value = "";
         vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida();
       }
-      temp.value = ""; obs.value = ""; conf.checked = false;
+      temp.value = ""; obs.value = ""; conf.checked = false; campoFoto();
       avisoTemp.style.display = "none";
-      avisar("ok", "Registro salvo neste aparelho.");
+      avisar("ok", "Registro salvo neste aparelho." +
+        (lista[lista.length - 1].duracao_s != null ? " Tempo da intervenção: " + duracao(lista[lista.length - 1].duracao_s) + "." : ""));
+      inicioFicha = Date.now();
     });
   }
 

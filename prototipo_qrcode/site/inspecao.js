@@ -350,7 +350,7 @@
       document.getElementById("i-iniciar").onclick = function () {
         var resp = "";
         try { resp = localStorage.getItem("responsavel") || ""; } catch (err) {}
-        rascunho = { inicio: agora(), passo: 0, responsavel: resp, horimetro: null,
+        rascunho = { inicio: agora(), inicio_ms: Date.now(), passo: 0, responsavel: resp, horimetro: null,
           operacao: "Em operação", loto: false, itens: {}, observacao: "" };
         guardarRascunho(); avisar(); renderChecklist();
       };
@@ -370,6 +370,8 @@
         '<p class="dica">A Parte A (ruído, vibração, temperatura e rolamentos) é feita com o redutor funcionando. ' +
         'Se ele estiver parado, marque esses itens como “Não verificado”.</p>' +
         navegacao(false, true) +
+        '<button type="button" class="sap" id="i-tudo">Tudo conforme – ir direto ao resumo</button>' +
+        '<p class="dica">Marca como Conforme os itens ainda sem resposta. No resumo, toque no item que estiver diferente para corrigir.</p>' +
         '<p class="rodape"><button type="button" class="link" id="i-descartar">Descartar esta inspeção</button></p>';
       var resp = document.getElementById("i-resp"), hor = document.getElementById("i-hor");
       resp.oninput = function () { rascunho.responsavel = resp.value; guardarRascunho(); };
@@ -396,11 +398,28 @@
       elCheck.querySelectorAll("input[name=i-op]").forEach(function (r) {
         r.onchange = function () { rascunho.operacao = r.value; guardarRascunho(); };
       });
-      ligarNavegacao(function () {
+      var validar = function () {
         if (!rascunho.responsavel.trim()) return "Informe o responsável.";
         if (hor.value.trim() && (rascunho.horimetro == null || rascunho.horimetro < 0)) return "Horímetro inválido.";
         return null;
+      };
+      ligarNavegacao(validar);
+      document.getElementById("i-tudo").onclick = function () {
+        var erro = validar();
+        if (erro) return avisar("erro", erro);
+        marcarPendentes();
+      };
+    }
+
+    // "Tudo conforme" em um toque: só preenche o que ainda não foi respondido e leva ao resumo para conferência.
+    function marcarPendentes() {
+      itens.forEach(function (it) {
+        var r = rascunho.itens[it.id];
+        if (!r || !r.status) rascunho.itens[it.id] = { status: "C", valor: r ? r.valor : null, opcoes: r ? r.opcoes || [] : [],
+          obs: r ? r.obs || "" : "", foto: r ? r.foto || null : null, manual: true };
       });
+      rascunho.rapida = true;
+      irPara(itens.length + 1);
     }
 
     function renderItem(idx) {
@@ -441,6 +460,7 @@
             '><span class="' + STATUS[s].cls + '">' + STATUS[s].t + '</span></label>';
         }).join("") + '</div>' +
         '<label>Observação – opcional<input type="text" id="i-obs" maxlength="200" value="' + esc(reg.obs) + '"></label>' +
+        '<div id="i-foto"></div>' +
         navegacao(true, true);
       elCheck.innerHTML = html;
 
@@ -483,6 +503,9 @@
         r.onchange = function () { reg.status = r.value; reg.manual = true; atualizarSugestao(); };
       });
       document.getElementById("i-obs").oninput = function () { reg.obs = this.value; guardarRascunho(); };
+      if (window.Fotos) window.Fotos.campo(document.getElementById("i-foto"), reg.foto || null, function (id) {
+        reg.foto = id; guardarRascunho();
+      });
       var loto = document.getElementById("i-loto");
       if (loto) loto.onchange = function () { rascunho.loto = loto.checked; guardarRascunho(); };
       document.getElementById("i-ver3d").onclick = function () {
@@ -508,6 +531,7 @@
         if (r.valor != null) det.push(fmt(r.valor) + " " + it.medida.unidade);
         if (r.opcoes && r.opcoes.length) det.push(r.opcoes.join(", "));
         if (r.obs) det.push(r.obs);
+        if (r.foto) det.push("com foto");
         return '<tr><td><button type="button" class="link" data-passo="' + (i + 1) + '">' + (i + 1) + '. ' + esc(it.titulo) +
           '</button></td><td>' + (chip(r.status) || '<span class="chip st-falta">Pendente</span>') + '<br><small>' + esc(det.join(" · ")) + '</small></td></tr>';
       }).join("");
@@ -518,6 +542,8 @@
         (horasRodadas(rascunho.horimetro) >= 0 && horasRodadas(rascunho.horimetro) != null
           ? ' · rodou ' + fmt(horasRodadas(rascunho.horimetro)) + ' h desde a última inspeção' : '') + '</p>' +
         '<table class="resumo"><tbody>' + linhas + '</tbody></table>' +
+        (itens.some(function (it) { var r = rascunho.itens[it.id]; return !r || !r.status; })
+          ? '<button type="button" class="sap" id="i-tudo">Marcar os pendentes como Conforme</button>' : '') +
         '<div class="parecer ' + STATUS[par.s].cls + '"><span class="rotulo">Parecer geral</span><br><b>' + esc(par.t) + '</b>' +
           '<br><small>' + par.nc + ' não conforme(s) · ' + par.a + ' em atenção</small></div>' +
         '<label>Recomendações / observação geral – opcional<textarea id="i-obsg" maxlength="500" rows="3">' + esc(rascunho.observacao) + '</textarea></label>' +
@@ -525,6 +551,8 @@
         '<button type="button" class="salvar" id="i-salvar">Salvar inspeção</button>';
       document.getElementById("i-obsg").oninput = function () { rascunho.observacao = this.value; guardarRascunho(); };
       ligarNavegacao(null);
+      var tudo = document.getElementById("i-tudo");
+      if (tudo) tudo.onclick = marcarPendentes;
       document.getElementById("i-salvar").onclick = salvar;
     }
 
@@ -570,11 +598,14 @@
       var reg = {
         codigo: codigo, id: Date.now(), inicio: rascunho.inicio, data_hora: agora(),
         responsavel: rascunho.responsavel.trim(), horimetro: rascunho.horimetro,
-        horas_rodadas: rodou, operacao: rascunho.operacao, parecer: par.s, observacao: rascunho.observacao.trim(), itens: {}
+        horas_rodadas: rodou, marcacao_rapida: !!rascunho.rapida,
+        duracao_s: rascunho.inicio_ms && Date.now() - rascunho.inicio_ms < 144e5
+          ? Math.round((Date.now() - rascunho.inicio_ms) / 1000) : null,
+        operacao: rascunho.operacao, parecer: par.s, observacao: rascunho.observacao.trim(), itens: {}
       };
       itens.forEach(function (it) {
         var r = rascunho.itens[it.id];
-        reg.itens[it.id] = { status: r.status, valor: r.valor, opcoes: r.opcoes, obs: (r.obs || "").trim() };
+        reg.itens[it.id] = { status: r.status, valor: r.valor, opcoes: r.opcoes, obs: (r.obs || "").trim(), foto: r.foto || null };
       });
       var lista = lerInspecoes();
       lista.push(reg);
@@ -633,12 +664,15 @@
           if (x.valor != null) det.push(fmt(x.valor) + " " + it.medida.unidade);
           if (x.opcoes && x.opcoes.length) det.push(x.opcoes.join(", "));
           if (x.obs) det.push(x.obs);
-          return '<tr><td>' + esc(it.titulo) + '</td><td>' + chip(x.status) + '<br><small>' + esc(det.join(" · ")) + '</small></td></tr>';
+          return '<tr><td>' + esc(it.titulo) + '</td><td>' + chip(x.status) + '<br><small>' + esc(det.join(" · ")) + '</small>' +
+            (x.foto ? ' <button type="button" class="link" data-foto="' + esc(x.foto) + '">Ver foto</button>' : '') + '</td></tr>';
         }).join("");
         return '<details class="insp"><summary>' + esc(r.data_hora) + ' · ' + esc(r.responsavel) + ' ' + chip(r.parecer) +
           '</summary><p>' + esc(r.operacao) + (r.horimetro != null ? ' · horímetro ' + fmt(r.horimetro) + ' h' : '') +
           (r.horas_rodadas != null ? ' · rodou ' + fmt(r.horas_rodadas) + ' h' : '') +
-          ' · ' + p.nc + ' NC · ' + p.a + ' atenção</p>' +
+          ' · ' + p.nc + ' NC · ' + p.a + ' atenção' + (r.marcacao_rapida ? ' · marcação rápida' : '') +
+          (r.duracao_s != null ? ' · duração ' + (r.duracao_s < 60 ? r.duracao_s + ' s' : Math.floor(r.duracao_s / 60) + ' min ' + (r.duracao_s % 60) + ' s') : '') + '</p>' +
+          (r.parecer !== "C" && window.DocSap ? '<button type="button" class="sap" data-nota="' + r.id + '">Abrir nota de manutenção</button>' : '') +
           (r.observacao ? '<p><b>Recomendações:</b> ' + esc(r.observacao) + '</p>' : '') +
           '<table><tbody>' + linhas + '</tbody></table></details>';
       }).join("");
@@ -647,17 +681,42 @@
         '<p class="rotulo" style="margin-top:14px">Inspeções realizadas</p>' + itensHtml +
         '<p class="rodape"><button type="button" class="link" id="i-csv">Baixar inspeções deste aparelho (CSV)</button></p>';
       document.getElementById("i-csv").onclick = baixarCsv;
+      corpo.querySelectorAll("[data-foto]").forEach(function (b) {
+        b.onclick = function () { if (window.Fotos) window.Fotos.mostrar(b.getAttribute("data-foto")); };
+      });
+      // nota de manutenção (proposta de integração com SAP) com os itens que não estão conformes
+      corpo.querySelectorAll("[data-nota]").forEach(function (b) {
+        b.onclick = function () {
+          var r = minhas().filter(function (x) { return String(x.id) === b.getAttribute("data-nota"); })[0];
+          if (!r) return;
+          var prob = itens.filter(function (it) { var x = r.itens[it.id]; return x && (x.status === "NC" || x.status === "A"); })
+            .map(function (it) {
+              var x = r.itens[it.id];
+              return STATUS[x.status].t + ": " + it.titulo + (x.opcoes && x.opcoes.length ? " (" + x.opcoes.join(", ") + ")" : "") +
+                (x.obs ? " – " + x.obs : "");
+            }).join("; ");
+          window.DocSap("Nota de manutenção", "PM", [
+            ["Equipamento", codigo + " – " + e.nome],
+            ["Descrição", prob],
+            ["Recomendações", r.observacao],
+            ["Fotos anexadas", String(itens.filter(function (it) { return r.itens[it.id] && r.itens[it.id].foto; }).length || "")],
+            ["Prioridade", r.parecer === "NC" ? "Alta" : "Média"],
+            ["Solicitante", r.responsavel],
+            ["Data da inspeção", r.data_hora]
+          ]);
+        };
+      });
     }
 
     function baixarCsv() {
-      var linhas = [["codigo", "inspecao", "data_hora", "responsavel", "operacao", "horimetro_h", "horas_rodadas_h", "parecer",
-        "item", "condicao", "medicao", "unidade", "condicoes_marcadas", "observacao", "recomendacoes"]];
+      var linhas = [["codigo", "inspecao", "data_hora", "responsavel", "operacao", "horimetro_h", "horas_rodadas_h", "duracao_s", "parecer",
+        "item", "condicao", "medicao", "unidade", "condicoes_marcadas", "observacao", "foto", "recomendacoes"]];
       minhas().forEach(function (r) {
         itens.forEach(function (it) {
           var x = r.itens[it.id] || {};
-          linhas.push([r.codigo, r.id, r.data_hora, r.responsavel, r.operacao, fmt(r.horimetro), fmt(r.horas_rodadas),
+          linhas.push([r.codigo, r.id, r.data_hora, r.responsavel, r.operacao, fmt(r.horimetro), fmt(r.horas_rodadas), r.duracao_s,
             STATUS[r.parecer] ? STATUS[r.parecer].t : "", it.titulo, x.status ? STATUS[x.status].t : "",
-            fmt(x.valor), it.medida ? it.medida.unidade : "", (x.opcoes || []).join(" | "), x.obs, r.observacao]);
+            fmt(x.valor), it.medida ? it.medida.unidade : "", (x.opcoes || []).join(" | "), x.obs, x.foto ? "sim" : "", r.observacao]);
         });
       });
       var csv = "﻿" + linhas.map(function (l) {
