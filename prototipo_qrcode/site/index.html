@@ -120,7 +120,6 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .foto-btn input{position:absolute;opacity:0;width:1px;height:1px}.foto-btn:focus-within{outline:3px solid #e0a100}
 .foto-mini{display:block;max-width:120px;max-height:120px;border-radius:8px;border:1px solid #b8c4cf}
 .foto-grande{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:8px}
-.levar{margin:6px 0 0;padding-left:1.2em}.levar li{margin:5px 0}
 .cor-galao{display:flex;align-items:center;gap:8px;margin:0 0 6px}
 .cor-galao i{width:34px;height:22px;border-radius:5px;border:2px solid #14202b;flex:none}
 .peca-acoes{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
@@ -503,12 +502,6 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         }).join("") + '</div>' +
         '</details>' +
       '</section>' : '') +
-      (e.levar ? '<section class="cartao"><div class="rotulo">Leve com você</div><ul class="levar">' +
-        '<li><b>' + esc(fmt(e.volume_ml) + " mL de " + e.padrao_fabrica) + '</b>' +
-          (e.tag_oleo ? ' – tag ' + esc(codigo + "-" + e.tag_oleo) : '') +
-          (e.cor_oleo ? ', galão ' + esc(e.cor_oleo.nome.toLowerCase()) : '') + '</li>' +
-        e.levar.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") +
-        '</ul></section>' : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
