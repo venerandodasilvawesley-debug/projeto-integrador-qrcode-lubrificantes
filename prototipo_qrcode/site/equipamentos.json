@@ -15,6 +15,11 @@
     "volume_ml": 30,
     "volumes_por_posicao": "posição 1 = 30 mL; posições 2 e 4 = 55 mL; posição 3 = 35 mL; posições 5 e 6 = 40 mL",
     "pontos": "Não informados no catálogo para o tamanho 28. Confirmar no redutor instalado ou com o fabricante antes da intervenção.",
+    "vida_util_oleo": [
+      { "temp_c": 80, "horas": 15000 },
+      { "temp_c": 85, "horas": 10000 },
+      { "temp_c": 90, "horas": 7500 }
+    ],
     "periodicidade": "Troca conforme a temperatura do óleo: 15.000 h (80 °C); 10.000 h (85 °C); 7.500 h (90 °C). Avaliar o óleo nas primeiras 500 h.",
     "epis": "Luvas nitrílicas e óculos de proteção",
     "alertas": [

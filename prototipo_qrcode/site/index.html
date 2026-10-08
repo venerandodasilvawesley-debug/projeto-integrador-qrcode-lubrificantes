@@ -149,6 +149,14 @@ main.larga,.larga .abas div{max-width:1180px}
 .parecer{margin-top:12px;border-radius:10px;padding:12px;border-left:6px solid}
 .parecer.st-c{background:#d9f2e1;border-color:#1c8a45}.parecer.st-a{background:#fff3cd;border-color:#e0a100}
 .parecer.st-nc{background:#fbdcdc;border-color:#c22525}
+/* vida útil do óleo */
+.vida-barra{position:relative;height:14px;margin-top:14px;border-radius:7px;overflow:hidden;
+  background:linear-gradient(90deg,#bfe6cb 0 80%,#ffe69a 80% 100%)}
+.vida-barra i{display:block;height:100%;width:0;background:#1c8a45}
+.vida-barra i.st-a{background:#e0a100}.vida-barra i.st-nc{background:#c22525}
+.vida-escala{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:#5b6b7a;margin-top:2px}
+.tipos span small{display:block;font-weight:600;font-size:.78rem}
+#vida-status b.fazer{display:block;margin-top:6px}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .nav button{font-size:1.1rem;padding:14px}
 .nav button.pri{background:#123a5c;color:#fff}
@@ -203,6 +211,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   }
   // 30 -> "30"; 30.5 -> "30,5"
   function fmt(n) { return n == null ? "" : String(n).replace(".", ","); }
+  // 15000 -> "15.000"
+  function milhar(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+$)/g, "."); }
   // "30", "30,5" ou "" -> número (ou null)
   function numero(t) {
     t = String(t || "").trim().replace(",", ".");
@@ -226,10 +236,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function baixarCsv() {
     if (!lerRegistros().length) return alert("Ainda não há registros neste aparelho.");
     var linhas = [["codigo", "data_hora", "tipo", "quantidade_ml", "temperatura_c",
-      "responsavel", "observacao"]];
+      "responsavel", "observacao", "horas_oleo", "limite_oleo_h"]];
     lerRegistros().forEach(function (r) {
       linhas.push([r.codigo, r.data_hora, r.tipo, fmt(r.quantidade_ml), fmt(r.temperatura_c),
-        r.responsavel, r.observacao]);
+        r.responsavel, r.observacao, r.horas_oleo, r.limite_oleo_h]);
     });
     var csv = "﻿" + linhas.map(function (l) {
       return l.map(function (c) { return '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"'; }).join(";");
@@ -323,6 +333,19 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     app.innerHTML = escolha + cabecalho(codigo, e.nome + " · posição " + e.posicao) + abas + '<main>' +
       '<div id="painel-lubrificacao" role="tabpanel">' +
       '<div id="mensagem"></div>' +
+      (e.vida_util_oleo ? '<section class="cartao" id="vida">' +
+        '<div class="rotulo">Vida útil do óleo</div>' +
+        '<label style="margin-top:6px">Horas trabalhadas desde a última troca (horímetro)' +
+          '<input type="text" inputmode="numeric" id="horas-oleo" maxlength="7"></label>' +
+        '<label>Temperatura de trabalho do óleo</label>' +
+        '<div class="tipos">' + e.vida_util_oleo.map(function (v) {
+          return '<label><input type="radio" name="limite-oleo" value="' + v.horas + '"><span>' +
+            (v.temp_c === e.vida_util_oleo[0].temp_c ? 'até ' : '') + v.temp_c + ' °C<small>' + milhar(v.horas) + ' h</small></span></label>';
+        }).join("") + '</div>' +
+        '<div class="vida-barra"><i id="vida-fill"></i></div>' +
+        '<div class="vida-escala"><span>0 h</span><span id="vida-80"></span><span id="vida-100"></span></div>' +
+        '<div id="vida-status"></div>' +
+      '</section>' : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
@@ -383,6 +406,62 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     // o nome do responsável fica memorizado no aparelho
     try { resp.value = localStorage.getItem("responsavel") || ""; } catch (err) {}
 
+    // Vida útil do óleo: verde até 80 % do limite, amarelo nos últimos 20 %, vermelho depois do limite.
+    var vida = { horas: null, limite: null };
+    var horasEl = document.getElementById("horas-oleo");
+    function atualizarVida() {
+      var st = document.getElementById("vida-status"), fill = document.getElementById("vida-fill");
+      var lim = vida.limite, h = vida.horas;
+      document.getElementById("vida-80").textContent = "80 % = " + milhar(lim * 0.8) + " h";
+      document.getElementById("vida-100").textContent = "limite " + milhar(lim) + " h";
+      if (h == null) {
+        fill.style.width = "0";
+        st.innerHTML = '<div class="parecer st-nv" style="background:#e3e8ed;border-color:#5b6b7a">' +
+          'Informe as horas do horímetro para ver a situação do óleo.</div>';
+        return;
+      }
+      var pct = Math.round(h / lim * 100), classe, titulo, fazer;
+      var oleo = fmt(e.volume_ml) + " mL de " + e.padrao_fabrica;
+      if (h > lim) {
+        classe = "st-nc";
+        titulo = "VERMELHO – limite ultrapassado em " + milhar(h - lim) + " h (" + pct + " % da vida útil).";
+        fazer = "Trocar o óleo agora: parar e bloquear o equipamento (LOTO), drenar o óleo usado e destinar ao rerrefino, " +
+          "reabastecer com " + oleo + " e registrar a intervenção como Troca.";
+      } else if (h > lim * 0.8) {
+        classe = "st-a";
+        titulo = "AMARELO – últimos 20 % da vida útil (" + pct + " %). Faltam " + milhar(lim - h) + " h para o limite.";
+        fazer = "Programar a troca: separar " + oleo + " (ou equivalente de mesma base), agendar a parada com bloqueio (LOTO) " +
+          "e trocar antes de " + milhar(lim) + " h.";
+      } else {
+        classe = "st-c";
+        titulo = "VERDE – óleo dentro da vida útil (" + pct + " %). Faltam " + milhar(lim * 0.8 - h) + " h para a faixa de atenção.";
+        fazer = "Manter a inspeção de rotina: nível, vazamentos e temperatura da carcaça.";
+      }
+      fill.className = classe;
+      fill.style.width = Math.min(100, pct) + "%";
+      st.innerHTML = '<div class="parecer ' + classe + '"><b>' + esc(titulo) + '</b>' +
+        '<b class="fazer">O que fazer:</b>' + esc(fazer) + '</div>';
+    }
+    function guardarVida() {
+      try { localStorage.setItem("vida_oleo_" + codigo, JSON.stringify(vida)); } catch (err) {}
+    }
+    if (horasEl) {
+      try { vida = JSON.parse(localStorage.getItem("vida_oleo_" + codigo)) || vida; } catch (err) {}
+      var limites = e.vida_util_oleo.map(function (v) { return v.horas; });
+      if (limites.indexOf(vida.limite) < 0) vida.limite = limites[0];
+      horasEl.value = vida.horas == null ? "" : milhar(vida.horas);
+      document.querySelectorAll("input[name=limite-oleo]").forEach(function (r) {
+        r.checked = Number(r.value) === vida.limite;
+        r.addEventListener("change", function () { vida.limite = Number(r.value); guardarVida(); atualizarVida(); });
+      });
+      horasEl.addEventListener("input", function () {
+        var d = horasEl.value.replace(/\D/g, "");
+        vida.horas = d ? Number(d) : null;
+        guardarVida(); atualizarVida();
+      });
+      atualizarVida();
+    }
+
     function tipoAtual() { return document.querySelector("input[name=tipo]:checked").value; }
     function ajustarTipo() {
       var tipo = tipoAtual();
@@ -421,7 +500,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 
       var lista = lerRegistros();
       lista.push({ codigo: codigo, data_hora: agora(), tipo: tipo, quantidade_ml: quantidade,
-        temperatura_c: temperatura, responsavel: responsavel, observacao: obs.value.trim() });
+        temperatura_c: temperatura, responsavel: responsavel, observacao: obs.value.trim(),
+        horas_oleo: horasEl ? vida.horas : null, limite_oleo_h: horasEl ? vida.limite : null });
       try {
         gravarRegistros(lista);
         localStorage.setItem("responsavel", responsavel);
@@ -429,6 +509,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         return avisar("erro", "Não foi possível salvar neste aparelho.");
       }
       document.getElementById("historico").innerHTML = linhasHistorico(codigo);
+      // óleo novo: a contagem de horas recomeça
+      if (horasEl && tipo === "Troca") { vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida(); }
       temp.value = ""; obs.value = ""; conf.checked = false;
       avisoTemp.style.display = "none";
       avisar("ok", "Registro salvo neste aparelho.");
