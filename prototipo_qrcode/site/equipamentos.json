@@ -23,6 +23,497 @@
     ],
     "limite_carcaca_c": 75,
     "aviso_temperatura": "Carcaça acima de 75 °C indica óleo acima do limite de 90 °C.",
-    "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005)."
+    "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005).",
+    "inspecao": {
+      "modelo3d": "WCR28",
+      "ficha_tecnica": [
+        [
+          "Descrição",
+          "Redutor de velocidade coroa e rosca sem fim"
+        ],
+        [
+          "Marca",
+          "WEG-Cestari"
+        ],
+        [
+          "Modelo",
+          "WCR28 1 HS U 7,5"
+        ],
+        [
+          "Referência",
+          "WCR28.7,5.NAB"
+        ],
+        [
+          "Redução",
+          "1 por 7,5"
+        ],
+        [
+          "Eixo de entrada",
+          "Maciço, Ø 11 mm"
+        ],
+        [
+          "Eixo de saída",
+          "Maciço, Ø 14 mm"
+        ],
+        [
+          "Potência máxima do motor",
+          "0,77 cv"
+        ],
+        [
+          "Rotação de saída",
+          "≈ 229 rpm com motor de 4 polos (1.720 rpm ÷ 7,5)"
+        ]
+      ],
+      "secoes": [
+        {
+          "id": "A",
+          "titulo": "Parte A – Equipamento em operação",
+          "texto": "Faça as medições com o redutor funcionando em regime normal. Não toque em partes girantes."
+        },
+        {
+          "id": "B",
+          "titulo": "Parte B – Equipamento parado e bloqueado",
+          "texto": "Desligue, bloqueie e etiquete o equipamento (LOTO) antes de continuar.",
+          "loto": true
+        }
+      ],
+      "checklist": [
+        {
+          "id": "ruido",
+          "secao": "A",
+          "titulo": "Nível de ruído",
+          "pecas": [
+            "coroa",
+            "rosca",
+            "rolamentos-saida",
+            "rolamentos-entrada"
+          ],
+          "verificar": [
+            "Medir o nível de ruído a 1 m da carcaça com decibelímetro, em dB(A).",
+            "Ouvir ruídos anormais: batidas, chiado metálico, ronco cíclico ou ruído que muda com a carga.",
+            "Comparar com a medição da inspeção anterior: aumento acima de 3 dB(A) indica alteração."
+          ],
+          "medida": {
+            "rotulo": "Nível de ruído a 1 m",
+            "unidade": "dB(A)",
+            "min": 20,
+            "max": 140,
+            "variacao": {
+              "aumento": 3,
+              "status": "A"
+            },
+            "curto": "Ruído"
+          },
+          "opcoes": {
+            "rotulo": "Ruído percebido",
+            "multipla": true,
+            "itens": [
+              {
+                "t": "Normal e contínuo",
+                "s": "C"
+              },
+              {
+                "t": "Ronco cíclico",
+                "s": "A"
+              },
+              {
+                "t": "Chiado metálico",
+                "s": "NC"
+              },
+              {
+                "t": "Batidas ou estalos",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "vibracao",
+          "secao": "A",
+          "titulo": "Vibração",
+          "pecas": [
+            "carcaca",
+            "rolamentos-saida",
+            "rolamentos-entrada"
+          ],
+          "verificar": [
+            "Medir a velocidade de vibração (mm/s RMS) sobre as tampas dos rolamentos, nas direções radial e axial. Anotar o maior valor.",
+            "Referência ISO 10816-1, classe I (máquinas pequenas): até 1,8 mm/s aceitável; de 1,8 a 4,5 mm/s atenção; acima de 4,5 mm/s inaceitável.",
+            "Verificar se a vibração passa para a base ou se há parafusos soltos."
+          ],
+          "medida": {
+            "rotulo": "Vibração (maior valor)",
+            "unidade": "mm/s",
+            "min": 0,
+            "max": 100,
+            "faixas": [
+              {
+                "ate": 1.8,
+                "status": "C"
+              },
+              {
+                "ate": 4.5,
+                "status": "A"
+              },
+              {
+                "status": "NC"
+              }
+            ],
+            "variacao": {
+              "aumento": 1,
+              "status": "A"
+            },
+            "curto": "Vibração"
+          }
+        },
+        {
+          "id": "temperatura",
+          "secao": "A",
+          "titulo": "Temperatura de operação",
+          "pecas": [
+            "carcaca",
+            "rosca"
+          ],
+          "verificar": [
+            "Medir a temperatura da carcaça com termômetro infravermelho, no ponto mais quente (região da rosca sem fim).",
+            "Limite: 75 °C na carcaça, o que corresponde a cerca de 90 °C no óleo.",
+            "Temperatura subindo de uma inspeção para outra indica óleo degradado, nível errado ou sobrecarga."
+          ],
+          "medida": {
+            "rotulo": "Temperatura da carcaça",
+            "unidade": "°C",
+            "min": -20,
+            "max": 200,
+            "faixas": [
+              {
+                "ate": 70,
+                "status": "C"
+              },
+              {
+                "ate": 75,
+                "status": "A"
+              },
+              {
+                "status": "NC"
+              }
+            ],
+            "variacao": {
+              "aumento": 10,
+              "status": "A"
+            },
+            "curto": "Temperatura"
+          }
+        },
+        {
+          "id": "rolamentos",
+          "secao": "A",
+          "titulo": "Rolamentos",
+          "pecas": [
+            "rolamentos-saida",
+            "rolamentos-entrada"
+          ],
+          "verificar": [
+            "Ouvir os mancais com estetoscópio mecânico (ou uma haste) nos dois lados de cada eixo.",
+            "Comparar a temperatura das tampas dos rolamentos: um lado bem mais quente indica rolamento danificado.",
+            "Ruído áspero, raspado ou intermitente indica desgaste, folga interna ou contaminação."
+          ],
+          "opcoes": {
+            "rotulo": "Condição encontrada",
+            "multipla": true,
+            "itens": [
+              {
+                "t": "Ruído suave e uniforme",
+                "s": "C"
+              },
+              {
+                "t": "Aquecimento localizado",
+                "s": "A"
+              },
+              {
+                "t": "Ruído intermitente",
+                "s": "A"
+              },
+              {
+                "t": "Ruído áspero ou raspado",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "carcaca",
+          "secao": "B",
+          "titulo": "Carcaça e fixação",
+          "pecas": [
+            "carcaca",
+            "parafusos"
+          ],
+          "verificar": [
+            "Procurar trincas, amassados ou pintura queimada na carcaça.",
+            "Conferir o aperto dos parafusos de fixação na base e das tampas.",
+            "Verificar o alinhamento e o estado do acoplamento com o motor."
+          ],
+          "opcoes": {
+            "rotulo": "Condição encontrada",
+            "multipla": true,
+            "itens": [
+              {
+                "t": "Sem anomalias",
+                "s": "C"
+              },
+              {
+                "t": "Parafuso frouxo",
+                "s": "A"
+              },
+              {
+                "t": "Desalinhamento",
+                "s": "A"
+              },
+              {
+                "t": "Trinca na carcaça",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "vedacao",
+          "secao": "B",
+          "titulo": "Vedação",
+          "pecas": [
+            "retentores",
+            "juntas",
+            "respiro",
+            "bujoes"
+          ],
+          "verificar": [
+            "Inspecionar os retentores dos eixos de entrada e de saída: sem vazamento e com o lábio sem ressecamento.",
+            "Verificar as juntas (anéis O) das tampas e os bujões: sem marcas de óleo.",
+            "Conferir se o respiro está limpo e desobstruído."
+          ],
+          "opcoes": {
+            "rotulo": "Condição encontrada",
+            "multipla": true,
+            "itens": [
+              {
+                "t": "Sem vazamento",
+                "s": "C"
+              },
+              {
+                "t": "Marca de óleo (umidade)",
+                "s": "A"
+              },
+              {
+                "t": "Respiro obstruído",
+                "s": "A"
+              },
+              {
+                "t": "Vazamento com gotejamento",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "nivel_oleo",
+          "secao": "B",
+          "titulo": "Nível do óleo",
+          "pecas": [
+            "bujoes",
+            "respiro"
+          ],
+          "verificar": [
+            "Com o redutor parado e frio, verificar o nível pelo bujão de nível (confirmar a posição no redutor instalado).",
+            "Volume de referência na posição de montagem M1: 30 mL.",
+            "Se estiver baixo, completar com o mesmo lubrificante e procurar a causa (vazamento)."
+          ],
+          "opcoes": {
+            "rotulo": "Nível encontrado",
+            "multipla": false,
+            "itens": [
+              {
+                "t": "Normal",
+                "s": "C"
+              },
+              {
+                "t": "Acima do nível",
+                "s": "A"
+              },
+              {
+                "t": "Abaixo do nível",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "condicao_oleo",
+          "secao": "B",
+          "titulo": "Condição do óleo",
+          "pecas": [
+            "bujoes",
+            "coroa"
+          ],
+          "verificar": [
+            "Retirar uma pequena amostra pelo dreno e observar cor, transparência e cheiro.",
+            "Óleo leitoso indica água; brilho dourado indica desgaste da coroa de bronze.",
+            "Partículas de aço indicam desgaste dos rolamentos ou da rosca sem fim."
+          ],
+          "opcoes": {
+            "rotulo": "Aspecto da amostra",
+            "multipla": true,
+            "itens": [
+              {
+                "t": "Limpo, cor normal",
+                "s": "C"
+              },
+              {
+                "t": "Escurecido",
+                "s": "A"
+              },
+              {
+                "t": "Leitoso (água)",
+                "s": "NC"
+              },
+              {
+                "t": "Partículas de bronze",
+                "s": "NC"
+              },
+              {
+                "t": "Partículas de aço",
+                "s": "NC"
+              },
+              {
+                "t": "Cheiro de queimado",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "lubrificante",
+          "secao": "B",
+          "titulo": "Lubrificante",
+          "pecas": [
+            "carcaca",
+            "bujoes"
+          ],
+          "verificar": [
+            "Confirmar que o óleo em uso é o da ficha: sintético PAO ISO VG 320 (padrão de fábrica Klübersynth EG4-320).",
+            "Não misturar com óleo mineral nem com sintético PG (poliglicol).",
+            "Conferir as horas desde a última troca: troca a cada 15.000 h (óleo a 80 °C), 10.000 h (85 °C) ou 7.500 h (90 °C)."
+          ],
+          "medida": {
+            "rotulo": "Horas desde a última troca",
+            "unidade": "h",
+            "min": 0,
+            "max": 200000,
+            "curto": "Horas do óleo"
+          },
+          "opcoes": {
+            "rotulo": "Lubrificante em uso",
+            "multipla": false,
+            "itens": [
+              {
+                "t": "Conforme a ficha",
+                "s": "C"
+              },
+              {
+                "t": "Não identificado",
+                "s": "A"
+              },
+              {
+                "t": "Diferente da ficha",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "folgas",
+          "secao": "B",
+          "titulo": "Folgas mecânicas",
+          "pecas": [
+            "eixo-saida",
+            "rosca",
+            "rolamentos-saida",
+            "rolamentos-entrada"
+          ],
+          "verificar": [
+            "Com relógio comparador, medir a folga axial do eixo de saída (empurrar e puxar o eixo).",
+            "Verificar a folga radial nos eixos de entrada e de saída (movimentar a ponta do eixo para cima e para baixo).",
+            "Girar o eixo de entrada com a mão e observar a folga angular (backlash) no eixo de saída."
+          ],
+          "medida": {
+            "rotulo": "Folga axial do eixo de saída",
+            "unidade": "mm",
+            "min": 0,
+            "max": 10,
+            "variacao": {
+              "aumento": 0.05,
+              "status": "A"
+            },
+            "curto": "Folga axial"
+          },
+          "opcoes": {
+            "rotulo": "Folga percebida",
+            "multipla": false,
+            "itens": [
+              {
+                "t": "Sem folga perceptível",
+                "s": "C"
+              },
+              {
+                "t": "Folga leve",
+                "s": "A"
+              },
+              {
+                "t": "Folga excessiva",
+                "s": "NC"
+              }
+            ]
+          }
+        },
+        {
+          "id": "engrenagens",
+          "secao": "B",
+          "titulo": "Engrenagens (coroa e rosca sem fim)",
+          "pecas": [
+            "coroa",
+            "rosca"
+          ],
+          "verificar": [
+            "Girar o eixo de entrada com a mão: o movimento deve ser suave, sem pontos duros nem travamento.",
+            "Se o redutor estiver aberto (desmontagem programada), examinar os dentes da coroa de bronze e a rosca sem fim: desgaste, pitting (pequenas crateras), riscos e marca de contato irregular.",
+            "Relacionar com a condição do óleo (partículas de bronze) e com o ruído medido na Parte A."
+          ],
+          "opcoes": {
+            "rotulo": "Condição encontrada",
+            "multipla": true,
+            "itens": [
+              {
+                "t": "Giro suave, sem anomalias",
+                "s": "C"
+              },
+              {
+                "t": "Ponto duro no giro",
+                "s": "A"
+              },
+              {
+                "t": "Desgaste ou pitting nos dentes",
+                "s": "NC"
+              },
+              {
+                "t": "Dente quebrado",
+                "s": "NC"
+              },
+              {
+                "t": "Dentes não inspecionados (redutor fechado)"
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 }

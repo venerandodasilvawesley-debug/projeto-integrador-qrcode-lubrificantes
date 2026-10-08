@@ -57,11 +57,97 @@ td,th{text-align:left;padding:6px 4px;border-bottom:1px solid #dde3e9;vertical-a
 a,button.link{color:#123a5c}
 button.link{background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer}
 .rodape{margin-top:18px;font-size:.85rem;text-align:center}
+/* abas: Lubrificação | Inspeção */
+.abas{position:sticky;top:0;z-index:5;background:#123a5c;padding:0 14px 10px}
+.abas div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.abas button{font:inherit;font-weight:800;font-size:1.05rem;padding:12px 6px;border:2px solid #fff;
+  border-radius:10px;background:transparent;color:#fff;cursor:pointer;line-height:1.15}
+.abas button small{display:block;font-weight:600;font-size:.78rem;opacity:.85}
+.abas button[aria-selected=true]{background:#fff;color:#123a5c}
+.abas button:focus-visible{outline:3px solid #e0a100}
+main.larga,.larga .abas div{max-width:1180px}
+.larga header div{max-width:1180px}
+/* aba de inspeção */
+.insp-grade{display:grid;gap:0 16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){
+  .insp-grade{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}
+  .insp-3d{position:sticky;top:76px}
+}
+.visor{position:relative;height:min(80vw,460px);min-height:260px;margin-top:8px;border-radius:10px;overflow:hidden;
+  background:linear-gradient(#f5f8fb,#d9e2ea);touch-action:none}
+.visor canvas{display:block;width:100%;height:100%}
+.visor-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:20px;color:#5b6b7a;font-weight:600}
+.baloes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.balao{position:absolute;left:0;top:0;width:26px;height:26px;padding:0;border-radius:50%;border:2px solid #123a5c;
+  background:#fff;color:#123a5c;font:700 12px/22px system-ui,sans-serif;text-align:center;pointer-events:auto;cursor:pointer}
+.balao.ativo{background:#e0a100;border-color:#7a5600;color:#14202b}
+.balao.apagado{opacity:.35}
+.visor-ctrl{margin-top:10px}
+.faixa{display:flex;align-items:center;gap:8px;margin:0;font-size:.85rem;font-weight:600}
+.faixa input{flex:1;min-width:0;height:28px}
+.botoes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.botoes button,.nav button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 4px;border-radius:10px;
+  border:2px solid #123a5c;background:#fff;color:#123a5c;cursor:pointer}
+.botoes button[aria-pressed=true]{background:#123a5c;color:#fff}
+.info-peca{margin-top:10px;background:#eef1f4;border-radius:10px;padding:10px;font-size:.92rem}
+.legenda{box-shadow:none;padding:6px 0 0;margin-top:6px}
+.legenda ol{margin:6px 0 0;padding-left:28px;columns:2;column-gap:18px;font-size:.9rem}
+.cartao-det{margin-top:12px}
+.ficha dt{font-size:.8rem;color:#5b6b7a;text-transform:uppercase;letter-spacing:.4px}
+.progresso .barra{height:6px;background:#dde3e9;border-radius:3px;overflow:hidden}
+.progresso .barra i{display:block;height:100%;background:#123a5c}
+.pontos{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 12px}
+.ponto{width:34px;height:34px;border-radius:50%;border:2px solid #b8c4cf;background:#fff;font:700 .8rem system-ui,sans-serif;
+  color:#14202b;cursor:pointer;padding:0}
+.ponto.atual{border-color:#123a5c;box-shadow:0 0 0 3px #e0a100}
+.secao-tag{display:inline-block;background:#123a5c;color:#fff;border-radius:6px;padding:3px 8px;font-size:.8rem;font-weight:700}
+.dica{font-size:.92rem;color:#3d4c5a}
+.ref{background:#eef1f4;border-left:6px solid #5b6b7a;border-radius:8px;padding:8px 10px;margin:8px 0 12px;font-size:.92rem}
+.verificar{margin:6px 0 8px;padding-left:22px}.verificar li{margin:4px 0}
+.delta{font-size:.9rem;font-weight:700;color:#5b6b7a;margin-top:4px}
+.sugestao{margin-top:10px;font-weight:600}
+.opcoes,.status{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px}
+.status{grid-template-columns:repeat(4,1fr)}
+@media (max-width:480px){.status{grid-template-columns:1fr 1fr}}
+.opcoes label,.status label{margin:0}
+.opcoes input,.status input{position:absolute;opacity:0}
+.opcoes span,.status span{display:flex;align-items:center;justify-content:center;min-height:52px;text-align:center;
+  padding:8px 6px;border:2px solid #b8c4cf;border-radius:10px;font-weight:700;background:#fff;font-size:.95rem;cursor:pointer}
+.opcoes input:checked+span{background:#123a5c;border-color:#123a5c;color:#fff}
+.status input:checked+span.st-c{background:#1c8a45;border-color:#1c8a45;color:#fff}
+.status input:checked+span.st-a{background:#e0a100;border-color:#e0a100;color:#14202b}
+.status input:checked+span.st-nc{background:#c22525;border-color:#c22525;color:#fff}
+.status input:checked+span.st-nv{background:#5b6b7a;border-color:#5b6b7a;color:#fff}
+.opcoes input:focus-visible+span,.status input:focus-visible+span{outline:3px solid #e0a100}
+.chip{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.st-c.chip,.ponto.st-c{background:#d9f2e1;color:#14602f;border-color:#1c8a45}
+.st-a.chip,.ponto.st-a{background:#fff3cd;color:#6b4d00;border-color:#e0a100}
+.st-nc.chip,.ponto.st-nc{background:#fbdcdc;color:#8f1a1a;border-color:#c22525}
+.st-nv.chip,.ponto.st-nv{background:#e3e8ed;color:#3d4c5a;border-color:#5b6b7a}
+.st-falta.chip{background:#fff;color:#c22525;border:1px dashed #c22525}
+.st-c-txt{color:#14602f}.st-a-txt{color:#8a6300;font-weight:700}.st-nc-txt{color:#c22525;font-weight:800}
+.parecer{margin-top:12px;border-radius:10px;padding:12px;border-left:6px solid}
+.parecer.st-c{background:#d9f2e1;border-color:#1c8a45}.parecer.st-a{background:#fff3cd;border-color:#e0a100}
+.parecer.st-nc{background:#fbdcdc;border-color:#c22525}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.nav button{font-size:1.1rem;padding:14px}
+.nav button.pri{background:#123a5c;color:#fff}
+textarea{width:100%;font:inherit;padding:10px;margin-top:4px;border:2px solid #b8c4cf;border-radius:10px}
+.pend{margin:6px 0;padding-left:20px}.pend li{margin:4px 0}
+.etapas{margin:6px 0 0;padding-left:24px}
+.rolar{overflow-x:auto}
+details.insp{box-shadow:none;border:1px solid #dde3e9;padding:8px 10px;margin-top:8px}
+table.resumo td:first-child{width:55%}
+table.resumo button.link{text-align:left}
+.cartao details{box-shadow:none;padding:6px 0;margin-top:6px}
+#i-msg,#i-checklist,#i-visor{scroll-margin-top:84px}
 </style>
 </head>
 <body>
 <div id="offline">Sem internet – a ficha continua funcionando</div>
 <div id="app"><main><div class="cartao">Carregando…</div></main></div>
+<script src="/inspecao.js"></script>
 
 <script>
 (function () {
@@ -148,6 +234,33 @@ button.link{background:none;border:0;padding:0;font:inherit;text-decoration:unde
     return linhas || '<tr><td colspan="3">Nenhum registro neste aparelho.</td></tr>';
   }
 
+  // O mesmo QR Code abre a ficha com duas abas; o operador escolhe Lubrificação ou Inspeção.
+  function prepararAbas(codigo, e) {
+    var inspecao = window.Inspecao.montar(document.getElementById("painel-inspecao"), codigo, e);
+    var nomes = ["lubrificacao", "inspecao"];
+    function mostrar(nome) {
+      nomes.forEach(function (n) {
+        document.getElementById("painel-" + n).hidden = n !== nome;
+        document.getElementById("aba-" + n).setAttribute("aria-selected", String(n === nome));
+      });
+      app.classList.toggle("larga", nome === "inspecao");
+      document.querySelector("main").classList.toggle("larga", nome === "inspecao");
+      document.title = codigo + (nome === "inspecao" ? " – inspeção" : " – ficha de lubrificação");
+      if (nome === "inspecao") inspecao.mostrar();
+    }
+    nomes.forEach(function (n) {
+      document.getElementById("aba-" + n).onclick = function () {
+        if (location.hash !== "#" + n) history.replaceState(null, "", "#" + n);
+        mostrar(n);
+        window.scrollTo(0, 0);
+      };
+    });
+    window.addEventListener("hashchange", function () {
+      mostrar(location.hash === "#inspecao" ? "inspecao" : "lubrificacao");
+    });
+    mostrar(location.hash === "#inspecao" ? "inspecao" : "lubrificacao");
+  }
+
   function telaFicha(codigo, e) {
     document.title = codigo + " – ficha de lubrificação";
     var tipos = TIPOS.map(function (t, i) {
@@ -156,7 +269,13 @@ button.link{background:none;border:0;padding:0;font:inherit;text-decoration:unde
     }).join("");
     var alertas = e.alertas.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join("");
 
-    app.innerHTML = cabecalho(codigo, e.nome + " · posição " + e.posicao) + '<main>' +
+    var temInspecao = !!(e.inspecao && window.Inspecao);
+    var abas = temInspecao ? '<nav class="abas" role="tablist"><div>' +
+      '<button type="button" role="tab" id="aba-lubrificacao" aria-controls="painel-lubrificacao">Lubrificação<small>ficha e registro</small></button>' +
+      '<button type="button" role="tab" id="aba-inspecao" aria-controls="painel-inspecao">Inspeção<small>modelo 3D e checklist</small></button>' +
+      '</div></nav>' : '';
+    app.innerHTML = cabecalho(codigo, e.nome + " · posição " + e.posicao) + abas + '<main>' +
+      '<div id="painel-lubrificacao" role="tabpanel">' +
       '<div id="mensagem"></div>' +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
@@ -199,7 +318,9 @@ button.link{background:none;border:0;padding:0;font:inherit;text-decoration:unde
         '<tbody id="historico">' + linhasHistorico(codigo) + '</tbody></table></details>' +
       '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
         '<button class="link" id="csv">Registros deste aparelho (CSV)</button> · ' +
-        '<a href="/">Todas as fichas</a></p></main>';
+        '<a href="/">Todas as fichas</a></p></div>' +
+      '<div id="painel-inspecao" role="tabpanel" hidden></div></main>';
+    if (temInspecao) prepararAbas(codigo, e);
 
     var qtd = document.getElementById("quantidade");
     var campoQtd = document.getElementById("campo-quantidade");

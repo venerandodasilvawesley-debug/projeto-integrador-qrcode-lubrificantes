@@ -48,7 +48,7 @@ body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-
 
 ETIQUETA = """<div class="etiqueta">{svg}
 <div class="txt"><div class="cod">{codigo}</div>
-<b>LUBRIFICAÇÃO</b><br>{nome}<br>Aponte a câmera do celular para o código.</div></div>
+<b>LUBRIFICAÇÃO E INSPEÇÃO</b><br>{nome}<br>Aponte a câmera do celular para o código.</div></div>
 """
 
 
