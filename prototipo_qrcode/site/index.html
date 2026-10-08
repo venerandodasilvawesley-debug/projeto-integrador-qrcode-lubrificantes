@@ -346,8 +346,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     return F;
   })();
 
-  // Proposta de integração com o SAP: o protótipo só monta o documento (reserva de material ou nota de
-  // manutenção) e mostra na tela como ficaria. Nada é enviado ao SAP nesta versão.
+  // Proposta de integração com o SAP: o protótipo só monta o documento (nota de manutenção)
+  // e mostra na tela como ficaria. Nada é enviado ao SAP nesta versão.
   window.DocSap = function (titulo, modulo, campos) {
     var antigo = document.getElementById("sap-fundo");
     if (antigo) antigo.remove();
@@ -513,8 +513,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           '<div class="tag-grande">Tag <code>' + esc(codigo + "-" + e.tag_oleo) + '</code></div>' +
           (e.cor_oleo ? '<div class="cor-galao"><i style="background:' + esc(e.cor_oleo.hex) + '"></i>Cor do galão: <b>' +
             esc(e.cor_oleo.nome.toUpperCase()) + '</b></div>' : '') +
-          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + fmt(e.volume_ml) + " mL por troca") +
-          '<button type="button" class="sap" id="sap-oleo">Pedir óleo ao almoxarifado</button></div>' : '') +
+          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + fmt(e.volume_ml) + " mL por troca") + '</div>' : '') +
         '<div class="duplo">' +
           '<div><div class="rotulo">Viscosidade</div><div class="grande">' + esc(e.viscosidade) + '</div></div>' +
           '<div><div class="rotulo">Volume (' + esc(e.posicao) + ')</div><div class="grande">' +
@@ -588,17 +587,6 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       if (document.hidden) saiuEm = Date.now();
       else if (saiuEm && Date.now() - saiuEm > 6e5) inicioFicha = Date.now();
     });
-    var pedir = document.getElementById("sap-oleo");
-    if (pedir) pedir.onclick = function () {
-      window.DocSap("Reserva de material", "MM", [
-        ["Material", codigo + "-" + e.tag_oleo + " – " + e.padrao_fabrica + " (" + e.viscosidade + ")"],
-        ["Identificação", e.cor_oleo ? "Galão de cor " + e.cor_oleo.nome.toLowerCase() : ""],
-        ["Quantidade", fmt(e.volume_ml) + " mL"],
-        ["Equipamento", codigo + " – " + e.nome],
-        ["Solicitante", resp.value.trim()],
-        ["Data", agora()]
-      ]);
-    };
 
     // o nome do responsável fica memorizado no aparelho
     try { resp.value = localStorage.getItem("responsavel") || ""; } catch (err) {}
