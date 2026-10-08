@@ -25,6 +25,7 @@
     "horimetro": false,
     "regime": { "h_dia": 24, "dias_semana": 7 },
     "data_ultima_troca": "2026-10-01",
+    "analise_oleo": "Sem coleta para laboratório: a carga total é de apenas 30 mL (posição M1), menos do que um frasco de amostra costuma pedir. A condição do óleo é acompanhada pela inspeção visual de algumas gotas (cor, transparência e partículas), pela temperatura da carcaça e pelas horas de uso. O que for retirado deve ser reposto com o mesmo óleo e registrado como Complemento.",
     "periodicidade": "Troca conforme a temperatura do óleo: 15.000 h (80 °C); 10.000 h (85 °C); 7.500 h (90 °C). Avaliar o óleo nas primeiras 500 h.",
     "epis": "Luvas nitrílicas e óculos de proteção",
     "alertas": [
@@ -367,7 +368,10 @@
           "verificar": [
             "Retirar uma pequena amostra pelo dreno e observar cor, transparência e cheiro.",
             "Óleo leitoso indica água; brilho dourado indica desgaste da coroa de bronze.",
-            "Partículas de aço indicam desgaste dos rolamentos ou da rosca sem fim."
+            "Partículas de aço indicam desgaste dos rolamentos ou da rosca sem fim.",
+            "Usar só algumas gotas: o redutor leva apenas 30 mL (posição M1). Não é amostra para laboratório.",
+            "Depois, conferir o nível e repor o que foi retirado com o mesmo óleo (tag RED-001-OLE-01, galão azul), sem misturar tipos nem fabricantes. Registrar como Complemento na aba Lubrificação.",
+            "Óleo contaminado ou com partículas deve ser trocado (orientação do fabricante)."
           ],
           "opcoes": {
             "rotulo": "Aspecto da amostra",

@@ -398,6 +398,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<dt>Óleos equivalentes (mesma base)</dt><dd>' + esc(e.equivalentes.join("; ")) + '</dd>' +
         '<dt>Volume por posição de trabalho</dt><dd>' + esc(e.volumes_por_posicao) + '</dd>' +
         '<dt>Periodicidade</dt><dd>' + esc(e.periodicidade) + '</dd>' +
+        (e.analise_oleo ? '<dt>Amostra e análise do óleo</dt><dd>' + esc(e.analise_oleo) + '</dd>' : '') +
         '<dt>Temperatura</dt><dd>' + esc(e.aviso_temperatura) + '</dd>' +
         '<dt>Descarte</dt><dd>' + esc(e.descarte) + '</dd>' +
       '</dl></details>' +
