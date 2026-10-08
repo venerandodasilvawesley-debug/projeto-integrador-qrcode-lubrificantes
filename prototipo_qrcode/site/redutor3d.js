@@ -10,85 +10,85 @@ import { OrbitControls } from "./vendor/OrbitControls.js";
 // As especificações são as usuais para redutores deste porte; o código exato de cada
 // peça de reposição deve ser conferido na própria peça ou na lista de peças do fabricante.
 export const PECAS = [
-  { id: "carcaca", nome: "Carcaça", tipo: "Carcaça monobloco com base de fixação (pés)",
+  { id: "carcaca", sigla: "CAR", nome: "Carcaça", tipo: "Carcaça monobloco com base de fixação (pés)",
     material: "Ferro fundido cinzento, pintado (confirmar no catálogo do tamanho 28)", qtd: "1",
     espec: "Furos usinados para os mancais da coroa (eixo de saída) e da rosca sem fim, a 28 mm de distância entre centros.",
     funcao: "Aloja e alinha os eixos, guarda o óleo e dissipa o calor.",
     inspecao: "Trincas, aquecimento, vazamentos e fixação na base.",
     falhas: "Trinca por sobrecarga ou aperto irregular da base; pintura queimada por superaquecimento." },
-  { id: "respiro", nome: "Respiro", tipo: "Bujão respiro (com furo de alívio e filtro)",
+  { id: "respiro", sigla: "RSP", nome: "Respiro", tipo: "Bujão respiro (com furo de alívio e filtro)",
     material: "Latão ou plástico técnico", qtd: "1",
     espec: "Rosca igual à do furo superior da carcaça; montado sempre na posição mais alta.",
     funcao: "Equaliza a pressão interna quando o óleo aquece, evitando que ele seja empurrado pelos retentores.",
     inspecao: "Deve estar limpo e desobstruído.",
     falhas: "Entupido por poeira ou tinta, fazendo o óleo vazar pelos retentores." },
-  { id: "bujoes", nome: "Bujões de nível e dreno", tipo: "Bujão sextavado com rosca e arruela de vedação",
+  { id: "bujoes", sigla: "BUJ", nome: "Bujões de nível e dreno", tipo: "Bujão sextavado com rosca e arruela de vedação",
     material: "Aço zincado; arruela de cobre, alumínio ou fibra", qtd: "2 (posição ilustrativa)",
     espec: "A posição varia com a forma de montagem (M1 a M6). Confirmar no redutor instalado.",
     funcao: "Conferir o nível (bujão de nível) e escoar o óleo usado (bujão de dreno).",
     inspecao: "Sem vazamento; usar para conferir o nível e coletar amostra.",
     falhas: "Arruela de vedação reutilizada ou rosca espanada por aperto excessivo." },
-  { id: "coroa", nome: "Coroa (bronze)", tipo: "Coroa para rosca sem fim (engrenagem helicoidal côncava)",
+  { id: "coroa", sigla: "COR", nome: "Coroa (bronze)", tipo: "Coroa para rosca sem fim (engrenagem helicoidal côncava)",
     material: "Aro de bronze (liga cobre-estanho) com cubo de aço", qtd: "1", interna: true,
     espec: "30 dentes. Com a rosca de 4 entradas: 30 ÷ 4 = redução 1:7,5. Fixada no eixo de saída por chaveta.",
     funcao: "Engrenagem movida: recebe o movimento da rosca sem fim e gira o eixo de saída 7,5 vezes mais devagar.",
     inspecao: "Desgaste, pitting e partículas de bronze no óleo.",
     falhas: "Desgaste por óleo errado ou degradado, pitting (pequenas crateras) por sobrecarga, dente quebrado por choque." },
-  { id: "eixo-saida", nome: "Eixo de saída Ø 14 mm", tipo: "Eixo maciço com rasgo de chaveta",
+  { id: "eixo-saida", sigla: "EIX", nome: "Eixo de saída Ø 14 mm", tipo: "Eixo maciço com rasgo de chaveta",
     material: "Aço carbono (ex.: SAE 1045)", qtd: "1", interna: true,
     espec: "Ponta Ø 14 mm para acoplar a máquina; apoiado em dois rolamentos.",
     funcao: "Transmite o movimento reduzido (1:7,5) e o torque à máquina.",
     inspecao: "Folga axial e radial, riscos na pista do retentor.",
     falhas: "Pista do retentor riscada (vazamento), rasgo de chaveta deformado, empeno por esforço radial excessivo." },
-  { id: "chavetas", nome: "Chavetas", tipo: "Chaveta paralela DIN 6885 forma A",
+  { id: "chavetas", sigla: "CHV", nome: "Chavetas", tipo: "Chaveta paralela DIN 6885 forma A",
     material: "Aço carbono trefilado (ex.: C45)", qtd: "3", interna: true,
     espec: "Eixo Ø 14 mm (coroa e ponta de saída): 5 × 5 mm. Eixo Ø 11 mm (entrada): 4 × 4 mm.",
     funcao: "Travam a coroa no eixo e os acoplamentos nas pontas dos eixos, transmitindo o torque.",
     inspecao: "Folga ou marcas de cisalhamento.",
     falhas: "Folga no rasgo (batida na partida), chaveta cisalhada por travamento." },
-  { id: "rolamentos-saida", nome: "Rolamentos do eixo de saída", tipo: "Rolamento rígido de esferas, uma carreira",
+  { id: "rolamentos-saida", sigla: "ROL", nome: "Rolamentos do eixo de saída", tipo: "Rolamento rígido de esferas, uma carreira",
     material: "Aço cromo para rolamentos, gaiola de aço", qtd: "2", interna: true,
     espec: "A designação (ex.: série 62xx) está gravada no anel externo; anotar antes de comprar a reposição.",
     funcao: "Apoiam o eixo de saída nos dois lados da carcaça e suportam as cargas radiais e axiais da coroa.",
     inspecao: "Ruído, aquecimento localizado e folga.",
     falhas: "Ruído áspero por contaminação ou falta de óleo, folga interna, pista marcada por montagem com martelo." },
-  { id: "juntas", nome: "Juntas (anéis O) das tampas", tipo: "Anel O-ring (anel de vedação estático)",
+  { id: "juntas", sigla: "JNT", nome: "Juntas (anéis O) das tampas", tipo: "Anel O-ring (anel de vedação estático)",
     material: "Borracha nitrílica (NBR)", qtd: "4",
     espec: "Medida = diâmetro interno × espessura do cordão. Trocar sempre que a tampa for aberta.",
     funcao: "Vedam o encosto das tampas na carcaça.",
     inspecao: "Marcas de óleo em volta das tampas.",
     falhas: "Ressecado, cortado na montagem ou esmagado por aperto desigual dos parafusos." },
-  { id: "tampas-saida", nome: "Tampas do eixo de saída", tipo: "Tampa flangeada (com furo para o eixo) e tampa cega",
+  { id: "tampas-saida", sigla: "TMP", nome: "Tampas do eixo de saída", tipo: "Tampa flangeada (com furo para o eixo) e tampa cega",
     material: "Ferro fundido ou alumínio, pintadas", qtd: "2",
     espec: "Encaixe (rebaixo) centraliza a tampa no furo da carcaça; a tampa com furo aloja o retentor.",
     funcao: "Fecham a carcaça e posicionam axialmente os rolamentos da coroa.",
     inspecao: "Aperto dos parafusos e vazamento.",
     falhas: "Vazamento por junta danificada ou parafusos frouxos." },
-  { id: "rosca", nome: "Rosca sem fim / eixo de entrada Ø 11 mm", tipo: "Rosca sem fim de 4 entradas, integrada ao eixo de entrada",
+  { id: "rosca", sigla: "RSF", nome: "Rosca sem fim / eixo de entrada Ø 11 mm", tipo: "Rosca sem fim de 4 entradas, integrada ao eixo de entrada",
     material: "Aço liga cementado, temperado e retificado (ex.: SAE 8620)", qtd: "1", interna: true,
     espec: "Ponta de entrada maciça Ø 11 mm com chaveta 4 × 4, para motor de até 0,77 cv.",
     funcao: "Recebe o giro do motor e aciona a coroa; 1 volta da rosca avança 4 dentes da coroa.",
     inspecao: "Desgaste dos filetes, folga e giro suave.",
     falhas: "Filetes riscados ou desgastados por óleo contaminado; aquecimento por atrito excessivo." },
-  { id: "rolamentos-entrada", nome: "Rolamentos da rosca sem fim", tipo: "Rolamento rígido de esferas (ou de contato angular)",
+  { id: "rolamentos-entrada", sigla: "ROL", nome: "Rolamentos da rosca sem fim", tipo: "Rolamento rígido de esferas (ou de contato angular)",
     material: "Aço cromo para rolamentos", qtd: "2", interna: true,
     espec: "Suportam o empuxo axial gerado pela rosca. Designação gravada no anel externo.",
     funcao: "Apoiam a rosca sem fim e absorvem o esforço axial.",
     inspecao: "Ruído, aquecimento localizado e folga.",
     falhas: "Desgaste pelo empuxo axial, contaminação e falta de lubrificação." },
-  { id: "tampas-entrada", nome: "Tampas da rosca sem fim", tipo: "Tampa com furo para o eixo de entrada e tampa cega",
+  { id: "tampas-entrada", sigla: "TMP", nome: "Tampas da rosca sem fim", tipo: "Tampa com furo para o eixo de entrada e tampa cega",
     material: "Ferro fundido ou alumínio, pintadas", qtd: "2",
     espec: "A tampa com furo aloja o retentor do eixo de entrada.",
     funcao: "Fecham a carcaça e posicionam os rolamentos da rosca.",
     inspecao: "Aperto dos parafusos e vazamento.",
     falhas: "Vazamento por junta danificada ou parafusos frouxos." },
-  { id: "retentores", nome: "Retentores dos eixos", tipo: "Retentor radial de lábio com mola (DIN 3760)",
+  { id: "retentores", sigla: "RET", nome: "Retentores dos eixos", tipo: "Retentor radial de lábio com mola (DIN 3760)",
     material: "Borracha nitrílica (NBR) com armação de aço", qtd: "2",
     espec: "Um para o eixo de saída (Ø 14 mm) e um para o de entrada (Ø 11 mm). Medida gravada: eixo × alojamento × largura.",
     funcao: "Vedam a passagem dos eixos girantes, segurando o óleo e barrando poeira e água.",
     inspecao: "Vazamento e lábio ressecado ou cortado.",
     falhas: "Lábio ressecado por calor, cortado na montagem ou gasto pelo eixo riscado." },
-  { id: "parafusos", nome: "Parafusos e arruelas", tipo: "Parafuso cabeça cilíndrica com sextavado interno (Allen) ISO 4762 + arruela",
+  { id: "parafusos", sigla: "PAR", nome: "Parafusos e arruelas", tipo: "Parafuso cabeça cilíndrica com sextavado interno (Allen) ISO 4762 + arruela",
     material: "Aço classe 8.8, zincado", qtd: "16 (4 por tampa)",
     espec: "Apertar em cruz, com torque uniforme, para não deformar a tampa nem esmagar a junta.",
     funcao: "Fixam as tampas na carcaça.",
@@ -351,45 +351,47 @@ function rosca(M) {
 // Cada entrada: peça, posição montada e deslocamento na vista explodida.
 function montar(M) {
   const L = [];
-  const add = (id, obj, pos, desl) => {
+  // tag: código de identificação da unidade (o código completo leva o prefixo do equipamento,
+  // ex.: RED-001-COR-01); local: onde a unidade fica no redutor
+  const add = (id, obj, pos, desl, tag, local) => {
     obj.position.set(...pos);
-    obj.userData = { peca: id, base: new THREE.Vector3(...pos), desl: new THREE.Vector3(...desl) };
+    obj.userData = { peca: id, tag, local, base: new THREE.Vector3(...pos), desl: new THREE.Vector3(...desl) };
     L.push(obj);
   };
-  add("carcaca", carcaca(M), [0, 0, 0], [0, 0, 0]);
-  add("respiro", respiro(M), [0, 46, 0], [0, 48, 0]);
-  add("bujoes", bujao(M, "x"), [-43.2, 20, 0], [-38, 18, 0]);
-  add("bujoes", bujao(M, "z"), [22, -34, 29.2], [0, -8, 55]);
+  add("carcaca", carcaca(M), [0, 0, 0], [0, 0, 0], "CAR-01", "carcaça");
+  add("respiro", respiro(M), [0, 46, 0], [0, 48, 0], "RSP-01", "topo da carcaça");
+  add("bujoes", bujao(M, "x"), [-43.2, 20, 0], [-38, 18, 0], "BUJ-01", "bujão de nível, lateral");
+  add("bujoes", bujao(M, "z"), [22, -34, 29.2], [0, -8, 55], "BUJ-02", "bujão de dreno, parte baixa");
 
   // eixo de saída (Z+: frente, aparece embaixo à esquerda)
-  add("eixo-saida", eixoSaida(M), [0, 0, 0], [0, 0, 70]);
-  add("chavetas", chaveta(M, 14, "z"), [0, 9, 0], [-16, 10, 82]);
-  add("chavetas", chaveta(M, 22, "z"), [0, 9, 62], [-22, 8, 112]);
-  add("coroa", coroa(M), [0, 0, 0], [0, 0, 160]);
-  add("juntas", junta(M, 24, "z"), [0, 0, 31.5], [0, 0, 155]);
-  add("rolamentos-saida", rolamento(M, 17.5, 7, 11, "z"), [0, 0, 22], [0, 0, 175]);
-  add("tampas-saida", tampa(M, 34, 21, 8, 7, "z", 1, 27, 4), [0, 0, 35], [0, 0, 190]);
-  add("retentores", retentor(M, 12, 7, 5, "z"), [0, 0, 36], [0, 0, 215]);
-  add("parafusos", parafusos(M, 27, 4, "z", 1, 14), [0, 0, 38.5], [0, 0, 230]);
+  add("eixo-saida", eixoSaida(M), [0, 0, 0], [0, 0, 70], "EIX-01", "eixo de saída Ø 14 mm");
+  add("chavetas", chaveta(M, 14, "z"), [0, 9, 0], [-16, 10, 82], "CHV-01", "chaveta 5 × 5 da coroa");
+  add("chavetas", chaveta(M, 22, "z"), [0, 9, 62], [-22, 8, 112], "CHV-02", "chaveta 5 × 5 da ponta de saída");
+  add("coroa", coroa(M), [0, 0, 0], [0, 0, 160], "COR-01", "coroa de bronze, 30 dentes");
+  add("juntas", junta(M, 24, "z"), [0, 0, 31.5], [0, 0, 155], "JNT-01", "junta da tampa flangeada (lado da ponta de saída)");
+  add("rolamentos-saida", rolamento(M, 17.5, 7, 11, "z"), [0, 0, 22], [0, 0, 175], "ROL-01", "eixo de saída, lado da ponta");
+  add("tampas-saida", tampa(M, 34, 21, 8, 7, "z", 1, 27, 4), [0, 0, 35], [0, 0, 190], "TMP-01", "tampa flangeada do eixo de saída (lado da ponta)");
+  add("retentores", retentor(M, 12, 7, 5, "z"), [0, 0, 36], [0, 0, 215], "RET-01", "retentor do eixo de saída Ø 14 mm");
+  add("parafusos", parafusos(M, 27, 4, "z", 1, 14), [0, 0, 38.5], [0, 0, 230], "PAR-01 a PAR-04", "parafusos da tampa TMP-01");
   // lado traseiro (Z-: aparece em cima à direita)
-  add("rolamentos-saida", rolamento(M, 17.5, 7, 11, "z"), [0, 0, -22], [0, 0, -70]);
-  add("juntas", junta(M, 24, "z"), [0, 0, -31.5], [0, 0, -78]);
-  add("tampas-saida", tampa(M, 31, 21, 0, 6, "z", -1, 27, 4), [0, 0, -34.5], [0, 0, -95]);
-  add("parafusos", parafusos(M, 27, 4, "z", -1, 14), [0, 0, -37.5], [0, 0, -120]);
+  add("rolamentos-saida", rolamento(M, 17.5, 7, 11, "z"), [0, 0, -22], [0, 0, -70], "ROL-02", "eixo de saída, lado oposto à ponta");
+  add("juntas", junta(M, 24, "z"), [0, 0, -31.5], [0, 0, -78], "JNT-02", "junta da tampa cega do eixo de saída");
+  add("tampas-saida", tampa(M, 31, 21, 0, 6, "z", -1, 27, 4), [0, 0, -34.5], [0, 0, -95], "TMP-02", "tampa cega do eixo de saída");
+  add("parafusos", parafusos(M, 27, 4, "z", -1, 14), [0, 0, -37.5], [0, 0, -120], "PAR-05 a PAR-08", "parafusos da tampa TMP-02");
 
   // rosca sem fim (X+: aparece embaixo à direita)
-  add("rosca", rosca(M), [0, -28, 0], [70, 0, 0]);
-  add("chavetas", chaveta(M, 20, "x"), [76, -20.5, 0], [70, 14, 0]);
-  add("rolamentos-entrada", rolamento(M, 15.5, 6, 10, "x"), [36, -28, 0], [142, 0, 0]);
-  add("juntas", junta(M, 18, "x"), [46.5, -28, 0], [143.5, 0, 0]);
-  add("tampas-entrada", tampa(M, 22, 16, 6, 6, "x", 1, 18, 4), [49, -28, 0], [155, 0, 0]);
-  add("retentores", retentor(M, 10, 5.5, 4.5, "x"), [50.5, -28, 0], [171.5, 0, 0]);
-  add("parafusos", parafusos(M, 18, 4, "x", 1, 12), [52, -28, 0], [188, 0, 0]);
+  add("rosca", rosca(M), [0, -28, 0], [70, 0, 0], "RSF-01", "rosca sem fim de 4 entradas / eixo de entrada Ø 11 mm");
+  add("chavetas", chaveta(M, 20, "x"), [76, -20.5, 0], [70, 14, 0], "CHV-03", "chaveta 4 × 4 da ponta de entrada");
+  add("rolamentos-entrada", rolamento(M, 15.5, 6, 10, "x"), [36, -28, 0], [142, 0, 0], "ROL-03", "rosca sem fim, lado do motor");
+  add("juntas", junta(M, 18, "x"), [46.5, -28, 0], [143.5, 0, 0], "JNT-03", "junta da tampa da rosca (lado do motor)");
+  add("tampas-entrada", tampa(M, 22, 16, 6, 6, "x", 1, 18, 4), [49, -28, 0], [155, 0, 0], "TMP-03", "tampa da rosca com furo (lado do motor)");
+  add("retentores", retentor(M, 10, 5.5, 4.5, "x"), [50.5, -28, 0], [171.5, 0, 0], "RET-02", "retentor do eixo de entrada Ø 11 mm");
+  add("parafusos", parafusos(M, 18, 4, "x", 1, 12), [52, -28, 0], [188, 0, 0], "PAR-09 a PAR-12", "parafusos da tampa TMP-03");
   // lado oposto da rosca (X-: aparece em cima à esquerda)
-  add("rolamentos-entrada", rolamento(M, 15.5, 6, 10, "x"), [-36, -28, 0], [-62, 0, 0]);
-  add("juntas", junta(M, 18, "x"), [-46.5, -28, 0], [-72, 0, 0]);
-  add("tampas-entrada", tampa(M, 22, 16, 0, 6, "x", -1, 18, 4), [-49, -28, 0], [-92, 0, 0]);
-  add("parafusos", parafusos(M, 18, 4, "x", -1, 12), [-52, -28, 0], [-115, 0, 0]);
+  add("rolamentos-entrada", rolamento(M, 15.5, 6, 10, "x"), [-36, -28, 0], [-62, 0, 0], "ROL-04", "rosca sem fim, lado oposto ao motor");
+  add("juntas", junta(M, 18, "x"), [-46.5, -28, 0], [-72, 0, 0], "JNT-04", "junta da tampa cega da rosca");
+  add("tampas-entrada", tampa(M, 22, 16, 0, 6, "x", -1, 18, 4), [-49, -28, 0], [-92, 0, 0], "TMP-04", "tampa cega da rosca sem fim");
+  add("parafusos", parafusos(M, 18, 4, "x", -1, 12), [-52, -28, 0], [-115, 0, 0], "PAR-13 a PAR-16", "parafusos da tampa TMP-04");
   return L;
 }
 
@@ -606,15 +608,15 @@ export function criarVisualizador(caixa, opcoes) {
     ponteiro.set((ev.clientX - r.left) / r.width * 2 - 1, -(ev.clientY - r.top) / r.height * 2 + 1);
     raio.setFromCamera(ponteiro, camera);
     const naCena = malhas.filter((m) => m.userData.raiz.visible);
-    const visiveis = naCena.filter((m) => !m.material.transparent);
-    const hit = raio.intersectObjects(visiveis.length ? visiveis : naCena, false)
-      .filter((h) => !cortado(h.object, h.point))[0];
-    selecionar(hit ? hit.object.userData.peca : null, true);
+    // prefere a peça em destaque; se o toque foi em outra (mesmo apagada), seleciona a outra
+    const hits = raio.intersectObjects(naCena, false).filter((h) => !cortado(h.object, h.point));
+    const hit = hits.find((h) => !h.object.material.transparent) || hits[0];
+    selecionar(hit ? hit.object.userData.peca : null, true, hit ? hit.object.userData.raiz.userData.tag : null);
   });
 
-  function selecionar(id, peloUsuario) {
-    selecionada = id === selecionada ? null : id;
-    if (peloUsuario && opcoes.aoSelecionar) opcoes.aoSelecionar(selecionada);
+  function selecionar(id, peloUsuario, tag) {
+    selecionada = id === selecionada && !tag ? null : id;
+    if (peloUsuario && opcoes.aoSelecionar) opcoes.aoSelecionar(selecionada, selecionada ? tag : null);
   }
 
   let ativo = true, ultimo = performance.now();
@@ -658,6 +660,10 @@ export function criarVisualizador(caixa, opcoes) {
     corte(sim) { aplicarCorte(!!sim); },
     isolar,
     get isolada() { return isolada; },
+    // tags (códigos) de cada unidade da peça, na ordem de montagem
+    unidades(id) {
+      return objetos.filter((o) => o.userData.peca === id).map((o) => ({ tag: o.userData.tag, local: o.userData.local }));
+    },
     baloes(sim) { mostrarBaloes = !!sim; },
     vistaInicial,
     destruir() {
