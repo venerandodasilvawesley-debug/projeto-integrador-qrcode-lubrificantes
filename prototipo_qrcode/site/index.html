@@ -350,6 +350,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
             '<label>Horas por dia<input type="text" inputmode="decimal" id="oleo-hdia" maxlength="4"></label>' +
             '<label>Dias por semana<input type="text" inputmode="numeric" id="oleo-dias" maxlength="1"></label>' +
           '</div>' +
+          '<label>Horas de parada desde a última troca (programada ou emergencial)' +
+            '<input type="text" inputmode="numeric" id="oleo-paradas" maxlength="6"></label>' +
         '</div>' +
         '<label>Horas trabalhadas desde a última troca' +
           '<input type="text" inputmode="numeric" id="horas-oleo" maxlength="7"></label>' +
@@ -478,17 +480,19 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       var limites = e.vida_util_oleo.map(function (v) { return v.horas; });
       if (limites.indexOf(vida.limite) < 0) vida.limite = limites[0];
       if (vida.modo !== "estimado") vida.modo = "horimetro";
-      if (vida.h_dia == null) vida.h_dia = 8;
-      if (vida.dias_semana == null) vida.dias_semana = 5;
+      // regime contínuo (24 h, 7 dias) como padrão: a máquina só para em parada programada ou emergencial
+      if (vida.h_dia == null) vida.h_dia = 24;
+      if (vida.dias_semana == null) vida.dias_semana = 7;
+      if (vida.paradas_h == null) vida.paradas_h = 0;
       var dataEl = document.getElementById("oleo-data"), hdiaEl = document.getElementById("oleo-hdia"),
-        diasEl = document.getElementById("oleo-dias");
-      // Sem horímetro: horas = dias corridos desde a troca × (dias por semana ÷ 7) × horas por dia.
+        diasEl = document.getElementById("oleo-dias"), paradasEl = document.getElementById("oleo-paradas");
+      // Sem horímetro: horas = dias corridos desde a troca × (dias por semana ÷ 7) × horas por dia − horas de parada.
       var estimar = function () {
         var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(vida.data_troca || "");
         if (!m || !(vida.h_dia > 0 && vida.h_dia <= 24) || !(vida.dias_semana >= 1 && vida.dias_semana <= 7)) return null;
         var hoje = new Date(); hoje.setHours(12, 0, 0, 0);
         var dias = Math.round((hoje - new Date(+m[1], +m[2] - 1, +m[3], 12)) / 864e5);
-        return dias < 0 ? null : Math.round(dias * vida.dias_semana / 7 * vida.h_dia);
+        return dias < 0 ? null : Math.max(0, Math.round(dias * vida.dias_semana / 7 * vida.h_dia - (vida.paradas_h || 0)));
       };
       var aplicarModo = function () {
         var est = vida.modo === "estimado";
@@ -497,7 +501,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         if (est) vida.horas = estimar();
         horasEl.value = vida.horas == null ? "" : milhar(vida.horas);
         document.getElementById("horas-dica").textContent = est
-          ? "Estimativa calculada sozinha a cada abertura da ficha: dias desde a troca × jornada. Ao registrar uma Troca, a data volta para hoje."
+          ? "Estimativa calculada sozinha a cada abertura da ficha: dias desde a troca × jornada, menos as horas de parada. Ao registrar uma Troca, a data volta para hoje e as paradas zeram."
           : "Preenchido sozinho: a cada inspeção com horímetro, as horas rodadas desde a inspeção anterior são somadas aqui.";
         guardarVida(); atualizarVida();
       };
@@ -506,6 +510,11 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         r.addEventListener("change", function () { vida.modo = r.value; aplicarModo(); });
       });
       dataEl.value = vida.data_troca || ""; hdiaEl.value = fmt(vida.h_dia); diasEl.value = vida.dias_semana;
+      paradasEl.value = vida.paradas_h || "";
+      paradasEl.addEventListener("input", function () {
+        var d = paradasEl.value.replace(/\D/g, "");
+        vida.paradas_h = d ? Number(d) : 0; aplicarModo();
+      });
       dataEl.addEventListener("input", function () { vida.data_troca = dataEl.value || null; aplicarModo(); });
       hdiaEl.addEventListener("input", function () { vida.h_dia = numero(hdiaEl.value); aplicarModo(); });
       diasEl.addEventListener("input", function () { vida.dias_semana = numero(diasEl.value); aplicarModo(); });
@@ -579,6 +588,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         var d = new Date();
         vida.data_troca = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
         document.getElementById("oleo-data").value = vida.data_troca;
+        vida.paradas_h = 0; document.getElementById("oleo-paradas").value = "";
         vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida();
       }
       temp.value = ""; obs.value = ""; conf.checked = false;
