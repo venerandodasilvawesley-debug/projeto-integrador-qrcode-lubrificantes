@@ -32,6 +32,10 @@ body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-
 .etiqueta svg{{display:block;width:{lado}cm;height:{lado}cm}}
 .txt{{max-width:4.2cm;font-size:9pt;line-height:1.25}}
 .cod{{font-size:17pt;font-weight:800;line-height:1.1}}
+/* cor do galão: feita com borda, que sai na impressão mesmo sem "imprimir cores de fundo" */
+.oleo{{display:flex;align-items:center;gap:.15cm;margin-top:.12cm;font-size:8pt;line-height:1.2}}
+.oleo i{{flex:none;width:0;height:0;border:.3cm solid #000;border-radius:.08cm;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}}
 @media print{{.instrucoes{{display:none}}}}
 </style>
 </head>
@@ -48,7 +52,7 @@ body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-
 
 ETIQUETA = """<div class="etiqueta">{svg}
 <div class="txt"><div class="cod">{codigo}</div>
-<b>LUBRIFICAÇÃO E INSPEÇÃO</b><br>{nome}<br>Aponte a câmera do celular para o código.</div></div>
+<b>LUBRIFICAÇÃO E INSPEÇÃO</b><br>{nome}<br>Aponte a câmera do celular para o código.{oleo}</div></div>
 """
 
 
@@ -63,6 +67,16 @@ def qr_svg(url):
     return re.sub(r'(<svg[^>]*?)\swidth="[^"]*"\sheight="[^"]*"', r"\1", svg, count=1)
 
 
+def faixa_oleo(codigo, e):
+    """Cor do galão e tag do óleo, para o mecânico pedir no almoxarifado."""
+    cor = e.get("cor_oleo")
+    if not cor:
+        return ""
+    tag = f"<br>{html.escape(codigo + '-' + e['tag_oleo'])}" if e.get("tag_oleo") else ""
+    return (f'<div class="oleo"><i style="border-color:{html.escape(cor["hex"])}"></i>'
+            f'<span>Óleo: galão <b>{html.escape(cor["nome"].upper())}</b>{tag}</span></div>')
+
+
 def main():
     ap = argparse.ArgumentParser(description="Gera as etiquetas com QR Code")
     ap.add_argument("url_base", help="endereço do site publicado, ex.: https://exemplo.vercel.app")
@@ -74,7 +88,7 @@ def main():
     for codigo, e in equipamentos.items():
         url = f"{base}/e/{codigo}"
         etiqueta = ETIQUETA.format(svg=qr_svg(url), codigo=html.escape(codigo),
-                                   nome=html.escape(e["nome"]))
+                                   nome=html.escape(e["nome"]), oleo=faixa_oleo(codigo, e))
         destino = SITE / f"etiqueta-{codigo}.html"
         destino.write_text(MODELO.format(codigo=html.escape(codigo), lado=html.escape(args.lado),
                                          url=html.escape(url), etiqueta=etiqueta), encoding="utf-8")
