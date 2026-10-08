@@ -1,0 +1,6 @@
+.claude/
+__pycache__/
+*.FCBak
+.~lock.*
+.vercel/
+.env*

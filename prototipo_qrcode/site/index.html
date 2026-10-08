@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123a5c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Lubrificação">
+<title>Ficha de lubrificação</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#eef1f4;color:#14202b;font-size:17px;line-height:1.4}
+main{max-width:560px;margin:0 auto;padding:12px 14px 40px}
+header{background:#123a5c;color:#fff;padding:14px}
+header div{max-width:560px;margin:0 auto}
+header b{font-size:1.5rem;letter-spacing:.5px}
+header span{display:block;opacity:.9;font-size:.95rem}
+#offline{display:none;background:#5b6b7a;color:#fff;text-align:center;font-weight:700;
+  font-size:.9rem;padding:6px}
+.cartao{background:#fff;border-radius:12px;padding:14px;margin-top:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.12)}
+a.cartao{display:block;text-decoration:none;color:inherit}
+.rotulo{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b6b7a}
+.grande{font-size:1.75rem;font-weight:800;line-height:1.15;margin:2px 0 4px}
+.duplo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.alerta{background:#fff3cd;border-left:6px solid #e0a100}
+.alerta ul{margin:6px 0 0;padding-left:20px}
+.alerta li{margin:3px 0;font-weight:600}
+.ok{background:#d9f2e1;border-left:6px solid #1c8a45;font-weight:700}
+.erro{background:#fbdcdc;border-left:6px solid #c22525;font-weight:700}
+details{margin-top:12px;background:#fff;border-radius:12px;padding:12px 14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.12)}
+summary{font-weight:700;cursor:pointer}
+dl{margin:8px 0 0}dt{font-weight:700;margin-top:8px}dd{margin:0}
+h2{font-size:1.15rem;margin:0 0 10px}
+label{display:block;font-weight:600;margin-top:12px}
+input[type=text]{width:100%;font-size:1.15rem;padding:12px;margin-top:4px;
+  border:2px solid #b8c4cf;border-radius:10px}
+.tipos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.tipos label{margin:0}
+.tipos input{position:absolute;opacity:0}
+.tipos span{display:block;text-align:center;padding:14px 4px;border:2px solid #b8c4cf;
+  border-radius:10px;font-weight:700;background:#fff}
+.tipos input:checked+span{background:#123a5c;border-color:#123a5c;color:#fff}
+.tipos input:focus-visible+span{outline:3px solid #e0a100}
+.confirma{display:flex;gap:12px;align-items:center;background:#eef1f4;border-radius:10px;
+  padding:12px;font-weight:700}
+.confirma input{width:28px;height:28px;flex:none}
+button.salvar{width:100%;margin-top:16px;padding:16px;font-size:1.25rem;font-weight:800;color:#fff;
+  background:#1c8a45;border:0;border-radius:12px}
+#aviso-temp{display:none;color:#c22525;font-weight:700;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
+td,th{text-align:left;padding:6px 4px;border-bottom:1px solid #dde3e9;vertical-align:top}
+a,button.link{color:#123a5c}
+button.link{background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer}
+.rodape{margin-top:18px;font-size:.85rem;text-align:center}
+</style>
+</head>
+<body>
+<div id="offline">Sem internet – a ficha continua funcionando</div>
+<div id="app"><main><div class="cartao">Carregando…</div></main></div>
+
+<script>
+(function () {
+  "use strict";
+  var TIPOS = ["Inspeção", "Complemento", "Troca"];
+  var CHAVE = "registros_lubrificacao";
+  var app = document.getElementById("app");
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  // 30 -> "30"; 30.5 -> "30,5"
+  function fmt(n) { return n == null ? "" : String(n).replace(".", ","); }
+  // "30", "30,5" ou "" -> número (ou null)
+  function numero(t) {
+    t = String(t || "").trim().replace(",", ".");
+    if (!t || isNaN(Number(t))) return null;
+    return Number(t);
+  }
+
+  // Os registros ficam guardados no próprio aparelho (funciona sem internet).
+  function lerRegistros() {
+    try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch (e) { return []; }
+  }
+  function gravarRegistros(lista) { localStorage.setItem(CHAVE, JSON.stringify(lista)); }
+
+  function agora() {
+    var d = new Date();
+    function p(n) { return String(n).padStart(2, "0"); }
+    return p(d.getDate()) + "/" + p(d.getMonth() + 1) + "/" + d.getFullYear() + " " +
+      p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+  }
+
+  function baixarCsv() {
+    if (!lerRegistros().length) return alert("Ainda não há registros neste aparelho.");
+    var linhas = [["codigo", "data_hora", "tipo", "quantidade_ml", "temperatura_c",
+      "responsavel", "observacao"]];
+    lerRegistros().forEach(function (r) {
+      linhas.push([r.codigo, r.data_hora, r.tipo, fmt(r.quantidade_ml), fmt(r.temperatura_c),
+        r.responsavel, r.observacao]);
+    });
+    var csv = "﻿" + linhas.map(function (l) {
+      return l.map(function (c) { return '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"'; }).join(";");
+    }).join("\r\n");
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = "registros_lubrificacao.csv";
+    a.click();
+  }
+
+  function cabecalho(titulo, sub) {
+    return '<header><div><b>' + esc(titulo) + '</b><span>' + esc(sub) + '</span></div></header>';
+  }
+
+  function telaInicial(equipamentos) {
+    var itens = Object.keys(equipamentos).map(function (c) {
+      var e = equipamentos[c];
+      return '<a class="cartao" href="/e/' + esc(c) + '"><div class="rotulo">' + esc(c) +
+        '</div><b>' + esc(e.nome) + '</b><br><span>' + esc(e.modelo) + '</span></a>';
+    }).join("");
+    app.innerHTML = cabecalho("Fichas de lubrificação",
+      "Projeto Integrador · Técnico em Mecânica · SENAI Três Lagoas") +
+      '<main>' + itens + '<p class="rodape"><button class="link" id="csv">' +
+      'Baixar os registros deste aparelho (CSV)</button></p></main>';
+    document.getElementById("csv").onclick = baixarCsv;
+  }
+
+  function telaNaoEncontrado() {
+    app.innerHTML = '<main><div class="cartao erro">Equipamento não encontrado.</div>' +
+      '<p class="rodape"><a href="/">Início</a></p></main>';
+  }
+
+  function linhasHistorico(codigo) {
+    var linhas = lerRegistros().filter(function (r) { return r.codigo === codigo; })
+      .slice(-10).reverse().map(function (r) {
+        return '<tr><td>' + esc(r.data_hora) + '</td><td>' + esc(r.tipo) + '<br>' +
+          fmt(r.quantidade_ml) + ' mL' +
+          (r.temperatura_c != null ? ' · ' + fmt(r.temperatura_c) + ' °C' : '') +
+          '</td><td>' + esc(r.responsavel) +
+          (r.observacao ? '<br><small>' + esc(r.observacao) + '</small>' : '') + '</td></tr>';
+      }).join("");
+    return linhas || '<tr><td colspan="3">Nenhum registro neste aparelho.</td></tr>';
+  }
+
+  function telaFicha(codigo, e) {
+    document.title = codigo + " – ficha de lubrificação";
+    var tipos = TIPOS.map(function (t, i) {
+      return '<label><input type="radio" name="tipo" value="' + esc(t) + '"' +
+        (i === 0 ? " checked" : "") + '><span>' + esc(t) + '</span></label>';
+    }).join("");
+    var alertas = e.alertas.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join("");
+
+    app.innerHTML = cabecalho(codigo, e.nome + " · posição " + e.posicao) + '<main>' +
+      '<div id="mensagem"></div>' +
+      '<section class="cartao">' +
+        '<div class="rotulo">Lubrificante</div>' +
+        '<div class="grande">' + esc(e.lubrificante) + '</div>' +
+        '<div>Padrão de fábrica: <b>' + esc(e.padrao_fabrica) + '</b></div>' +
+        '<div class="duplo">' +
+          '<div><div class="rotulo">Viscosidade</div><div class="grande">' + esc(e.viscosidade) + '</div></div>' +
+          '<div><div class="rotulo">Volume (' + esc(e.posicao) + ')</div><div class="grande">' +
+            fmt(e.volume_ml) + ' mL</div></div>' +
+        '</div>' +
+        '<div class="rotulo" style="margin-top:12px">Enchimento, dreno e nível</div>' +
+        '<div>' + esc(e.pontos) + '</div>' +
+      '</section>' +
+      '<section class="cartao alerta"><div class="rotulo">Segurança</div><ul>' + alertas +
+        '<li>EPIs: ' + esc(e.epis) + '.</li></ul></section>' +
+      '<details><summary>Mais informações</summary><dl>' +
+        '<dt>Modelo</dt><dd>' + esc(e.modelo) + '</dd>' +
+        '<dt>Óleos equivalentes (mesma base)</dt><dd>' + esc(e.equivalentes.join("; ")) + '</dd>' +
+        '<dt>Volume por posição de trabalho</dt><dd>' + esc(e.volumes_por_posicao) + '</dd>' +
+        '<dt>Periodicidade</dt><dd>' + esc(e.periodicidade) + '</dd>' +
+        '<dt>Temperatura</dt><dd>' + esc(e.aviso_temperatura) + '</dd>' +
+        '<dt>Descarte</dt><dd>' + esc(e.descarte) + '</dd>' +
+      '</dl></details>' +
+      '<form class="cartao" id="registro" novalidate>' +
+        '<h2>Registrar intervenção</h2>' +
+        '<div class="tipos">' + tipos + '</div>' +
+        '<label id="campo-quantidade">Quantidade aplicada (mL)' +
+          '<input type="text" inputmode="decimal" id="quantidade"></label>' +
+        '<label>Temperatura da carcaça (°C) – opcional' +
+          '<input type="text" inputmode="decimal" id="temperatura"></label>' +
+        '<div id="aviso-temp">' + esc(e.aviso_temperatura) + '</div>' +
+        '<label>Responsável<input type="text" id="responsavel" maxlength="60" autocomplete="name"></label>' +
+        '<label>Observação – opcional<input type="text" id="observacao" maxlength="200"></label>' +
+        '<label class="confirma"><input type="checkbox" id="confirmado">' +
+          'Equipamento bloqueado (LOTO) e bocal limpo</label>' +
+        '<button type="submit" class="salvar">Salvar registro</button>' +
+      '</form>' +
+      '<details><summary>Histórico (últimos 10 registros)</summary>' +
+        '<table><thead><tr><th>Data</th><th>Intervenção</th><th>Responsável</th></tr></thead>' +
+        '<tbody id="historico">' + linhasHistorico(codigo) + '</tbody></table></details>' +
+      '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
+        '<button class="link" id="csv">Registros deste aparelho (CSV)</button> · ' +
+        '<a href="/">Todas as fichas</a></p></main>';
+
+    var qtd = document.getElementById("quantidade");
+    var campoQtd = document.getElementById("campo-quantidade");
+    var temp = document.getElementById("temperatura");
+    var avisoTemp = document.getElementById("aviso-temp");
+    var resp = document.getElementById("responsavel");
+    var obs = document.getElementById("observacao");
+    var conf = document.getElementById("confirmado");
+    var msg = document.getElementById("mensagem");
+
+    // o nome do responsável fica memorizado no aparelho
+    try { resp.value = localStorage.getItem("responsavel") || ""; } catch (err) {}
+
+    function tipoAtual() { return document.querySelector("input[name=tipo]:checked").value; }
+    function ajustarTipo() {
+      var tipo = tipoAtual();
+      campoQtd.style.display = tipo === "Inspeção" ? "none" : "block";
+      qtd.value = tipo === "Inspeção" ? "0" : (tipo === "Troca" ? fmt(e.volume_ml) : "");
+    }
+    document.querySelectorAll("input[name=tipo]").forEach(function (r) {
+      r.addEventListener("change", ajustarTipo);
+    });
+    ajustarTipo();
+
+    temp.addEventListener("input", function () {
+      var v = numero(temp.value);
+      avisoTemp.style.display = v != null && v > e.limite_carcaca_c ? "block" : "none";
+    });
+
+    function avisar(classe, texto) {
+      msg.innerHTML = '<div class="cartao ' + classe + '">' + esc(texto) + '</div>';
+      window.scrollTo(0, 0);
+    }
+
+    document.getElementById("csv").onclick = baixarCsv;
+    document.getElementById("registro").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var tipo = tipoAtual();
+      var quantidade = tipo === "Inspeção" ? 0 : numero(qtd.value);
+      var temperatura = numero(temp.value);
+      var responsavel = resp.value.trim();
+
+      if (!responsavel) return avisar("erro", "Informe o responsável.");
+      if (!conf.checked) return avisar("erro", "Confirme o bloqueio (LOTO) e a limpeza do bocal.");
+      if (quantidade == null || quantidade < 0 || quantidade > 1000)
+        return avisar("erro", "Informe a quantidade aplicada, em mL.");
+      if (temp.value.trim() && (temperatura == null || temperatura < -20 || temperatura > 200))
+        return avisar("erro", "Temperatura inválida.");
+
+      var lista = lerRegistros();
+      lista.push({ codigo: codigo, data_hora: agora(), tipo: tipo, quantidade_ml: quantidade,
+        temperatura_c: temperatura, responsavel: responsavel, observacao: obs.value.trim() });
+      try {
+        gravarRegistros(lista);
+        localStorage.setItem("responsavel", responsavel);
+      } catch (err) {
+        return avisar("erro", "Não foi possível salvar neste aparelho.");
+      }
+      document.getElementById("historico").innerHTML = linhasHistorico(codigo);
+      temp.value = ""; obs.value = ""; conf.checked = false;
+      avisoTemp.style.display = "none";
+      avisar("ok", "Registro salvo neste aparelho.");
+    });
+  }
+
+  function iniciar(equipamentos) {
+    var m = location.pathname.match(/^\/e\/([A-Za-z0-9-]{1,20})\/?$/);
+    if (!m) return telaInicial(equipamentos);
+    var codigo = m[1].toUpperCase();
+    if (!Object.prototype.hasOwnProperty.call(equipamentos, codigo)) return telaNaoEncontrado();
+    telaFicha(codigo, equipamentos[codigo]);
+  }
+
+  var faixa = document.getElementById("offline");
+  function atualizarRede() { faixa.style.display = navigator.onLine ? "none" : "block"; }
+  window.addEventListener("online", atualizarRede);
+  window.addEventListener("offline", atualizarRede);
+  atualizarRede();
+
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+
+  fetch("/equipamentos.json").then(function (r) { return r.json(); }).then(iniciar)
+    .catch(function () {
+      app.innerHTML = '<main><div class="cartao erro">Não foi possível carregar a ficha. ' +
+        'Abra esta página uma vez com internet para que ela fique salva no aparelho.</div></main>';
+    });
+})();
+</script>
+</body>
+</html>

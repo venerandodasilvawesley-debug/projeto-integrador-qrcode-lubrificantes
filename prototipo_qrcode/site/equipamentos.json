@@ -1,0 +1,28 @@
+{
+  "RED-001": {
+    "nome": "Redutor coroa e rosca WEG-Cestari WCR28",
+    "modelo": "WCR28 1 HS U, relação 1:7,5 (ref. WCR28.7,5.NAB)",
+    "local": "Equipamento de referência (simulação didática)",
+    "posicao": "M1",
+    "lubrificante": "Óleo sintético PAO (CLP HC)",
+    "padrao_fabrica": "Klübersynth EG4-320",
+    "equivalentes": [
+      "Mobilgear SHC 632",
+      "Shell Omala S4 GX 320",
+      "Lubrax Syntesys Gear PAO 320"
+    ],
+    "viscosidade": "ISO VG 320",
+    "volume_ml": 30,
+    "volumes_por_posicao": "posição 1 = 30 mL; posições 2 e 4 = 55 mL; posição 3 = 35 mL; posições 5 e 6 = 40 mL",
+    "pontos": "Não informados no catálogo para o tamanho 28. Confirmar no redutor instalado ou com o fabricante antes da intervenção.",
+    "periodicidade": "Troca conforme a temperatura do óleo: 15.000 h (80 °C); 10.000 h (85 °C); 7.500 h (90 °C). Avaliar o óleo nas primeiras 500 h.",
+    "epis": "Luvas nitrílicas e óculos de proteção",
+    "alertas": [
+      "Bloqueie e etiquete o equipamento (LOTO) antes de intervir.",
+      "Não misturar com óleo mineral nem com sintético PG (poliglicol)."
+    ],
+    "limite_carcaca_c": 75,
+    "aviso_temperatura": "Carcaça acima de 75 °C indica óleo acima do limite de 90 °C.",
+    "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005)."
+  }
+}
