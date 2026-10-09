@@ -122,6 +122,39 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .foto-grande{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:8px}
 .cor-galao{display:flex;align-items:center;gap:8px;margin:0 0 6px}
 .cor-galao i{width:34px;height:22px;border-radius:5px;border:2px solid #14202b;flex:none}
+.sub-abas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.sub-abas button{font:inherit;font-weight:800;padding:12px 8px;border-radius:10px;border:2px solid #123a5c;background:#fff;
+  color:#123a5c;cursor:pointer;line-height:1.15}
+.sub-abas button small{display:block;font-weight:600;font-size:.75rem;opacity:.8}
+.sub-abas button[aria-selected=true]{background:#123a5c;color:#fff}
+.pop-cab h2{margin:4px 0 8px;font-size:1.2rem}
+.pop-ctrl{margin-top:10px;font-size:.9rem}.pop-ctrl th{color:#5b6b7a;font-size:.75rem;text-transform:uppercase;white-space:nowrap}
+.pop-exec{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;
+  background:#eef1f4;border-radius:10px;padding:10px}
+.pop-exec button,.pop-3d{font:inherit;font-weight:700;font-size:.9rem;padding:10px 12px;border-radius:10px;border:2px solid #123a5c;
+  background:#fff;color:#123a5c;cursor:pointer}
+.pop-3d{margin-top:6px;background:#123a5c;color:#fff}
+.pop-sum ol{margin:6px 0 0;padding-left:22px}.pop-sum li{margin:4px 0}
+.pop-doc{padding:4px 14px 14px}
+.pop-sec{box-shadow:none;border-bottom:1px solid #dde3e9;border-radius:0;margin:0;padding:12px 0}
+.pop-sec>summary{font-size:1.05rem}
+.pop-sec{scroll-margin-top:84px}
+.pop-corpo h4{margin:14px 0 6px;font-size:1rem}
+.pop-corpo ul{padding-left:22px}.pop-corpo li{margin:4px 0}
+.pop-num{list-style:none;padding:0;margin:6px 0}.pop-num li{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+.pop-n{font-weight:800;color:#123a5c;min-width:2.2em}
+.pop-ck{width:26px;height:26px;flex:none;margin:0}
+.pop-num li:has(.pop-ck:checked){color:#5b6b7a;text-decoration:line-through;text-decoration-color:#9aa7b3}
+.pop-etapa{border:1px solid #dde3e9;border-radius:10px;padding:4px 12px 12px;margin-top:10px}
+.pop-prog{font-size:.8rem;font-weight:700;background:#eef1f4;border-radius:999px;padding:2px 8px;margin-left:6px;color:#5b6b7a}
+.pop-prog.feito{background:#d9f2e1;color:#14602f}
+.pop-nota{background:#fff3cd;border-left:6px solid #e0a100;border-radius:8px;padding:8px 10px}
+.pop-def{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px}.pop-def dt{margin:0}.pop-def dd{margin:0}
+@media (max-width:480px){.pop-def{grid-template-columns:1fr}.pop-def dt{margin-top:6px}}
+.pop-aplic,.pop-comp{background:#eef4fb;border-left:6px solid #123a5c;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.92rem}
+.pop-aprov{margin-top:8px}.pop-aprov td{height:34px;border-bottom:1px solid #9aa7b3}
+.acao-pop{margin-top:10px;background:#fbdcdc;border-left:6px solid #c22525;border-radius:8px;padding:10px 12px;font-size:.92rem}
+.acao-pop .rotulo{display:block}.acao-pop ul{margin:6px 0 0;padding-left:20px}
 .peca-acoes{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
 .peca-acoes button.sec{background:#fff;color:#123a5c}
 .peca-acoes button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 14px;border-radius:10px;border:2px solid #123a5c;
@@ -246,6 +279,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 <div id="offline">Sem internet – a ficha continua funcionando</div>
 <div id="app"><main><div class="cartao">Carregando…</div></main></div>
 <p id="estado-offline" class="rodape"></p>
+<script src="/pop.js"></script>
 <script src="/inspecao.js"></script>
 <script src="/galao.js"></script>
 <script src="/troca.js"></script>

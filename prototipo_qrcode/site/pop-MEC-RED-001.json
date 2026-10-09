@@ -1,0 +1,628 @@
+{
+ "codigo": "POP-MEC-RED-001",
+ "revisao": "00",
+ "emissao": "09/10/2026",
+ "area": "Manutenção Mecânica Industrial",
+ "titulo": "Inspeção, Lubrificação e Manutenção Preventiva de Redutores de Velocidade Industriais",
+ "equipamento": "Redutor de velocidade industrial",
+ "setor": "Manutenção Industrial / Equipamentos Rotativos",
+ "status": "Minuta para validação técnica",
+ "secoes": [
+  {
+   "num": "1",
+   "titulo": "Objetivo",
+   "blocos": [
+    {
+     "p": "Estabelecer os procedimentos padronizados para inspeção, lubrificação e manutenção preventiva de redutores de velocidade industriais, visando garantir o funcionamento adequado do equipamento, reduzir falhas mecânicas, aumentar a vida útil dos componentes e proporcionar maior segurança e confiabilidade ao processo produtivo."
+    }
+   ]
+  },
+  {
+   "num": "2",
+   "titulo": "Alcance",
+   "blocos": [
+    {
+     "p": "Este procedimento aplica-se aos redutores de velocidade utilizados em equipamentos industriais, como transportadores de correia, esteiras, agitadores, picadores e outros sistemas acionados por motores elétricos."
+    },
+    {
+     "p": "Abrange as atividades de inspeção visual, verificação de vazamentos, monitoramento de temperatura e vibração, verificação do nível de óleo, substituição do lubrificante e registro das atividades de manutenção."
+    }
+   ]
+  },
+  {
+   "num": "3",
+   "titulo": "Definições",
+   "blocos": [
+    {
+     "def": [
+      [
+       "Redutor de velocidade",
+       "Equipamento mecânico utilizado para reduzir a rotação de entrada e transmitir torque ao equipamento acionado."
+      ],
+      [
+       "Manutenção preventiva",
+       "Conjunto de atividades realizadas periodicamente para prevenir falhas e preservar as condições de funcionamento do equipamento."
+      ],
+      [
+       "Manutenção preditiva",
+       "Monitoramento das condições do equipamento por meio de medições e análises, permitindo identificar possíveis falhas antes que ocorram."
+      ],
+      [
+       "Lubrificante",
+       "Óleo ou graxa utilizado para reduzir o atrito, o desgaste e o aquecimento dos componentes mecânicos."
+      ],
+      [
+       "Ordem de Serviço (OS)",
+       "Documento utilizado para planejar, executar e registrar as atividades de manutenção."
+      ],
+      [
+       "Bloqueio e etiquetagem (LOTO)",
+       "Procedimento de isolamento e identificação das fontes de energia para impedir a partida inesperada do equipamento durante a manutenção."
+      ],
+      [
+       "Anomalia",
+       "Condição fora do padrão esperado de funcionamento, como vazamento, ruído anormal, vibração excessiva ou temperatura elevada."
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "num": "4",
+   "titulo": "Referências",
+   "blocos": [
+    {
+     "lista": [
+      "Manual técnico do fabricante do redutor.",
+      "Plano de manutenção preventiva do equipamento.",
+      "Procedimento interno de bloqueio de energias perigosas (LOTO).",
+      "Normas de segurança aplicáveis às atividades de manutenção industrial.",
+      "Procedimentos internos de gerenciamento de resíduos industriais.",
+      "ABNT NBR 5462 — Confiabilidade e mantenabilidade, quando aplicável.",
+      "ISO 9001 — Sistemas de gestão da qualidade, quando aplicável.",
+      "ISO 14001 — Sistemas de gestão ambiental, quando aplicável."
+     ]
+    }
+   ]
+  },
+  {
+   "num": "5",
+   "titulo": "Disposições gerais",
+   "blocos": [
+    {
+     "numerada": [
+      [
+       "5.1",
+       "As atividades de manutenção deverão ser realizadas por profissionais capacitados e autorizados."
+      ],
+      [
+       "5.2",
+       "Toda intervenção deverá estar vinculada a uma Ordem de Serviço ou ao registro correspondente no sistema de gestão de manutenção."
+      ],
+      [
+       "5.3",
+       "Antes de iniciar o serviço, deverão ser avaliados os riscos da atividade, as condições de acesso ao equipamento e a necessidade de isolamento da área."
+      ],
+      [
+       "5.4",
+       "As ferramentas, os materiais e os equipamentos de proteção individual deverão ser selecionados conforme a atividade e os riscos identificados."
+      ],
+      [
+       "5.5",
+       "Os parâmetros de temperatura, vibração, nível de óleo, tipo de lubrificante e periodicidade de manutenção deverão seguir o manual do fabricante e o plano de manutenção aprovado para o equipamento."
+      ],
+      [
+       "5.6",
+       "Qualquer condição anormal identificada durante a inspeção deverá ser registrada e comunicada ao supervisor responsável."
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "num": "6",
+   "titulo": "Responsabilidades",
+   "sub": [
+    {
+     "num": "6.1",
+     "titulo": "Técnico de Manutenção Mecânica",
+     "blocos": [
+      {
+       "lista": [
+        "Executar as inspeções e atividades de manutenção previstas na Ordem de Serviço.",
+        "Verificar as condições dos componentes mecânicos e do sistema de lubrificação.",
+        "Utilizar os equipamentos de proteção individual necessários.",
+        "Registrar os resultados das inspeções, os materiais utilizados e as anomalias identificadas.",
+        "Comunicar qualquer condição que impeça a liberação segura do equipamento."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "6.2",
+     "titulo": "Operador da Área",
+     "blocos": [
+      {
+       "lista": [
+        "Informar as condições de funcionamento do equipamento.",
+        "Solicitar a parada operacional conforme o procedimento interno.",
+        "Auxiliar na liberação do equipamento para manutenção.",
+        "Participar dos testes operacionais e confirmar as condições de funcionamento após a intervenção."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "6.3",
+     "titulo": "Supervisor de Manutenção",
+     "blocos": [
+      {
+       "lista": [
+        "Planejar e supervisionar a execução das atividades.",
+        "Garantir a disponibilidade dos recursos necessários.",
+        "Avaliar os desvios identificados e definir as ações corretivas.",
+        "Validar os registros e aprovar o encerramento da Ordem de Serviço."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "6.4",
+     "titulo": "Responsável pela Segurança",
+     "blocos": [
+      {
+       "lista": [
+        "Orientar quanto aos requisitos de segurança aplicáveis.",
+        "Apoiar a avaliação de riscos e a aplicação dos procedimentos de bloqueio, quando necessário."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "num": "7",
+   "titulo": "Equipamentos de Proteção Individual (EPIs)",
+   "blocos": [
+    {
+     "p": "Utilizar os EPIs definidos pela análise de riscos da atividade e pelas regras da unidade industrial, incluindo, conforme aplicável:"
+    },
+    {
+     "lista": [
+      "Capacete de segurança.",
+      "Óculos de proteção.",
+      "Calçado de segurança.",
+      "Protetor auditivo, quando necessário.",
+      "Luvas adequadas para manuseio de lubrificantes e componentes mecânicos.",
+      "Vestimenta de trabalho apropriada."
+     ]
+    },
+    {
+     "nota": "Os EPIs deverão ser compatíveis com os riscos existentes. Luvas não devem ser utilizadas próximas a partes rotativas quando houver risco de aprisionamento."
+    }
+   ]
+  },
+  {
+   "num": "8",
+   "titulo": "Ferramentas, materiais e recursos",
+   "blocos": [
+    {
+     "lista": [
+      "Conjunto de chaves e ferramentas manuais adequadas.",
+      "Torquímetro, quando necessário.",
+      "Termômetro infravermelho ou instrumento de medição de temperatura.",
+      "Instrumento de medição de vibração, quando previsto no plano de manutenção.",
+      "Recipiente apropriado para coleta e armazenamento temporário do óleo usado.",
+      "Bomba ou dispositivo adequado para retirada e abastecimento de lubrificante.",
+      "Panos absorventes industriais.",
+      "Bandeja de contenção para evitar derramamentos.",
+      "Lubrificante especificado pelo fabricante.",
+      "Materiais de limpeza compatíveis com o equipamento.",
+      "Etiquetas, cadeados e dispositivos de bloqueio.",
+      "Ordem de Serviço e sistema eletrônico de registro de manutenção."
+     ]
+    },
+    {
+     "complemento": {
+      "titulo": "Instrumentos de inspeção sensitiva (conforme o Projeto Integrador)",
+      "itens": [
+       [
+        "Lanterna",
+        "visão detalhada em locais de difícil acesso ou pouco iluminados; revela desgaste, corrosão e vazamentos."
+       ],
+       [
+        "Termômetro infravermelho",
+        "mede a temperatura sem contato e identifica sobreaquecimento por sobrecarga ou falta de lubrificação."
+       ],
+       [
+        "Paquímetro",
+        "mede dimensões e folgas das peças."
+       ],
+       [
+        "Espelho de inspeção",
+        "mostra áreas ocultas, como a parte traseira dos componentes."
+       ],
+       [
+        "Lupa de inspeção",
+        "amplia detalhes da superfície para achar fissuras, riscos e corrosão."
+       ],
+       [
+        "Régua metálica",
+        "mede comprimentos, distâncias e alinhamentos."
+       ],
+       [
+        "Calibrador de folgas (lâminas)",
+        "verifica folgas entre peças conforme o fabricante."
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "num": "9",
+   "titulo": "Procedimento de segurança e bloqueio (LOTO)",
+   "pecas": [],
+   "blocos": [
+    {
+     "numerada": [
+      [
+       "9.1",
+       "Comunicar ao operador e ao supervisor a necessidade de intervenção no redutor."
+      ],
+      [
+       "9.2",
+       "Avaliar os riscos e confirmar a autorização para execução do serviço."
+      ],
+      [
+       "9.3",
+       "Realizar a parada controlada do equipamento conforme o procedimento operacional da unidade."
+      ],
+      [
+       "9.4",
+       "Identificar e isolar todas as fontes de energia associadas ao conjunto, incluindo a alimentação elétrica do motor e outras fontes de energia existentes no sistema."
+      ],
+      [
+       "9.5",
+       "Aplicar os dispositivos de bloqueio e as etiquetas de identificação conforme o procedimento interno de LOTO."
+      ],
+      [
+       "9.6",
+       "Impedir a partida inesperada do motor e do equipamento acionado."
+      ],
+      [
+       "9.7",
+       "Verificar a ausência de energia perigosa por meio do procedimento de teste definido pela unidade. Considerar também a possibilidade de movimento residual e energia mecânica armazenada."
+      ],
+      [
+       "9.8",
+       "Iniciar a intervenção somente após a confirmação das condições seguras de trabalho."
+      ],
+      [
+       "9.9",
+       "Manter o bloqueio durante toda a execução da manutenção. Nenhuma etapa que exija acesso a partes perigosas deverá ser realizada com o equipamento em funcionamento."
+      ],
+      [
+       "9.10",
+       "Ao término do serviço, conferir a retirada de ferramentas e materiais, reinstalar as proteções e seguir o procedimento autorizado para retirada dos bloqueios e liberação do equipamento."
+      ]
+     ],
+     "marcar": true
+    }
+   ]
+  },
+  {
+   "num": "10",
+   "titulo": "Descrição do procedimento operacional",
+   "aplicacao": true,
+   "sub": [
+    {
+     "num": "10.1",
+     "titulo": "Etapa 1 — Preparação da atividade",
+     "pecas": [],
+     "passos": [
+      "Consultar a Ordem de Serviço e confirmar a identificação e a localização do redutor.",
+      "Verificar o histórico de manutenção e as anomalias registradas anteriormente.",
+      "Consultar o manual do fabricante e confirmar os requisitos específicos de inspeção e lubrificação.",
+      "Separar as ferramentas, os materiais e os EPIs necessários.",
+      "Comunicar a equipe operacional e programar a parada do equipamento.",
+      "Preparar a área de trabalho e os recursos para contenção de possíveis vazamentos."
+     ]
+    },
+    {
+     "num": "10.2",
+     "titulo": "Etapa 2 — Inspeção visual",
+     "pecas": [
+      "carcaca",
+      "retentores",
+      "juntas",
+      "bujoes",
+      "parafusos"
+     ],
+     "passos": [
+      "Inspecionar a carcaça do redutor e verificar a presença de trincas, deformações, corrosão ou danos aparentes.",
+      "Verificar a existência de vazamentos nas juntas, nos retentores, nos bujões e nas conexões.",
+      "Inspecionar os elementos de fixação e a base de montagem.",
+      "Verificar visualmente as condições do acoplamento e das proteções externas, sem acessar partes móveis.",
+      "Observar sinais de desgaste, contaminação ou acúmulo excessivo de resíduos.",
+      "Registrar as anomalias identificadas no sistema de manutenção."
+     ]
+    },
+    {
+     "num": "10.3",
+     "titulo": "Etapa 3 — Monitoramento de temperatura, ruído e vibração",
+     "pecas": [
+      "carcaca",
+      "rolamentos-saida",
+      "rolamentos-entrada",
+      "coroa",
+      "rosca"
+     ],
+     "passos": [
+      "Quando previsto no plano de manutenção, medir a temperatura externa do redutor em pontos definidos para monitoramento.",
+      "Realizar as medições de temperatura durante a operação somente quando houver condições seguras, instrumentos apropriados e procedimento autorizado, sem remover proteções ou se aproximar perigosamente de partes móveis.",
+      "Comparar os valores registrados com os limites estabelecidos pelo fabricante e com o histórico do equipamento.",
+      "Verificar a existência de ruídos anormais durante a operação, mantendo distância segura das partes móveis.",
+      "Realizar a medição de vibração com instrumento adequado, conforme os pontos e os critérios definidos no plano de manutenção.",
+      "Registrar os valores encontrados, as condições de operação e qualquer desvio identificado.",
+      "Em caso de anomalia crítica, comunicar a supervisão e solicitar a avaliação do equipamento antes de prosseguir."
+     ]
+    },
+    {
+     "num": "10.4",
+     "titulo": "Etapa 4 — Verificação do nível e das condições do óleo",
+     "pecas": [
+      "bujoes",
+      "respiro"
+     ],
+     "passos": [
+      "Confirmar a identificação do lubrificante especificado para o redutor.",
+      "Posicionar o equipamento nas condições exigidas pelo fabricante para a leitura do nível de óleo.",
+      "Verificar o nível pelo visor, vareta ou dispositivo de medição instalado.",
+      "Comparar o nível observado com a marcação recomendada pelo fabricante.",
+      "Verificar visualmente, quando possível, a presença de espuma, alteração de aspecto, contaminação ou indícios de degradação do óleo.",
+      "Caso seja necessário coletar uma amostra, utilizar o ponto de coleta e o método estabelecidos no procedimento de manutenção, evitando queimaduras, contaminação e exposição a partes móveis.",
+      "Registrar o nível observado e as condições identificadas.",
+      "Caso seja necessária a complementação do lubrificante, utilizar somente o produto especificado e registrar a quantidade adicionada."
+     ]
+    },
+    {
+     "num": "10.5",
+     "titulo": "Etapa 5 — Substituição do óleo lubrificante",
+     "pecas": [
+      "bujoes",
+      "respiro",
+      "juntas"
+     ],
+     "intro": "Executar esta etapa quando houver previsão no plano de manutenção ou indicação técnica para a substituição do lubrificante.",
+     "passos": [
+      "Confirmar a autorização da atividade e aplicar o procedimento de bloqueio LOTO descrito no item 9.",
+      "Aguardar que o equipamento e o lubrificante apresentem condições seguras para a intervenção, seguindo as orientações do fabricante.",
+      "Posicionar um recipiente de capacidade adequada sob o ponto de drenagem.",
+      "Limpar externamente a região do bujão de drenagem.",
+      "Abrir o ponto de drenagem conforme as instruções do fabricante e recolher o óleo usado sem provocar derramamentos.",
+      "Inspecionar o bujão magnético, quando existente, verificando a presença de partículas metálicas ou outros resíduos.",
+      "Registrar qualquer indício de desgaste anormal identificado durante a inspeção.",
+      "Reinstalar o bujão de drenagem, utilizando a vedação e o torque especificados pelo fabricante.",
+      "Abastecer o redutor com o lubrificante correto, respeitando a quantidade e o nível recomendados.",
+      "Verificar o fechamento dos pontos de abastecimento, a reinstalação do respiro e a vedação dos componentes.",
+      "Limpar os resíduos de óleo da superfície externa do equipamento.",
+      "Destinar o óleo usado e os materiais contaminados conforme o procedimento ambiental da unidade.",
+      "Registrar o tipo de lubrificante utilizado, a quantidade abastecida e a data da intervenção."
+     ],
+     "nota": "Nota técnica: Não utilizar automaticamente óleo ISO VG 220 ou qualquer outra viscosidade sem confirmar a especificação do fabricante. O tipo de óleo, a viscosidade, a compatibilidade e a quantidade dependem do modelo e das condições de operação do redutor."
+    },
+    {
+     "num": "10.6",
+     "titulo": "Etapa 6 — Inspeção final e liberação",
+     "pecas": [
+      "parafusos",
+      "tampas-saida",
+      "tampas-entrada",
+      "bujoes"
+     ],
+     "passos": [
+      "Verificar se todos os bujões, tampas e componentes removidos foram reinstalados corretamente.",
+      "Confirmar o nível de óleo conforme a recomendação do fabricante.",
+      "Verificar o aperto dos elementos de fixação e a reinstalação de todas as proteções.",
+      "Recolher as ferramentas e os materiais utilizados.",
+      "Garantir que a área de trabalho esteja limpa e livre de resíduos.",
+      "Confirmar que todos os envolvidos estejam afastados da zona de perigo antes da liberação.",
+      "Retirar os bloqueios somente conforme o procedimento LOTO da unidade, por pessoal autorizado.",
+      "Comunicar ao operador que o equipamento está preparado para o teste operacional.",
+      "Realizar o teste de funcionamento de acordo com o procedimento operacional da unidade, observando ruídos, vibrações, vazamentos e temperatura.",
+      "Interromper o teste se forem identificadas condições anormais que comprometam a segurança ou a integridade do equipamento.",
+      "Registrar os resultados do teste e comunicar a condição final à supervisão."
+     ]
+    }
+   ]
+  },
+  {
+   "num": "11",
+   "titulo": "Ações corretivas em caso de anormalidades",
+   "sub": [
+    {
+     "num": "11.1",
+     "titulo": "Temperatura acima do limite especificado",
+     "blocos": [
+      {
+       "lista": [
+        "Registrar o valor medido e as condições de operação.",
+        "Comunicar imediatamente o supervisor responsável.",
+        "Avaliar a necessidade de parada segura do equipamento.",
+        "Verificar o nível e as condições do lubrificante, além de possíveis problemas de sobrecarga, alinhamento ou rolamentos.",
+        "Solicitar análise complementar antes de liberar o equipamento, quando necessário."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "11.2",
+     "titulo": "Vazamento de óleo",
+     "blocos": [
+      {
+       "lista": [
+        "Avaliar a gravidade do vazamento e os riscos associados.",
+        "Conter o derramamento com recursos apropriados.",
+        "Comunicar a supervisão e registrar a ocorrência.",
+        "Programar ou executar a correção conforme a prioridade e a autorização da manutenção.",
+        "Não liberar o equipamento quando o vazamento representar risco à segurança, ao meio ambiente ou à integridade mecânica."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "11.3",
+     "titulo": "Presença de partículas metálicas no óleo ou no bujão magnético",
+     "blocos": [
+      {
+       "lista": [
+        "Registrar a condição encontrada.",
+        "Comunicar a supervisão de manutenção.",
+        "Solicitar análise do lubrificante e inspeção mecânica, conforme necessário.",
+        "Avaliar a necessidade de manter o equipamento parado até a conclusão do diagnóstico.",
+        "Não retornar o equipamento à operação quando houver suspeita de dano interno significativo sem avaliação técnica."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "11.4",
+     "titulo": "Ruído ou vibração anormal",
+     "blocos": [
+      {
+       "lista": [
+        "Comunicar a supervisão e avaliar a necessidade de interromper a operação.",
+        "Verificar possíveis problemas de fixação, alinhamento, acoplamento, engrenagens ou rolamentos.",
+        "Solicitar análise preditiva ou inspeção complementar.",
+        "Registrar os resultados e as ações adotadas."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "11.5",
+     "titulo": "Nível de óleo abaixo do recomendado",
+     "blocos": [
+      {
+       "lista": [
+        "Verificar possíveis vazamentos e as condições do sistema de lubrificação.",
+        "Completar o nível somente com o lubrificante especificado.",
+        "Investigar a causa da redução do nível.",
+        "Registrar a quantidade adicionada e comunicar a supervisão quando houver recorrência ou indícios de falha."
+       ]
+      }
+     ]
+    },
+    {
+     "num": "11.6",
+     "titulo": "Falha durante o teste operacional",
+     "blocos": [
+      {
+       "lista": [
+        "Interromper o teste conforme o procedimento de segurança.",
+        "Isolar o equipamento quando necessário.",
+        "Comunicar o supervisor e registrar a falha.",
+        "Abrir ou atualizar a Ordem de Serviço para investigação e correção.",
+        "Liberar o equipamento somente após avaliação e aprovação dos responsáveis."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "num": "12",
+   "titulo": "Registros e encerramento da Ordem de Serviço",
+   "blocos": [
+    {
+     "numerada": [
+      [
+       "12.1",
+       "Registrar no sistema de gestão de manutenção as seguintes informações:"
+      ]
+     ]
+    },
+    {
+     "lista": [
+      "Código e identificação do equipamento.",
+      "Número da Ordem de Serviço.",
+      "Data e horário da intervenção.",
+      "Identificação dos profissionais responsáveis.",
+      "Valores de temperatura e vibração medidos, quando aplicável.",
+      "Condição e nível do lubrificante.",
+      "Tipo e quantidade de óleo utilizado.",
+      "Anomalias identificadas.",
+      "Peças, materiais e serviços executados.",
+      "Ações corretivas realizadas ou recomendadas.",
+      "Resultado do teste operacional.",
+      "Condição final do equipamento.",
+      "Pendências identificadas e necessidade de nova intervenção."
+     ]
+    },
+    {
+     "numerada": [
+      [
+       "12.2",
+       "Recolher os resíduos e encaminhá-los aos locais de armazenamento e destinação definidos pela unidade, observando os requisitos ambientais aplicáveis."
+      ],
+      [
+       "12.3",
+       "O técnico responsável deverá concluir os registros da Ordem de Serviço no sistema."
+      ],
+      [
+       "12.4",
+       "O supervisor de manutenção deverá avaliar os resultados, verificar as pendências e aprovar o encerramento da Ordem de Serviço quando os critérios de conclusão forem atendidos."
+      ],
+      [
+       "12.5",
+       "Caso permaneçam pendências que impeçam a liberação segura, o equipamento deverá permanecer indisponível até a conclusão das ações necessárias e a autorização formal dos responsáveis."
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "num": "13",
+   "titulo": "Controle de revisão",
+   "blocos": [
+    {
+     "def": [
+      [
+       "Revisão 00",
+       "Emissão inicial do procedimento para inspeção, lubrificação e manutenção preventiva de redutores de velocidade industriais."
+      ]
+     ]
+    },
+    {
+     "p": "Toda alteração deste documento deverá ser registrada, avaliada e aprovada pelos responsáveis pela manutenção e pela segurança, conforme o fluxo de controle documental da unidade."
+    }
+   ]
+  },
+  {
+   "num": "14",
+   "titulo": "Aprovação do documento",
+   "blocos": [
+    {
+     "aprovacao": [
+      "Elaborado por",
+      "Revisado por",
+      "Aprovado por"
+     ]
+    },
+    {
+     "def": [
+      [
+       "Identificação da versão no sistema",
+       "________________________"
+      ],
+      [
+       "Status de aprovação",
+       "Pendente de validação técnica."
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}
