@@ -202,22 +202,23 @@
     if (document.hidden && plantao.trava) plantao.trava = null;
   });
 
+  // Sirene no estilo do alerta de emergência (Defesa Civil): 853 Hz + 960 Hz juntos, em pulsos de
+  // 2 s, 1 s e 1 s com 0,5 s de pausa. No nível de atenção, bipes curtos de 960 Hz.
   function sirene(critico) {
     var ctx = plantao.audio;
     if (!ctx) return function () {};
-    var osc = ctx.createOscillator(), vol = ctx.createGain();
-    osc.type = "square"; vol.gain.value = 0.18;
-    osc.connect(vol); vol.connect(ctx.destination);
-    var t0 = ctx.currentTime;
-    // sobe e desce como sirene (crítico) ou bipes duplos (atenção)
-    for (var i = 0; i < 120; i++) {
-      var t = t0 + i * 1.2;
-      if (critico) { osc.frequency.setValueAtTime(650, t); osc.frequency.linearRampToValueAtTime(1250, t + 0.6); osc.frequency.linearRampToValueAtTime(650, t + 1.2); }
-      else { osc.frequency.setValueAtTime(880, t); vol.gain.setValueAtTime(0.18, t); vol.gain.setValueAtTime(0, t + 0.15);
-        vol.gain.setValueAtTime(0.18, t + 0.3); vol.gain.setValueAtTime(0, t + 0.45); }
-    }
-    osc.start();
-    return function () { try { osc.stop(); osc.disconnect(); } catch (err) {} };
+    var vol = ctx.createGain(); vol.gain.value = 0; vol.connect(ctx.destination);
+    var oscs = (critico ? [853, 960] : [960]).map(function (f) {
+      var o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = f; o.connect(vol); o.start(); return o;
+    });
+    var ciclo = critico ? [[2, 0.5], [1, 0.5], [1, 0.5]] : [[0.25, 0.2], [0.25, 1]];
+    var nivel = critico ? 0.5 : 0.6, t = ctx.currentTime + 0.05;
+    for (var r = 0; r < 60; r++) ciclo.forEach(function (c) {
+      vol.gain.setValueAtTime(0, t); vol.gain.linearRampToValueAtTime(nivel, t + 0.01);
+      vol.gain.setValueAtTime(nivel, t + c[0] - 0.01); vol.gain.linearRampToValueAtTime(0, t + c[0]);
+      t += c[0] + c[1];
+    });
+    return function () { oscs.forEach(function (o) { try { o.stop(); o.disconnect(); } catch (err) {} }); vol.disconnect(); };
   }
 
   function telaCheia(codigo, e, L, av, aoCiente) {

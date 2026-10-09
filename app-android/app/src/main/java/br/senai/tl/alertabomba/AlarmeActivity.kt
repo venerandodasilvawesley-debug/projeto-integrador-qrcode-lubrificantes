@@ -7,8 +7,6 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.media.AudioAttributes
-import android.media.MediaPlayer
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -30,10 +28,10 @@ import java.util.Date
 import java.util.Locale
 
 // Alarme em tela cheia, no estilo do alerta da Defesa Civil: acende a tela por cima do bloqueio,
-// pisca, toca o som de alarme e vibra sem parar até a pessoa tocar em "Ciente".
+// pisca, toca a sirene de emergência em volume máximo e vibra sem parar até a pessoa tocar em "Ciente".
 class AlarmeActivity : Activity() {
 
-    private var som: MediaPlayer? = null
+    private var sirene: Sirene? = null
     private var vibrador: Vibrator? = null
     private val pisca = Handler(Looper.getMainLooper())
     private var aceso = true
@@ -90,22 +88,10 @@ class AlarmeActivity : Activity() {
         if (critico) pisca.post(object : Runnable {
             override fun run() { aceso = !aceso; val c = if (aceso) corA else corB; raiz.setBackgroundColor(c); (raiz.parent as? ScrollView)?.setBackgroundColor(c); pisca.postDelayed(this, 500) }
         })
-        tocar()
+        sirene = Sirene(this, critico).also { it.tocar() }
         vibrar(critico)
     }
 
-    private fun tocar() {
-        try {
-            val uri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM) ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-            som = MediaPlayer().apply {
-                setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
-                setDataSource(this@AlarmeActivity, uri)
-                isLooping = true
-                prepare(); start()
-            }
-        } catch (e: Exception) {}
-    }
 
     // vibra sem parar (o padrão repete do índice 0) até tocar em "Ciente"
     @Suppress("DEPRECATION")
@@ -119,8 +105,8 @@ class AlarmeActivity : Activity() {
 
     private fun parar() {
         pisca.removeCallbacksAndMessages(null)
-        try { som?.stop(); som?.release() } catch (e: Exception) {}
-        som = null
+        sirene?.parar()
+        sirene = null
         vibrador?.cancel()
         getSystemService(NotificationManager::class.java).cancel(MonitorService.ID_ALARME)
         MonitorService.alarmeAberto = false
