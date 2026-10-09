@@ -37,7 +37,8 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    // conexão com os sensores (WebSocket) e com o ntfy
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     // leitor de QR Code dentro do app
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }

@@ -10,18 +10,13 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.json.JSONObject
 import kotlin.concurrent.thread
 
-// Fica ligado em segundo plano (notificação fixa), recebe as leituras dos sensores por MQTT,
-// avalia com as mesmas regras da ficha e, se passar do limite, abre o alarme em tela cheia,
-// mesmo com o celular bloqueado.
+// Fica ligado em segundo plano (notificação fixa) e dispara o alarme em tela cheia, mesmo com o
+// celular bloqueado, por dois caminhos independentes (se um falhar, o outro ainda avisa):
+//  1) leituras dos sensores por MQTT (WebSocket seguro), avaliadas com as mesmas regras da ficha;
+//  2) alertas publicados no ntfy pelo simulador ou pela bancada, recebidos por HTTPS comum.
 class MonitorService : Service() {
 
     companion object {
@@ -54,7 +49,8 @@ class MonitorService : Service() {
         }
     }
 
-    private var cliente: MqttAsyncClient? = null
+    private var mqtt: MqttWs? = null
+    @Volatile private var ligado = true
     private var config = Config()
     private var disparado = 0
 
@@ -66,53 +62,57 @@ class MonitorService : Service() {
         val n = notificacaoFixa("Conectando aos sensores…")
         if (Build.VERSION.SDK_INT >= 34) startForeground(ID_FIXO, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         else startForeground(ID_FIXO, n)
-        thread { config = Config.baixar(); conectar() }
+        thread {
+            config = Config.baixar()
+            mqtt = MqttWs(config.mqttServidor, config.mqttTopico, { e -> estado = e; if (e != "Conectado") atualizarFixa(e) else atualizarFixa("Conectado. Aguardando leituras da $CODIGO") }, { receber(it) })
+                .also { it.iniciar() }
+            ouvirNtfy()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
 
     override fun onDestroy() {
-        try { cliente?.disconnect() } catch (e: Exception) {}
+        ligado = false
+        mqtt?.parar()
         estado = "Desligado"
         super.onDestroy()
     }
 
-    private fun conectar() {
-        try {
-            val c = MqttAsyncClient(config.mqttServidor, "app-" + System.currentTimeMillis().toString(36), MemoryPersistence())
-            c.setCallback(object : MqttCallbackExtended {
-                override fun connectComplete(reconnect: Boolean, serverURI: String?) {
-                    estado = "Conectado"
-                    try { c.subscribe(config.mqttTopico, 0) } catch (e: Exception) {}
-                    atualizarFixa("Conectado. Aguardando leituras da $CODIGO")
+    // Alertas do ntfy (HTTPS): fluxo contínuo de mensagens do tópico; cada alerta traz as leituras no link.
+    private fun ouvirNtfy() {
+        thread {
+            var desde = System.currentTimeMillis() / 1000
+            while (ligado) {
+                try {
+                    val c = java.net.URL("https://ntfy.sh/" + config.ntfyTopico + "/json?since=" + desde).openConnection() as java.net.HttpURLConnection
+                    c.connectTimeout = 15000; c.readTimeout = 120000 // o ntfy manda um sinal de vida a cada ~45 s
+                    c.inputStream.bufferedReader().use { r ->
+                        while (ligado) {
+                            val linha = r.readLine() ?: break
+                            val j = try { JSONObject(linha) } catch (e: Exception) { continue }
+                            desde = maxOf(desde, j.optLong("time", desde))
+                            if (j.optString("event") == "message") alertaDoNtfy(j.optString("click"))
+                        }
+                    }
+                } catch (e: Exception) {
+                    Thread.sleep(5000)
                 }
-                override fun connectionLost(cause: Throwable?) {
-                    estado = "Sem conexão (" + (cause?.message ?: "rede") + "), tentando de novo"
-                    atualizarFixa("Sem conexão com os sensores. Tentando de novo…")
-                }
-                override fun messageArrived(topic: String?, message: MqttMessage?) { receber(String(message?.payload ?: return)) }
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
-            })
-            val op = MqttConnectOptions().apply {
-                isAutomaticReconnect = true; isCleanSession = true; connectionTimeout = 15; keepAliveInterval = 30
             }
-            cliente = c
-            c.connect(op, null, object : org.eclipse.paho.client.mqttv3.IMqttActionListener {
-                override fun onSuccess(t: org.eclipse.paho.client.mqttv3.IMqttToken?) {}
-                override fun onFailure(t: org.eclipse.paho.client.mqttv3.IMqttToken?, e: Throwable?) {
-                    estado = "Erro ao conectar: " + (e?.message ?: "sem detalhe") + ". Tentando de novo…"
-                    atualizarFixa(estado)
-                    // nova tentativa em 10 s (a reconexão automática só vale depois da 1ª conexão)
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ thread { conectar() } }, 10000)
-                }
-            })
-        } catch (e: Exception) {
-            estado = "Erro ao conectar: " + (e.message ?: e.javaClass.simpleName)
-            atualizarFixa(estado)
         }
     }
 
-    private fun receber(texto: String) {
+    @Synchronized private fun alertaDoNtfy(click: String) {
+        val m = Regex("[?&]alerta=([^&]+)").find(click) ?: return
+        val j = try { JSONObject(android.net.Uri.decode(m.groupValues[1])) } catch (e: Exception) { return }
+        val L = Leitura(j.optDouble("v"), j.optDouble("p"), j.optDouble("tc"))
+        val a = avaliar(config, L)
+        if (a.nivel == 0 || Alerta.ativo != null) return
+        disparado = maxOf(disparado, a.nivel)
+        dispararAlarme(L, a, j.optLong("t", System.currentTimeMillis()))
+    }
+
+    @Synchronized private fun receber(texto: String) {
         val L = try {
             val j = JSONObject(texto)
             Leitura(j.getDouble("v"), j.getDouble("p"), j.getDouble("t"))
@@ -128,12 +128,12 @@ class MonitorService : Service() {
         }
     }
 
-    private fun dispararAlarme(L: Leitura, a: Avaliacao) {
+    private fun dispararAlarme(L: Leitura, a: Avaliacao, hora: Long = System.currentTimeMillis()) {
         Alerta.iniciar(this, DadosAlerta(
             nivel = a.nivel, v = L.v, p = L.p, t = L.t, nome = config.nome,
             causa = a.causas.firstOrNull()?.titulo ?: "Leituras fora do normal.",
             verificar = a.causas.firstOrNull()?.verificar?.joinToString(" · ") ?: "",
-            leituras = linhaLeituras(L, a), hora = System.currentTimeMillis()))
+            leituras = linhaLeituras(L, a), hora = hora))
     }
 
     private fun notificacaoFixa(texto: String): Notification {

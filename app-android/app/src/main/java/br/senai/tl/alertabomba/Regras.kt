@@ -27,7 +27,8 @@ data class Config(
     val tempAtencao: Double = 45.0, val tempCritico: Double = 55.0,
     // mesma conexão do site (WebSocket seguro, porta 8884): passa por mais redes que a porta 8883
     val mqttServidor: String = "wss://broker.hivemq.com:8884/mqtt",
-    val mqttTopico: String = "senai-tl/pi/BOMBA-001/leituras-d74f12ff"
+    val mqttTopico: String = "senai-tl/pi/BOMBA-001/leituras-d74f12ff",
+    val ntfyTopico: String = "ficha-senai-tl-bomba-001-d74f12ff"
 ) {
     companion object {
         // lê os limites da ficha publicada; sem internet, fica com os padrões
@@ -45,7 +46,8 @@ data class Config(
                     vibAtencao = v.getDouble("atencao"), vibCritico = v.getDouble("critico"),
                     presNormal = p.getDouble("normal"), quedaAtencao = p.getDouble("queda_atencao"), quedaCritico = p.getDouble("queda_critico"),
                     tempAtencao = t.getDouble("atencao"), tempCritico = t.getDouble("critico"),
-                    mqttTopico = mq?.optString("topico") ?: Config().mqttTopico
+                    mqttTopico = mq?.optString("topico") ?: Config().mqttTopico,
+                    ntfyTopico = e.getJSONObject("alerta").optString("ntfy_topico", Config().ntfyTopico)
                 )
             } catch (e: Exception) {
                 Config()
