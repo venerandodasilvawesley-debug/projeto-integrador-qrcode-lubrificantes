@@ -273,6 +273,10 @@ body.sem-rolagem{overflow:hidden}
 .passo-caixa .galao-manual{display:block;margin-top:10px;text-align:left}
 .causa{margin-top:12px}.causa b{display:block}
 .opcoes input[type=checkbox]:checked+span{background:#c22525;border-color:#c22525;color:#fff}
+.escolha-botoes a .sinal{display:block;margin:12px -10px -26px;padding:9px 8px;border-radius:0 0 13px 13px;font-size:.9rem;
+  font-weight:600;line-height:1.25;background:#e3e8ed;color:#14202b}
+.escolha-botoes a .sinal.st-c{background:#1c8a45;color:#fff}.escolha-botoes a .sinal.st-a{background:#f2b705;color:#14202b}
+.escolha-botoes a .sinal.st-nc{background:#c22525;color:#fff}
 a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;
   border:2px solid rgba(255,255,255,.7);border-radius:8px;padding:5px 10px}
 </style>
@@ -544,9 +548,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<button type="button" role="tab" id="aba-inspecao" aria-controls="painel-inspecao">Inspeção<small>modelo 3D e checklist</small></button>' +
       '</div></nav>' : '';
     var escolha = temInspecao ? '<div id="escolha"><div><h1>' + esc(codigo) + '</h1><p>' +
-      esc(e.nome + " · posição " + e.posicao) + '</p><div class="semaforo" id="semaforo" role="status"></div><nav class="escolha-botoes">' +
-      '<a href="#lubrificacao">Lubrificação<small>ficha e registro</small></a>' +
-      '<a href="#inspecao">Inspeção<small>modelo 3D e checklist</small></a>' +
+      esc(e.nome + " · posição " + e.posicao) + '</p><nav class="escolha-botoes">' +
+      '<a href="#lubrificacao">Lubrificação<small>ficha e registro</small><span class="sinal" id="sinal-lubrificacao" role="status"></span></a>' +
+      '<a href="#inspecao">Inspeção<small>modelo 3D e checklist</small><span class="sinal" id="sinal-inspecao" role="status"></span></a>' +
       '</nav></div></div>' : '';
     app.innerHTML = escolha + cabecalho(codigo, e.nome + " · posição " + e.posicao) + abas + '<main>' +
       '<div id="painel-lubrificacao" role="tabpanel">' +
@@ -679,10 +683,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     // o nome do responsável fica memorizado no aparelho
     try { resp.value = localStorage.getItem("responsavel") || ""; } catch (err) {}
 
-    // Semáforo do equipamento (gestão visual): junta a situação do óleo e a última inspeção.
-    // Verde = em dia; amarelo = atenção; vermelho = intervir. Aparece logo depois da leitura do QR Code.
+    // Semáforo (gestão visual), separado por aba porque Lubrificação e Inspeção são trabalhos de grupos diferentes:
+    // cada botão da tela de escolha e o filete do cabeçalho mostram só o dado daquela aba.
+    // Verde = em dia; amarelo = atenção; vermelho = intervir.
     var estadoVida = null;
-    var PESO_ST = { "st-c": 1, "st-a": 2, "st-nc": 3 };
     var DA_INSPECAO = { C: "st-c", A: "st-a", NC: "st-nc" };
     var NOME_PARECER = { C: "Conforme", A: "Atenção", NC: "Não conforme" };
     function atualizarSemaforo() {
@@ -691,21 +695,22 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         insp = (JSON.parse(localStorage.getItem("inspecoes_redutor")) || [])
           .filter(function (r) { return r.codigo === codigo; }).pop() || null;
       } catch (err) {}
-      var lista = [estadoVida && estadoVida.s, insp && DA_INSPECAO[insp.parecer]].filter(Boolean);
-      var cls = lista.reduce(function (a, b) { return !a || PESO_ST[b] > PESO_ST[a] ? b : a; }, null);
-      var titulo = { "st-c": "VERDE · em dia", "st-a": "AMARELO · atenção", "st-nc": "VERMELHO · intervir" }[cls] || "SEM DADOS AINDA";
-      var linhas = [estadoVida ? estadoVida.txt : "Óleo: informe a última troca na aba Lubrificação",
-        insp ? "Última inspeção: " + String(insp.data_hora).slice(0, 10) + " · " + (NOME_PARECER[insp.parecer] || "")
-          : "Nenhuma inspeção registrada neste aparelho"];
-      var el = document.getElementById("semaforo");
-      if (el) {
-        el.className = "semaforo" + (cls ? " " + cls : "");
-        el.innerHTML = '<b>' + esc(titulo) + '</b><ul>' + linhas.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join("") + '</ul>';
-      }
-      var cab = document.querySelector("#app header");
-      if (cab) cab.className = cls || "";
+      var COR = { "st-c": "VERDE", "st-a": "AMARELO", "st-nc": "VERMELHO" };
+      var sinais = {
+        lubrificacao: { cls: estadoVida && estadoVida.s, txt: estadoVida ? estadoVida.txt : "Óleo: informe a última troca" },
+        inspecao: { cls: insp && DA_INSPECAO[insp.parecer], txt: insp ? "Última inspeção " + String(insp.data_hora).slice(0, 10) +
+          " · " + (NOME_PARECER[insp.parecer] || "") : "Nenhuma inspeção registrada" }
+      };
+      Object.keys(sinais).forEach(function (aba) {
+        var el = document.getElementById("sinal-" + aba), x = sinais[aba];
+        if (el) { el.className = "sinal" + (x.cls ? " " + x.cls : ""); el.innerHTML = (x.cls ? '<b>' + COR[x.cls] + '</b> · ' : '') + esc(x.txt); }
+      });
+      // filete do cabeçalho: o da aba aberta
+      var aba = location.hash.slice(1), cab = document.querySelector("#app header");
+      if (cab) cab.className = (sinais[aba] && sinais[aba].cls) || "";
     }
     window.addEventListener("inspecao-salva", atualizarSemaforo);
+    window.addEventListener("hashchange", atualizarSemaforo);
 
     // Passo a passo da troca de óleo; ao terminar, o registro já fica como Troca.
     function abrirPassos() {
