@@ -25,7 +25,8 @@ data class Config(
     val vibAtencao: Double = 1.8, val vibCritico: Double = 4.5,
     val presNormal: Double = 1.5, val quedaAtencao: Double = 15.0, val quedaCritico: Double = 30.0,
     val tempAtencao: Double = 45.0, val tempCritico: Double = 55.0,
-    val mqttServidor: String = "ssl://broker.hivemq.com:8883",
+    // mesma conexão do site (WebSocket seguro, porta 8884): passa por mais redes que a porta 8883
+    val mqttServidor: String = "wss://broker.hivemq.com:8884/mqtt",
     val mqttTopico: String = "senai-tl/pi/BOMBA-001/leituras-d74f12ff"
 ) {
     companion object {

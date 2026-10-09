@@ -87,7 +87,7 @@ class MonitorService : Service() {
                     atualizarFixa("Conectado. Aguardando leituras da $CODIGO")
                 }
                 override fun connectionLost(cause: Throwable?) {
-                    estado = "Sem conexão, tentando de novo"
+                    estado = "Sem conexão (" + (cause?.message ?: "rede") + "), tentando de novo"
                     atualizarFixa("Sem conexão com os sensores. Tentando de novo…")
                 }
                 override fun messageArrived(topic: String?, message: MqttMessage?) { receber(String(message?.payload ?: return)) }
@@ -97,10 +97,18 @@ class MonitorService : Service() {
                 isAutomaticReconnect = true; isCleanSession = true; connectionTimeout = 15; keepAliveInterval = 30
             }
             cliente = c
-            c.connect(op)
+            c.connect(op, null, object : org.eclipse.paho.client.mqttv3.IMqttActionListener {
+                override fun onSuccess(t: org.eclipse.paho.client.mqttv3.IMqttToken?) {}
+                override fun onFailure(t: org.eclipse.paho.client.mqttv3.IMqttToken?, e: Throwable?) {
+                    estado = "Erro ao conectar: " + (e?.message ?: "sem detalhe") + ". Tentando de novo…"
+                    atualizarFixa(estado)
+                    // nova tentativa em 10 s (a reconexão automática só vale depois da 1ª conexão)
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ thread { conectar() } }, 10000)
+                }
+            })
         } catch (e: Exception) {
-            estado = "Erro ao conectar"
-            atualizarFixa("Erro ao conectar aos sensores")
+            estado = "Erro ao conectar: " + (e.message ?: e.javaClass.simpleName)
+            atualizarFixa(estado)
         }
     }
 

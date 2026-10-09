@@ -131,7 +131,7 @@ class MainActivity : Activity() {
         status.text = "Monitorando $CODIGO · " + when {
             L != null && idade < 5 -> "ao vivo (" + NOMES_NIVEL[avaliar(Config(), L).nivel].lowercase() + ")"
             L != null -> "sem leitura há $idade s"
-            else -> MonitorService.estado.lowercase()
+            else -> MonitorService.estado
         }
     }
 
