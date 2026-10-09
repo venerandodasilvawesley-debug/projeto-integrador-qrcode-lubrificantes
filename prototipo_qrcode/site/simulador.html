@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123a5c">
+<link rel="icon" href="/icone.svg" type="image/svg+xml">
+<title>Simulador da bancada</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#eef1f4;color:#14202b;font-size:17px;line-height:1.4}
+header{background:#123a5c;color:#fff;padding:14px}
+header div{max-width:980px;margin:0 auto}header b{font-size:1.5rem}header span{display:block;opacity:.9;font-size:.95rem}
+main{max-width:980px;margin:0 auto;padding:12px 14px 40px;display:grid;gap:14px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}
+@media (max-width:760px){main{grid-template-columns:minmax(0,1fr)}}
+.cartao{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+h2{font-size:1.15rem;margin:0 0 10px}
+.rotulo{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b6b7a}
+.sensor{margin-top:14px}
+.sensor .linha{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sensor output{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+.sensor input{width:100%;height:30px}
+.sensor small{color:#5b6b7a}
+.chip{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.8rem;font-weight:700}
+.st-c{background:#d9f2e1;color:#14602f}.st-a{background:#fff3cd;color:#6b4d00}.st-nc{background:#fbdcdc;color:#8f1a1a}
+.presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px}
+button{font:inherit;font-weight:700;padding:10px;border-radius:10px;border:2px solid #123a5c;background:#fff;color:#123a5c;cursor:pointer}
+button.pri{background:#123a5c;color:#fff;width:100%;padding:14px;font-size:1.1rem;margin-top:12px}
+button:focus-visible,input:focus-visible{outline:3px solid #e0a100}
+/* painel de alerta da bancada (luzes) */
+.painel{background:linear-gradient(#c9d0d6,#aab3bb);border-radius:14px;padding:18px;border:3px solid #7d8790}
+.luz{display:flex;align-items:center;gap:14px;margin:10px 0;font-weight:800;font-size:1.05rem;color:#1d2a35}
+.luz i{width:46px;height:46px;border-radius:50%;flex:none;border:3px solid #4b555e;opacity:.25;transition:opacity .2s,box-shadow .2s}
+.luz.verde i{background:#1fbf4f}.luz.amarela i{background:#f4c20d}.luz.vermelha i{background:#e3262b}
+.luz.acesa i{opacity:1;box-shadow:0 0 18px currentColor}
+.luz.verde{color:#1d2a35}.luz.verde.acesa i{color:#1fbf4f}.luz.amarela.acesa i{color:#f4c20d}.luz.vermelha.acesa i{color:#e3262b}
+.luz.vermelha.acesa i{animation:pisca .6s infinite alternate}
+@keyframes pisca{to{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.luz.vermelha.acesa i{animation:none}}
+.painel .nome{border-top:2px solid #7d8790;margin-top:12px;padding-top:8px;text-align:center;font-weight:800;font-size:.85rem;letter-spacing:.5px}
+.causa{margin-top:12px;font-weight:700}
+.causa ul{margin:4px 0 0;padding-left:20px;font-weight:400}
+.auto{display:flex;gap:10px;align-items:center;margin-top:12px;font-weight:700}
+.auto input{width:24px;height:24px}
+#log{list-style:none;margin:8px 0 0;padding:0;font-size:.9rem}
+#log li{border-top:1px solid #dde3e9;padding:6px 0}
+.erro{color:#c22525;font-weight:700}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef1f4;border-radius:6px;padding:1px 6px;word-break:break-all}
+a{color:#123a5c}
+</style>
+</head>
+<body>
+<header><div><b>Simulador da bancada</b><span id="sub">Faz o papel dos sensores da bomba</span></div></header>
+<main>
+  <section class="cartao">
+    <h2>Sensores</h2>
+    <div id="sensores"></div>
+    <div class="rotulo" style="margin-top:16px">Situações prontas</div>
+    <div class="presets">
+      <button type="button" data-preset="normal">Normal</button>
+      <button type="button" data-preset="cavitacao">Cavitação</button>
+      <button type="button" data-preset="desalinhamento">Desalinhamento</button>
+      <button type="button" data-preset="quente">Líquido quente</button>
+      <button type="button" data-preset="ar">Entrada de ar</button>
+    </div>
+  </section>
+  <section style="display:grid;gap:14px">
+    <div class="painel" aria-live="polite">
+      <div class="luz verde" id="l0"><i></i>NORMAL</div>
+      <div class="luz amarela" id="l1"><i></i>ATENÇÃO</div>
+      <div class="luz vermelha" id="l2"><i></i>RISCO DE CAVITAÇÃO</div>
+      <div class="nome">PAINEL DE MONITORAMENTO E ALERTA</div>
+    </div>
+    <div class="cartao">
+      <div class="rotulo">Possível causa</div>
+      <div id="causas"></div>
+      <label class="auto"><input type="checkbox" id="auto" checked>Avisar o mecânico sozinho quando piorar</label>
+      <button type="button" class="pri" id="enviar">Enviar alerta agora</button>
+      <p id="estado" role="status"></p>
+      <ul id="log"></ul>
+      <p style="font-size:.9rem">Celular do mecânico: aplicativo <b>ntfy</b>, tópico <code id="topico"></code>.
+        Ficha: <a id="ficha" href="/e/BOMBA-001">/e/BOMBA-001</a></p>
+    </div>
+  </section>
+</main>
+<script src="/monitor.js"></script>
+<script>
+(function () {
+  "use strict";
+  var CODIGO = "BOMBA-001";
+  var PRESETS = {
+    normal: { v: 0.8, p: 1.5, t: 30 },
+    cavitacao: { v: 5.2, p: 0.95, t: 33 },
+    desalinhamento: { v: 3.6, p: 1.48, t: 32 },
+    quente: { v: 2.4, p: 1.2, t: 52 },
+    ar: { v: 1.2, p: 1.15, t: 31 }
+  };
+  fetch("/equipamentos.json").then(function (r) { return r.json(); }).then(function (lista) {
+    var e = lista[CODIGO], s = e.sensores;
+    document.getElementById("sub").textContent = "Faz o papel dos sensores da " + CODIGO + " · " + e.nome;
+    document.getElementById("topico").textContent = e.alerta.ntfy_topico;
+    var CAMPOS = [["v", "vibracao", 1], ["p", "pressao", 2], ["t", "temperatura", 0]];
+    var L = { v: s.vibracao.normal, p: s.pressao.normal, t: s.temperatura.normal };
+    document.getElementById("sensores").innerHTML = CAMPOS.map(function (c) {
+      var x = s[c[1]];
+      return '<div class="sensor"><div class="linha"><label for="s-' + c[0] + '"><b>' + x.rotulo + '</b></label>' +
+        '<span><output id="o-' + c[0] + '"></output> ' + x.unidade + ' <span class="chip" id="c-' + c[0] + '"></span></span></div>' +
+        '<input type="range" id="s-' + c[0] + '" min="' + x.min + '" max="' + x.max + '" step="' + x.passo + '">' +
+        '<small>' + x.ref + '</small></div>';
+    }).join("");
+
+    var enviado = 0, enviando = false;
+    var estado = document.getElementById("estado"), log = document.getElementById("log");
+    function enviar(motivo) {
+      if (enviando) return;
+      enviando = true;
+      estado.textContent = "Enviando o alerta…"; estado.className = "";
+      window.Monitor.publicar(CODIGO, e, { v: L.v, p: L.p, t: L.t }).then(function (r) {
+        var d = new Date();
+        log.insertAdjacentHTML("afterbegin", '<li>' + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") +
+          ":" + String(d.getSeconds()).padStart(2, "0") + ' · <span class="chip ' + window.Monitor.NIVEL[r.av.nivel].cls + '">' +
+          window.Monitor.NIVEL[r.av.nivel].nome + '</span> ' + motivo + '</li>');
+        estado.textContent = "Alerta enviado para o celular do mecânico.";
+        enviado = r.av.nivel;
+      }, function () {
+        estado.textContent = "Não foi possível enviar o alerta. Confira a internet deste computador."; estado.className = "erro";
+      }).then(function () { enviando = false; });
+    }
+
+    var espera = null;
+    function atualizar() {
+      var av = window.Monitor.avaliar(e, L);
+      CAMPOS.forEach(function (c) {
+        document.getElementById("o-" + c[0]).textContent = Number(L[c[0]]).toFixed(c[2]).replace(".", ",");
+        var n = av.sensores[c[0]], ch = document.getElementById("c-" + c[0]);
+        ch.className = "chip " + window.Monitor.NIVEL[n].cls; ch.textContent = ["normal", "atenção", "crítico"][n];
+      });
+      [0, 1, 2].forEach(function (i) { document.getElementById("l" + i).classList.toggle("acesa", i === av.nivel); });
+      document.getElementById("causas").innerHTML = av.causas.length ? av.causas.map(function (c) {
+        return '<div class="causa">' + c.titulo + '<ul>' + c.verificar.map(function (v) { return '<li>' + v + '</li>'; }).join("") + '</ul></div>';
+      }).join("") : '<p>Leituras dentro dos limites.</p>';
+      // aviso automático: só quando a situação piora (espera 1,5 s o controle parar de mexer)
+      clearTimeout(espera);
+      if (av.nivel === 0) enviado = 0;
+      else if (document.getElementById("auto").checked && av.nivel > enviado)
+        espera = setTimeout(function () { if (window.Monitor.avaliar(e, L).nivel > enviado) enviar("automático"); }, 1500);
+    }
+    CAMPOS.forEach(function (c) {
+      var inp = document.getElementById("s-" + c[0]);
+      inp.value = L[c[0]];
+      inp.addEventListener("input", function () { L[c[0]] = Number(inp.value); atualizar(); });
+    });
+    document.querySelectorAll("[data-preset]").forEach(function (b) {
+      b.onclick = function () {
+        var p = PRESETS[b.getAttribute("data-preset")];
+        CAMPOS.forEach(function (c) { L[c[0]] = p[c[0]]; document.getElementById("s-" + c[0]).value = p[c[0]]; });
+        atualizar();
+      };
+    });
+    document.getElementById("enviar").onclick = function () { enviar("manual"); };
+    atualizar();
+  }).catch(function () {
+    document.querySelector("main").innerHTML = '<div class="cartao erro">Não foi possível carregar os dados do equipamento.</div>';
+  });
+})();
+</script>
+</body>
+</html>

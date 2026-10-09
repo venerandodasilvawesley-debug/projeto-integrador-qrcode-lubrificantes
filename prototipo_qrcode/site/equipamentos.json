@@ -634,5 +634,59 @@
         }
       }
     }
+  },
+  "BOMBA-001": {
+    "tipo": "monitoramento",
+    "nome": "Bomba centrífuga – bancada didática",
+    "modelo": "Bancada com sensores de vibração (mancal), pressão (recalque) e temperatura (carcaça)",
+    "local": "Laboratório – simulação didática",
+    "posicao": "bancada",
+    "aviso_valores": "Limites de exemplo para a bancada didática. Ajustar com os valores medidos com a bancada funcionando normalmente.",
+    "sensores": {
+      "vibracao": {
+        "rotulo": "Vibração no mancal",
+        "curto": "Vibração",
+        "unidade": "mm/s",
+        "normal": 0.8,
+        "atencao": 1.8,
+        "critico": 4.5,
+        "min": 0,
+        "max": 10,
+        "passo": 0.1,
+        "ref": "Faixas da ISO 10816-1, classe I (máquinas pequenas): até 1,8 mm/s aceitável; 1,8 a 4,5 mm/s atenção; acima de 4,5 mm/s inaceitável."
+      },
+      "pressao": {
+        "rotulo": "Pressão de recalque",
+        "curto": "Pressão",
+        "unidade": "bar",
+        "normal": 1.5,
+        "queda_atencao": 15,
+        "queda_critico": 30,
+        "min": 0,
+        "max": 3,
+        "passo": 0.05,
+        "ref": "Alerta pela queda em relação à pressão normal de trabalho: 15 % atenção, 30 % crítico."
+      },
+      "temperatura": {
+        "rotulo": "Temperatura da carcaça",
+        "curto": "Temperatura",
+        "unidade": "°C",
+        "normal": 30,
+        "atencao": 45,
+        "critico": 55,
+        "min": 10,
+        "max": 90,
+        "passo": 1,
+        "ref": "Líquido mais quente vaporiza com mais facilidade e aumenta o risco de cavitação."
+      }
+    },
+    "alerta": {
+      "ntfy_topico": "ficha-senai-tl-bomba-001-d74f12ff"
+    },
+    "epis": "Óculos de proteção e protetor auricular",
+    "seguranca": [
+      "Não toque em partes girantes. Para inspecionar o rotor, o acoplamento ou o mancal, desligue e bloqueie (LOTO).",
+      "Verificações da sucção (filtro, válvula, nível) podem ser feitas com a bomba em operação, sem abrir a tubulação."
+    ]
   }
 }

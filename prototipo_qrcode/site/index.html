@@ -271,6 +271,8 @@ body.sem-rolagem{overflow:hidden}
 .passo-caixa #passo-texto{font-size:1.15rem;margin:0}
 .passo-caixa .nav button:disabled{opacity:.4}
 .passo-caixa .galao-manual{display:block;margin-top:10px;text-align:left}
+.causa{margin-top:12px}.causa b{display:block}
+.opcoes input[type=checkbox]:checked+span{background:#c22525;border-color:#c22525;color:#fff}
 a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;
   border:2px solid rgba(255,255,255,.7);border-radius:8px;padding:5px 10px}
 </style>
@@ -283,6 +285,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 <script src="/inspecao.js"></script>
 <script src="/galao.js"></script>
 <script src="/troca.js"></script>
+<script src="/monitor.js"></script>
 
 <script>
 (function () {
@@ -1006,6 +1009,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     if (!m) return telaInicial(equipamentos);
     var codigo = m[1].toUpperCase();
     if (!Object.prototype.hasOwnProperty.call(equipamentos, codigo)) return telaNaoEncontrado();
+    if (equipamentos[codigo].tipo === "monitoramento" && window.Monitor) return window.Monitor.tela(app, codigo, equipamentos[codigo], cabecalho);
     telaFicha(codigo, equipamentos[codigo]);
   }
 
@@ -1024,7 +1028,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function conferirOffline(tentativa) {
     if (!("caches" in window)) return;
     var busca = { ignoreVary: true, ignoreSearch: true };
-    Promise.all(["/", "/equipamentos.json", "/inspecao.js", "/galao.js", "/troca.js", "/oleos.json"].map(function (a) { return caches.match(a, busca); }))
+    Promise.all(["/", "/equipamentos.json", "/inspecao.js", "/galao.js", "/troca.js", "/oleos.json", "/monitor.js"].map(function (a) { return caches.match(a, busca); }))
       .then(function (r) {
         var ok = r.every(Boolean);
         estado.innerHTML = (ok ? '<b class="pronto">✓ Ficha salva neste aparelho: abre pelo QR Code mesmo sem internet.</b>'
