@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera as páginas de etiqueta (QR Code) de cada equipamento em site/.
+"""Gera as páginas de etiqueta (QR Code) de cada equipamento e dos galões de óleo em site/.
 
 Precisa do programa `qrencode` (sudo apt install qrencode).
 
@@ -77,6 +77,60 @@ def faixa_oleo(codigo, e):
             f'<span>Óleo: galão <b>{html.escape(cor["nome"].upper())}</b>{tag}</span></div>')
 
 
+GALOES = """<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etiquetas dos galões de óleo</title>
+<style>
+body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#000;background:#fff}}
+.instrucoes{{max-width:560px;margin:14px;font-size:.95rem}}
+.etiqueta{{display:inline-flex;gap:.3cm;align-items:center;border:.25cm solid #000;
+  border-radius:.25cm;padding:.25cm;margin:.5cm;page-break-inside:avoid;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.etiqueta svg{{display:block;width:{lado}cm;height:{lado}cm}}
+.txt{{max-width:4.6cm;font-size:9pt;line-height:1.25}}
+.cod{{font-size:17pt;font-weight:800;line-height:1.1}}
+@media print{{.instrucoes{{display:none}}}}
+</style>
+</head>
+<body>
+<div class="instrucoes">
+<p><b>Etiquetas dos galões de óleo</b> – cole no galão. A borda tem a cor do galão.</p>
+<p>Na ficha do equipamento, o botão <b>Conferir o galão</b> lê este QR Code e diz se é o óleo certo.
+OLE-02 e OLE-03 são óleos de exemplo, para demonstrar o aviso de óleo errado.</p>
+<p>Imprima em escala 100% (sem "ajustar à página"). <a href="/">Início</a></p>
+</div>
+{etiquetas}
+</body>
+</html>
+"""
+
+GALAO = """<div class="etiqueta" style="border-color:{hex}">{svg}
+<div class="txt"><div class="cod">{codigo}</div>
+<b>GALÃO {cor}</b><br>{nome}<br>{base} · {visc}</div></div>
+"""
+
+
+def etiquetas_galoes(base, lado):
+    """Uma etiqueta por óleo de oleos.json; o QR leva a /g/OLE-01."""
+    arq = SITE / "oleos.json"
+    if not arq.exists():
+        return
+    oleos = json.loads(arq.read_text(encoding="utf-8"))
+    partes = []
+    for codigo, o in oleos.items():
+        url = f"{base}/g/{codigo}"
+        partes.append(GALAO.format(svg=qr_svg(url), codigo=html.escape(codigo), hex=html.escape(o["cor"]["hex"]),
+                                   cor=html.escape(o["cor"]["nome"].upper()), nome=html.escape(o["nome"]),
+                                   base=html.escape(o["base"]), visc=html.escape(o["viscosidade"])))
+        print(f"galão {codigo}: {url}")
+    destino = SITE / "etiqueta-galoes.html"
+    destino.write_text(GALOES.format(lado=html.escape(lado), etiquetas="".join(partes)), encoding="utf-8")
+    print(destino.name)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Gera as etiquetas com QR Code")
     ap.add_argument("url_base", help="endereço do site publicado, ex.: https://exemplo.vercel.app")
@@ -93,6 +147,7 @@ def main():
         destino.write_text(MODELO.format(codigo=html.escape(codigo), lado=html.escape(args.lado),
                                          url=html.escape(url), etiqueta=etiqueta), encoding="utf-8")
         print(f"{destino.name}: {url}")
+    etiquetas_galoes(base, args.lado)
 
 
 if __name__ == "__main__":

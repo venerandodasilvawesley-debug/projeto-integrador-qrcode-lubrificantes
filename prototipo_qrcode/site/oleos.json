@@ -1,0 +1,20 @@
+{
+  "OLE-01": {
+    "nome": "Klübersynth EG4-320",
+    "base": "Sintético PAO (CLP HC)",
+    "viscosidade": "ISO VG 320",
+    "cor": { "nome": "Azul", "hex": "#1565c0" }
+  },
+  "OLE-02": {
+    "nome": "Óleo mineral para engrenagens (exemplo para a demonstração)",
+    "base": "Mineral (CLP)",
+    "viscosidade": "ISO VG 320",
+    "cor": { "nome": "Amarelo", "hex": "#f9a825" }
+  },
+  "OLE-03": {
+    "nome": "Óleo sintético poliglicol (exemplo para a demonstração)",
+    "base": "Sintético PG (poliglicol)",
+    "viscosidade": "ISO VG 320",
+    "cor": { "nome": "Verde", "hex": "#2e7d32" }
+  }
+}

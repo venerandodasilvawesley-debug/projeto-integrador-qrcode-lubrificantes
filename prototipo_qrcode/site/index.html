@@ -50,7 +50,7 @@ input[type=text],input[type=date]{width:100%;font-size:1.15rem;padding:12px;marg
 .confirma{display:flex;gap:12px;align-items:center;background:#eef1f4;border-radius:10px;
   padding:12px;font-weight:700}
 .confirma input{width:28px;height:28px;flex:none}
-button.salvar{width:100%;margin-top:16px;padding:16px;font-size:1.25rem;font-weight:800;color:#fff;
+button.salvar{width:100%;margin-top:16px;padding:16px;font-family:inherit;font-size:1.25rem;font-weight:800;color:#fff;
   background:#1c8a45;border:0;border-radius:12px}
 #aviso-temp{display:none;color:#c22525;font-weight:700;margin-top:6px}
 table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
@@ -202,6 +202,42 @@ table.resumo button.link{text-align:left}
 .escolha-botoes a:first-child{background:#fff;color:#123a5c}
 .escolha-botoes a small{display:block;font-weight:600;font-size:1rem;opacity:.9}
 .escolha-botoes a:focus-visible{outline:3px solid #e0a100}
+/* semáforo do equipamento (gestão visual): faixa na tela de escolha e filete sob o cabeçalho */
+.semaforo{margin:0 0 18px;border-radius:14px;padding:14px 16px;color:#14202b;background:#e3e8ed;
+  border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.semaforo b{display:block;font-size:1.6rem;line-height:1.1}
+.semaforo ul{margin:6px 0 0;padding-left:20px;font-weight:600}
+.semaforo.st-c{background:#1c8a45;color:#fff}.semaforo.st-a{background:#f2b705}.semaforo.st-nc{background:#c22525;color:#fff}
+header.st-c{border-bottom:8px solid #1c8a45}header.st-a{border-bottom:8px solid #f2b705}header.st-nc{border-bottom:8px solid #c22525}
+.acoes-oleo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+@media (max-width:420px){.acoes-oleo{grid-template-columns:1fr}}
+.acoes-oleo button{margin:0}
+#galao-reg{margin-top:12px}
+#galao-reg .parecer{margin-top:0}
+/* conferir o galão (câmera) e passo a passo da troca: telas cheias por cima da ficha */
+body.sem-rolagem{overflow:hidden}
+.passo-fundo,.galao-fundo{position:fixed;inset:0;z-index:55;background:#eef1f4;overflow:auto}
+.galao-fundo{z-index:60;background:#14202b}
+.passo-caixa,.galao-caixa{max-width:560px;margin:0 auto;padding:14px 14px 28px}
+.galao-caixa{color:#fff}.galao-caixa .dica{color:#d4dde5}
+.galao-caixa .foto-btn{display:block;text-align:center;margin-top:10px}
+.galao-video{position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:1;max-height:60vh;margin:0 auto}
+.galao-video video{width:100%;height:100%;object-fit:cover;display:block}
+.galao-video i{position:absolute;inset:18%;border:4px solid #e0a100;border-radius:12px}
+.galao-res{border-radius:14px;padding:22px 16px;display:flex;flex-direction:column;gap:10px;text-align:center;font-size:1.1rem;font-weight:600}
+.galao-res b{font-size:2.2rem;line-height:1.05}
+.galao-res.st-c{background:#1c8a45}.galao-res.st-nc{background:#c22525}.galao-res.st-a{background:#f2b705;color:#14202b}
+.galao-cor{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800}
+.galao-cor i{width:34px;height:22px;border-radius:5px;border:2px solid #fff}
+.galao-caixa .nav button{background:#fff}.galao-caixa .nav button.pri{background:#e0a100;border-color:#e0a100;color:#14202b}
+.passo-topo{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700;margin-bottom:8px}
+.passo-topo button{font:inherit;font-weight:700;border:2px solid #123a5c;border-radius:10px;background:#fff;color:#123a5c;padding:6px 12px}
+.passo-img{margin-top:10px}.passo-img .foto-grande{max-height:45vh}
+.passo-visor{height:min(70vw,320px);min-height:220px}
+.passo-caixa h2{font-size:1.5rem;margin:14px 0 6px}
+.passo-caixa #passo-texto{font-size:1.15rem;margin:0}
+.passo-caixa .nav button:disabled{opacity:.4}
+.passo-caixa .galao-manual{display:block;margin-top:10px;text-align:left}
 a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;
   border:2px solid rgba(255,255,255,.7);border-radius:8px;padding:5px 10px}
 </style>
@@ -211,6 +247,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 <div id="app"><main><div class="cartao">Carregando…</div></main></div>
 <p id="estado-offline" class="rodape"></p>
 <script src="/inspecao.js"></script>
+<script src="/galao.js"></script>
+<script src="/troca.js"></script>
 
 <script>
 (function () {
@@ -252,6 +290,12 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function duracao(s) {
     if (s == null) return "";
     return s < 60 ? s + " s" : Math.floor(s / 60) + " min " + (s % 60) + " s";
+  }
+
+  // como o galão foi conferido no registro de Complemento ou Troca
+  function textoGalao(g) {
+    if (!g) return "";
+    return g.certo ? "conferido pelo QR, óleo certo (" + g.codigo + ")" : g.manual ? "conferido pela cor e pelo tag" : "";
   }
 
   // Fotos dos registros: reduzidas e guardadas no próprio aparelho (IndexedDB), como os demais dados.
@@ -369,10 +413,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function baixarCsv() {
     if (!lerRegistros().length) return alert("Ainda não há registros neste aparelho.");
     var linhas = [["codigo", "data_hora", "tipo", "quantidade_ml", "temperatura_c",
-      "responsavel", "observacao", "horas_oleo", "limite_oleo_h", "duracao_s", "foto"]];
+      "responsavel", "observacao", "horas_oleo", "limite_oleo_h", "duracao_s", "foto", "galao"]];
     lerRegistros().forEach(function (r) {
       linhas.push([r.codigo, r.data_hora, r.tipo, fmt(r.quantidade_ml), fmt(r.temperatura_c),
-        r.responsavel, r.observacao, r.horas_oleo, r.limite_oleo_h, r.duracao_s, r.foto ? "sim" : ""]);
+        r.responsavel, r.observacao, r.horas_oleo, r.limite_oleo_h, r.duracao_s, r.foto ? "sim" : "", textoGalao(r.galao)]);
     });
     var csv = "﻿" + linhas.map(function (l) {
       return l.map(function (c) { return '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"'; }).join(";");
@@ -413,6 +457,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           (r.temperatura_c != null ? ' · ' + fmt(r.temperatura_c) + ' °C' : '') +
           (r.horas_oleo != null ? '<br>Óleo com ' + milhar(r.horas_oleo) + ' h' : '') +
           (r.duracao_s != null ? '<br>Tempo: ' + duracao(r.duracao_s) : '') +
+          (r.galao ? '<br>Galão: ' + esc(textoGalao(r.galao)) : '') +
           (r.foto ? '<br><button type="button" class="link" data-foto="' + esc(r.foto) + '">Ver foto</button>' : '') +
           '</td><td>' + esc(r.responsavel) +
           (r.observacao ? '<br><small>' + esc(r.observacao) + '</small>' : '') + '</td></tr>';
@@ -462,7 +507,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<button type="button" role="tab" id="aba-inspecao" aria-controls="painel-inspecao">Inspeção<small>modelo 3D e checklist</small></button>' +
       '</div></nav>' : '';
     var escolha = temInspecao ? '<div id="escolha"><div><h1>' + esc(codigo) + '</h1><p>' +
-      esc(e.nome + " · posição " + e.posicao) + '</p><nav class="escolha-botoes">' +
+      esc(e.nome + " · posição " + e.posicao) + '</p><div class="semaforo" id="semaforo" role="status"></div><nav class="escolha-botoes">' +
       '<a href="#lubrificacao">Lubrificação<small>ficha e registro</small></a>' +
       '<a href="#inspecao">Inspeção<small>modelo 3D e checklist</small></a>' +
       '</nav></div></div>' : '';
@@ -521,6 +566,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '</div>' +
         '<div class="rotulo" style="margin-top:12px">Enchimento, dreno e nível</div>' +
         '<div>' + esc(e.pontos) + '</div>' +
+        '<div class="acoes-oleo">' +
+          (e.tag_oleo && window.Galao ? '<button type="button" class="sap" id="b-galao">Conferir o galão (QR)</button>' : '') +
+          (e.passo_troca && window.PassoTroca ? '<button type="button" class="sap" id="b-passos">Passo a passo da troca</button>' : '') +
+        '</div>' +
       '</section>' +
       '<section class="cartao alerta"><div class="rotulo">Segurança</div><ul>' + alertas +
         '<li>EPIs: ' + esc(e.epis) + '.</li></ul></section>' +
@@ -543,6 +592,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<div id="aviso-temp">' + esc(e.aviso_temperatura) + '</div>' +
         '<label>Responsável<input type="text" id="responsavel" maxlength="60" autocomplete="name"></label>' +
         '<label>Observação – opcional<input type="text" id="observacao" maxlength="200"></label>' +
+        '<div id="galao-reg"></div>' +
         '<div id="foto-registro"></div>' +
         '<label class="confirma"><input type="checkbox" id="confirmado">' +
           'Equipamento bloqueado (LOTO) e bocal limpo</label>' +
@@ -552,6 +602,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<table><thead><tr><th>Data</th><th>Intervenção</th><th>Responsável</th></tr></thead>' +
         '<tbody id="historico">' + linhasHistorico(codigo) + '</tbody></table></details>' +
       '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
+        (e.tag_oleo ? '<a href="/etiqueta-galoes.html">Etiquetas dos galões</a> · ' : '') +
         '<button class="link" id="csv">Registros deste aparelho (CSV)</button> · ' +
         '<a href="/">Todas as fichas</a></p></div>' +
       '<div id="painel-inspecao" role="tabpanel" hidden></div></main>';
@@ -591,6 +642,68 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     // o nome do responsável fica memorizado no aparelho
     try { resp.value = localStorage.getItem("responsavel") || ""; } catch (err) {}
 
+    // Semáforo do equipamento (gestão visual): junta a situação do óleo e a última inspeção.
+    // Verde = em dia; amarelo = atenção; vermelho = intervir. Aparece logo depois da leitura do QR Code.
+    var estadoVida = null;
+    var PESO_ST = { "st-c": 1, "st-a": 2, "st-nc": 3 };
+    var DA_INSPECAO = { C: "st-c", A: "st-a", NC: "st-nc" };
+    var NOME_PARECER = { C: "Conforme", A: "Atenção", NC: "Não conforme" };
+    function atualizarSemaforo() {
+      var insp = null;
+      try {
+        insp = (JSON.parse(localStorage.getItem("inspecoes_redutor")) || [])
+          .filter(function (r) { return r.codigo === codigo; }).pop() || null;
+      } catch (err) {}
+      var lista = [estadoVida && estadoVida.s, insp && DA_INSPECAO[insp.parecer]].filter(Boolean);
+      var cls = lista.reduce(function (a, b) { return !a || PESO_ST[b] > PESO_ST[a] ? b : a; }, null);
+      var titulo = { "st-c": "VERDE · em dia", "st-a": "AMARELO · atenção", "st-nc": "VERMELHO · intervir" }[cls] || "SEM DADOS AINDA";
+      var linhas = [estadoVida ? estadoVida.txt : "Óleo: informe a última troca na aba Lubrificação",
+        insp ? "Última inspeção: " + String(insp.data_hora).slice(0, 10) + " · " + (NOME_PARECER[insp.parecer] || "")
+          : "Nenhuma inspeção registrada neste aparelho"];
+      var el = document.getElementById("semaforo");
+      if (el) {
+        el.className = "semaforo" + (cls ? " " + cls : "");
+        el.innerHTML = '<b>' + esc(titulo) + '</b><ul>' + linhas.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join("") + '</ul>';
+      }
+      var cab = document.querySelector("#app header");
+      if (cab) cab.className = cls || "";
+    }
+    window.addEventListener("inspecao-salva", atualizarSemaforo);
+
+    // Passo a passo da troca de óleo; ao terminar, o registro já fica como Troca.
+    function abrirPassos() {
+      window.PassoTroca.abrir(codigo, e, function (r) {
+        document.querySelector("input[name=tipo][value=Troca]").checked = true;
+        ajustarTipo();
+        if (r.galao) { galaoReg = r.galao; desenharGalaoReg(); }
+        document.getElementById("registro").scrollIntoView({ behavior: "smooth", block: "start" });
+        if (!resp.value.trim()) resp.focus({ preventScroll: true });
+      });
+    }
+
+    // Conferência do galão no registro de Complemento ou Troca (poka-yoke).
+    var galaoReg = null;
+    function desenharGalaoReg() {
+      var el = document.getElementById("galao-reg");
+      if (!el) return;
+      if (tipoAtual() === "Inspeção" || !e.tag_oleo || !window.Galao) { el.innerHTML = ""; return; }
+      var g = galaoReg;
+      el.innerHTML = (g && g.certo ? '<div class="parecer st-c"><b>Galão conferido: óleo certo (' + esc(g.codigo) + ').</b></div>'
+          : g && g.manual ? '<div class="parecer st-a"><b>Galão conferido pela cor e pelo tag.</b></div>'
+          : g ? '<div class="parecer st-nc"><b>Galão errado (' + esc(g.codigo) + '): não use. Pegue o galão ' +
+            esc(e.cor_oleo ? e.cor_oleo.nome.toUpperCase() : "") + ' ' + esc(e.tag_oleo) + ' e confira de novo.</b></div>'
+          : '<p class="dica" style="margin:0">Antes de abastecer, leia o QR Code do galão.</p>') +
+        '<button type="button" class="sap" id="b-galao-reg">' + (g ? "Ler outro galão" : "Conferir o galão (QR)") + '</button>';
+      document.getElementById("b-galao-reg").onclick = function () { window.Galao.conferir(codigo, e); };
+    }
+    window.addEventListener("galao-conferido", function (ev) {
+      if (ev.detail.equipamento !== codigo) return;
+      galaoReg = ev.detail.resultado; desenharGalaoReg();
+    });
+    var bGalao = document.getElementById("b-galao"), bPassos = document.getElementById("b-passos");
+    if (bGalao) bGalao.onclick = function () { window.Galao.conferir(codigo, e); };
+    if (bPassos) bPassos.onclick = abrirPassos;
+
     // Vida útil do óleo: verde até 80 % do limite, amarelo nos últimos 20 %, vermelho depois do limite.
     var vida = { horas: null, limite: null };
     var horasEl = document.getElementById("horas-oleo");
@@ -602,6 +715,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       document.getElementById("vida-80").textContent = "80 % = " + milhar(lim * 0.8) + " h";
       document.getElementById("vida-100").textContent = "limite " + milhar(lim) + " h";
       if (h == null) {
+        estadoVida = null; atualizarSemaforo();
         fill.style.width = "0";
         st.innerHTML = '<div class="parecer st-nv" style="background:#e3e8ed;border-color:#5b6b7a">' +
           (vida.modo === "estimado" ? 'Informe abaixo a data da última troca de óleo (só na primeira vez). Depois a ficha calcula sozinha.'
@@ -631,7 +745,13 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       fill.style.width = Math.min(100, pct) + "%";
       st.innerHTML = '<div class="parecer ' + classe + '"><b>' + esc(titulo) + '</b>' +
         '<b class="fazer">O que fazer:</b>' + esc(fazer) +
+        (classe !== "st-c" && e.passo_troca && window.PassoTroca ? '<button type="button" class="sap" id="vida-passos">Passo a passo da troca</button>' : '') +
         (classe !== "st-c" ? '<button type="button" class="sap" id="sap-nota-oleo">Abrir nota de manutenção</button>' : '') + '</div>';
+      var bp = document.getElementById("vida-passos");
+      if (bp) bp.onclick = abrirPassos;
+      estadoVida = { s: classe, txt: h > lim ? "Óleo: troca vencida" : proxTroca ? "Óleo: próxima troca em " + proxTroca
+        : "Óleo: " + pct + " % da vida útil" };
+      atualizarSemaforo();
       var bn = document.getElementById("sap-nota-oleo");
       if (bn) bn.onclick = function () {
         window.DocSap("Nota de manutenção", "PM", [
@@ -758,11 +878,13 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       var tipo = tipoAtual();
       campoQtd.style.display = tipo === "Inspeção" ? "none" : "block";
       qtd.value = tipo === "Inspeção" ? "0" : (tipo === "Troca" ? fmt(e.volume_ml) : "");
+      desenharGalaoReg();
     }
     document.querySelectorAll("input[name=tipo]").forEach(function (r) {
       r.addEventListener("change", ajustarTipo);
     });
     ajustarTipo();
+    atualizarSemaforo();
 
     temp.addEventListener("input", function () {
       var v = numero(temp.value);
@@ -784,6 +906,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 
       if (!responsavel) return avisar("erro", "Informe o responsável.");
       if (!conf.checked) return avisar("erro", "Confirme o bloqueio (LOTO) e a limpeza do bocal.");
+      if (tipo !== "Inspeção" && galaoReg && !galaoReg.certo && !galaoReg.manual)
+        return avisar("erro", "O último galão lido é o errado (" + galaoReg.codigo + "). Pegue o galão certo e confira de novo antes de salvar.");
       if (quantidade == null || quantidade < 0 || quantidade > 1000)
         return avisar("erro", "Informe a quantidade aplicada, em mL.");
       if (temp.value.trim() && (temperatura == null || temperatura < -20 || temperatura > 200))
@@ -794,7 +918,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         temperatura_c: temperatura, responsavel: responsavel, observacao: obs.value.trim(),
         horas_oleo: horasEl ? vida.horas : null, limite_oleo_h: horasEl ? vida.limite : null,
         duracao_s: Date.now() - inicioFicha < 144e5 ? Math.round((Date.now() - inicioFicha) / 1000) : null,
-        foto: fotoReg });
+        foto: fotoReg,
+        galao: tipo !== "Inspeção" && galaoReg ? { certo: !!galaoReg.certo, manual: !!galaoReg.manual, codigo: galaoReg.codigo } : null });
       try {
         gravarRegistros(lista);
         localStorage.setItem("responsavel", responsavel);
@@ -811,6 +936,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida();
       }
       temp.value = ""; obs.value = ""; conf.checked = false; campoFoto();
+      galaoReg = null; desenharGalaoReg();
       avisoTemp.style.display = "none";
       avisar("ok", "Registro salvo neste aparelho." +
         (lista[lista.length - 1].duracao_s != null ? " Tempo da intervenção: " + duracao(lista[lista.length - 1].duracao_s) + "." : ""));
@@ -818,7 +944,30 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     });
   }
 
+  // Página do galão (/g/OLE-01): é o que abre quando o QR do galão é lido pela câmera comum do celular.
+  function telaGalao(cod, equipamentos) {
+    window.Galao.carregar().then(function (oleos) {
+      var o = oleos[cod];
+      if (!o) return telaNaoEncontrado();
+      document.title = "Galão " + cod;
+      var usam = Object.keys(equipamentos).filter(function (c) { return equipamentos[c].tag_oleo === cod; });
+      app.innerHTML = cabecalho("Galão " + cod, o.nome) + '<main><section class="cartao">' +
+        '<div class="rotulo">Óleo deste galão</div><div class="grande">' + esc(o.base) + '</div>' +
+        '<div>' + esc(o.nome) + ' · ' + esc(o.viscosidade) + '</div>' +
+        (o.cor ? '<div class="cor-galao" style="margin-top:8px"><i style="background:' + esc(o.cor.hex) + '"></i>Cor do galão: <b>' +
+          esc(o.cor.nome.toUpperCase()) + '</b></div>' : '') + '</section>' +
+        '<section class="cartao ' + (usam.length ? 'ok' : 'alerta') + '"><div class="rotulo">Equipamentos que usam este óleo</div>' +
+        (usam.length ? usam.map(function (c) { return '<a href="/e/' + esc(c) + '">' + esc(c) + '</a> – ' + esc(equipamentos[c].nome); }).join("<br>")
+          : 'Nenhum equipamento cadastrado usa este óleo.') + '</section>' +
+        '<section class="cartao alerta">Para conferir na hora da lubrificação, leia este QR Code pelo botão ' +
+        '<b>Conferir o galão</b> dentro da ficha do equipamento.</section>' +
+        '<p class="rodape"><a href="/">Todas as fichas</a></p></main>';
+    });
+  }
+
   function iniciar(equipamentos) {
+    var g = location.pathname.match(/^\/g\/(OLE-\d{2})\/?$/i);
+    if (g && window.Galao) return telaGalao(g[1].toUpperCase(), equipamentos);
     var m = location.pathname.match(/^\/e\/([A-Za-z0-9-]{1,20})\/?$/);
     if (!m) return telaInicial(equipamentos);
     var codigo = m[1].toUpperCase();
@@ -841,7 +990,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function conferirOffline(tentativa) {
     if (!("caches" in window)) return;
     var busca = { ignoreVary: true, ignoreSearch: true };
-    Promise.all(["/", "/equipamentos.json", "/inspecao.js"].map(function (a) { return caches.match(a, busca); }))
+    Promise.all(["/", "/equipamentos.json", "/inspecao.js", "/galao.js", "/troca.js", "/oleos.json"].map(function (a) { return caches.match(a, busca); }))
       .then(function (r) {
         var ok = r.every(Boolean);
         estado.innerHTML = (ok ? '<b class="pronto">✓ Ficha salva neste aparelho: abre pelo QR Code mesmo sem internet.</b>'

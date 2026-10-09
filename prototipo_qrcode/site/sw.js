@@ -1,11 +1,12 @@
 // Service worker: guarda a ficha no aparelho para funcionar sem internet.
 // Com rede, busca a versão mais nova; sem rede (ou rede lenta), usa a cópia salva.
-const CACHE = "ficha-lubrificacao-v20";
+const CACHE = "ficha-lubrificacao-v22";
 // Sem estes a ficha não abre: a instalação só termina se todos forem salvos.
-const ESSENCIAIS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/inspecao.js"];
+const ESSENCIAIS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/inspecao.js",
+  "/galao.js", "/troca.js", "/oleos.json"];
 // O modelo 3D é grande: é salvo em seguida, sem impedir a ficha de funcionar sem internet.
 const EXTRAS = ["/redutor3d.js", "/vendor/three.module.min.js", "/vendor/OrbitControls.js",
-  "/fundo.jpg", "/apple-touch-icon.png", "/icone-192.png"];
+  "/fundo.jpg", "/apple-touch-icon.png", "/icone-192.png", "/vendor/jsQR.js"];
 const ESPERA_MS = 3000;
 // O Safari (iPhone) pode não achar a cópia por causa do cabeçalho Vary; ignorar é seguro aqui.
 const BUSCA = { ignoreVary: true, ignoreSearch: true };
@@ -53,8 +54,8 @@ self.addEventListener("fetch", (ev) => {
   const url = new URL(pedido.url);
   if (pedido.method !== "GET" || url.origin !== location.origin) return;
 
-  // /e/RED-001 (endereço do QR Code) e a página inicial usam a mesma página guardada em "/"
-  const ehFicha = pedido.mode === "navigate" && (url.pathname === "/" || url.pathname.startsWith("/e/"));
+  // /e/RED-001 (QR do equipamento), /g/OLE-01 (QR do galão) e a página inicial usam a mesma página guardada em "/"
+  const ehFicha = pedido.mode === "navigate" && (url.pathname === "/" || url.pathname.startsWith("/e/") || url.pathname.startsWith("/g/"));
   const chave = ehFicha ? "/" : pedido;
 
   ev.respondWith(

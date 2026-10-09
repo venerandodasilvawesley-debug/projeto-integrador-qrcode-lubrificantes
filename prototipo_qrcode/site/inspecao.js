@@ -628,6 +628,7 @@
       }
       rascunho = null; guardarRascunho();
       renderChecklist(); renderHistorico();
+      window.dispatchEvent(new Event("inspecao-salva"));
       avisar(par.s === "C" ? "ok" : "alerta", "Inspeção salva neste aparelho. Parecer: " + par.t + "." + oleo);
     }
 
