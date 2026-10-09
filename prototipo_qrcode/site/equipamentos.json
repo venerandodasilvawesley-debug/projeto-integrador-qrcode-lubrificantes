@@ -638,8 +638,8 @@
   "BOMBA-001": {
     "tipo": "monitoramento",
     "nome": "Bomba centrífuga – bancada didática",
-    "modelo": "Bancada com sensores de vibração (mancal), pressão (recalque) e temperatura (carcaça)",
-    "local": "Laboratório – simulação didática",
+    "modelo": "Referência: ANDRITZ ACP (bomba centrífuga horizontal de processo). Bancada com sensores de vibração (mancal), pressão e temperatura (carcaça)",
+    "local": "Fábrica de celulose (exemplo): ETA, torres de resfriamento, linha de fibras ou utilidades",
     "posicao": "bancada",
     "aviso_valores": "Limites de exemplo para a bancada didática. Ajustar com os valores medidos com a bancada funcionando normalmente.",
     "sensores": {
@@ -653,7 +653,11 @@
         "min": 0,
         "max": 10,
         "passo": 0.1,
-        "ref": "Faixas da ISO 10816-1, classe I (máquinas pequenas): até 1,8 mm/s aceitável; 1,8 a 4,5 mm/s atenção; acima de 4,5 mm/s inaceitável."
+        "ref": "Faixas da ISO 10816-1, classe I (máquinas pequenas): até 1,8 mm/s aceitável; 1,8 a 4,5 mm/s atenção; acima de 4,5 mm/s inaceitável.",
+        "grafico": [
+          0,
+          8
+        ]
       },
       "pressao": {
         "rotulo": "Pressão de recalque",
@@ -665,7 +669,11 @@
         "min": 0,
         "max": 3,
         "passo": 0.05,
-        "ref": "Alerta pela queda em relação à pressão normal de trabalho: 15 % atenção, 30 % crítico."
+        "ref": "Alerta pela queda em relação à pressão normal de trabalho: 15 % atenção, 30 % crítico.",
+        "grafico": [
+          0,
+          2
+        ]
       },
       "temperatura": {
         "rotulo": "Temperatura da carcaça",
@@ -677,11 +685,19 @@
         "min": 10,
         "max": 90,
         "passo": 1,
-        "ref": "Líquido mais quente vaporiza com mais facilidade e aumenta o risco de cavitação."
+        "ref": "Líquido mais quente vaporiza com mais facilidade e aumenta o risco de cavitação.",
+        "grafico": [
+          20,
+          70
+        ]
       }
     },
     "alerta": {
-      "ntfy_topico": "ficha-senai-tl-bomba-001-d74f12ff"
+      "ntfy_topico": "ficha-senai-tl-bomba-001-d74f12ff",
+      "mqtt": {
+        "url": "wss://broker.hivemq.com:8884/mqtt",
+        "topico": "senai-tl/pi/BOMBA-001/leituras-d74f12ff"
+      }
     },
     "epis": "Óculos de proteção e protetor auricular",
     "seguranca": [

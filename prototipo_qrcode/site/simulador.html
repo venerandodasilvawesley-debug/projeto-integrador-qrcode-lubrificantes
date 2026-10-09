@@ -47,6 +47,11 @@ button:focus-visible,input:focus-visible{outline:3px solid #e0a100}
 .erro{color:#c22525;font-weight:700}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef1f4;border-radius:6px;padding:1px 6px;word-break:break-all}
 a{color:#123a5c}
+.graf{margin-top:12px}.graf-topo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.95rem}
+.graf-topo output{font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
+.graf canvas{display:block;width:100%;height:110px;margin-top:4px;border-radius:8px;border:1px solid #dde3e9}
+.graf-eixo{display:flex;justify-content:space-between;font-size:.75rem;color:#5b6b7a;margin-top:4px}
+.ao-vivo{grid-column:1/-1}
 </style>
 </head>
 <body>
@@ -81,6 +86,11 @@ a{color:#123a5c}
       <p style="font-size:.9rem">Celular do mecânico: aplicativo <b>ntfy</b>, tópico <code id="topico"></code>.
         Ficha: <a id="ficha" href="/e/BOMBA-001">/e/BOMBA-001</a></p>
     </div>
+  </section>
+  <section class="cartao ao-vivo">
+    <h2>Gráfico ao vivo</h2>
+    <p id="g-estado" style="margin:0;font-size:.9rem">Conectando…</p>
+    <div id="graf"></div>
   </section>
 </main>
 <script src="/monitor.js"></script>
@@ -159,6 +169,20 @@ a{color:#123a5c}
     });
     document.getElementById("enviar").onclick = function () { enviar("manual"); };
     atualizar();
+
+    // envia as leituras a cada segundo (MQTT), com uma pequena oscilação, como um sensor real;
+    // o gráfico abaixo mostra o que chega de volta, igual ao celular do mecânico
+    var cn = window.Monitor.conectar(e);
+    var gr = window.Monitor.grafico(document.getElementById("graf"), e, function () { return cn.dados; });
+    var gEst = document.getElementById("g-estado");
+    cn.ouvir(function () {
+      gr.desenhar();
+      gEst.textContent = cn.estado === "conectado" ? "Enviando as leituras a cada segundo (MQTT)." : "Conexão MQTT: " + cn.estado + ".";
+    });
+    function osc(x, pct) { return x * (1 + (Math.random() * 2 - 1) * pct); }
+    setInterval(function () {
+      cn.publicar({ v: Math.max(0, +osc(L.v, 0.06).toFixed(2)), p: Math.max(0, +osc(L.p, 0.015).toFixed(3)), t: +(L.t + (Math.random() - 0.5) * 0.6).toFixed(1) });
+    }, 1000);
   }).catch(function () {
     document.querySelector("main").innerHTML = '<div class="cartao erro">Não foi possível carregar os dados do equipamento.</div>';
   });

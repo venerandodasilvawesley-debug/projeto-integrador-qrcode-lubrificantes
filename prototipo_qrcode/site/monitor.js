@@ -84,6 +84,103 @@
     });
   }
 
+  // ---------------- leituras ao vivo (MQTT) ----------------
+  // Os sensores (ESP32 na bancada, ou o simulador) publicam { v, p, t, ts } a cada segundo num tópico MQTT;
+  // a ficha assina o tópico e desenha o gráfico. MQTT é o protocolo padrão de sensores na indústria (IoT).
+  var mqttLib = null;
+  function carregarMqtt() {
+    if (window.mqtt) return Promise.resolve(window.mqtt);
+    return mqttLib || (mqttLib = new Promise(function (ok, erro) {
+      var sc = document.createElement("script");
+      sc.src = "/vendor/mqtt.min.js";
+      sc.onload = function () { ok(window.mqtt); };
+      sc.onerror = function () { mqttLib = null; erro(new Error("mqtt")); };
+      document.head.appendChild(sc);
+    }));
+  }
+  var JANELA_MS = 60000;
+  var canal = null; // uma conexão por página, reaproveitada quando a ficha é redesenhada
+  function conectar(e) {
+    if (canal) return canal;
+    var ouvintes = [], cfg = e.alerta.mqtt;
+    canal = { dados: [], estado: "conectando", ouvir: function (f) { ouvintes.push(f); }, publicar: function () {} };
+    function avisar() { ouvintes.forEach(function (f) { f(canal); }); }
+    carregarMqtt().then(function (mqtt) {
+      var cli = mqtt.connect(cfg.url, { clientId: "ficha-" + Math.random().toString(16).slice(2, 10), reconnectPeriod: 3000, connectTimeout: 8000 });
+      canal.publicar = function (L) { if (cli.connected) cli.publish(cfg.topico, JSON.stringify(L)); };
+      cli.on("connect", function () { canal.estado = "conectado"; cli.subscribe(cfg.topico); avisar(); });
+      cli.on("offline", function () { canal.estado = "sem internet"; avisar(); });
+      cli.on("reconnect", function () { canal.estado = "conectando"; avisar(); });
+      cli.on("message", function (t, msg) {
+        try {
+          var L = JSON.parse(msg.toString());
+          if (typeof L.v !== "number" || typeof L.p !== "number" || typeof L.t !== "number") return;
+          L.ts = Date.now();
+          canal.dados.push(L);
+          while (canal.dados.length && canal.dados[0].ts < Date.now() - JANELA_MS) canal.dados.shift();
+          avisar();
+        } catch (err) {}
+      });
+    }, function () { canal.estado = "leitor indisponível"; avisar(); });
+    return canal;
+  }
+
+  // Gráfico em tempo real: um por sensor, últimos 60 s, com as faixas normal / atenção / crítico ao fundo.
+  var CAMPOS = [["v", "vibracao", 1], ["p", "pressao", 2], ["t", "temperatura", 0]];
+  function faixas(e, k) {
+    var s = e.sensores;
+    if (k === "p") return { baixo: true, a: s.pressao.normal * (1 - s.pressao.queda_atencao / 100), c: s.pressao.normal * (1 - s.pressao.queda_critico / 100) };
+    var x = k === "v" ? s.vibracao : s.temperatura;
+    return { baixo: false, a: x.atencao, c: x.critico };
+  }
+  function grafico(caixa, e, dadosDe) {
+    caixa.innerHTML = CAMPOS.map(function (c) {
+      var x = e.sensores[c[1]];
+      return '<div class="graf"><div class="graf-topo"><b>' + esc(x.rotulo) + '</b><span><output id="g-' + c[0] + '">–</output> ' + esc(x.unidade) +
+        ' <span class="chip" id="gc-' + c[0] + '"></span></span></div><canvas id="gv-' + c[0] + '" height="110" aria-label="Gráfico de ' + esc(x.rotulo) + ' nos últimos 60 segundos"></canvas></div>';
+    }).join("") + '<div class="graf-eixo"><span>−60 s</span><span>−30 s</span><span>agora</span></div>';
+    var CORES = { ok: "#d9f2e1", a: "#fff1c2", c: "#fbd5d5", linha: "#14202b", grade: "#c3ccd5", txt: "#3d4c5a" };
+    function desenhar() {
+      if (!caixa.isConnected) return;
+      var dados = dadosDe(), agora = Date.now(), ult = dados[dados.length - 1];
+      var av = ult ? avaliar(e, ult) : null;
+      CAMPOS.forEach(function (c) {
+        var k = c[0], x = e.sensores[c[1]], cv = document.getElementById("gv-" + k);
+        var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = 110;
+        if (!w) return;
+        if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+        var g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+        var y0 = x.grafico[0], y1 = x.grafico[1], f = faixas(e, k);
+        function Y(v) { return h - 4 - (Math.max(y0, Math.min(y1, v)) - y0) / (y1 - y0) * (h - 8); }
+        function X(ts) { return (ts - (agora - JANELA_MS)) / JANELA_MS * w; }
+        // faixas de fundo (gestão visual)
+        var zonas = f.baixo ? [[y0, f.c, CORES.c], [f.c, f.a, CORES.a], [f.a, y1, CORES.ok]] : [[y0, f.a, CORES.ok], [f.a, f.c, CORES.a], [f.c, y1, CORES.c]];
+        zonas.forEach(function (z) { g.fillStyle = z[2]; g.fillRect(0, Y(z[1]), w, Y(z[0]) - Y(z[1])); });
+        g.strokeStyle = CORES.grade; g.lineWidth = 1; g.setLineDash([4, 4]);
+        [f.a, f.c].forEach(function (v) { g.beginPath(); g.moveTo(0, Y(v)); g.lineTo(w, Y(v)); g.stroke(); });
+        g.setLineDash([]);
+        g.fillStyle = CORES.txt; g.font = "11px system-ui,sans-serif";
+        g.fillText("atenção " + fmt(f.a, c[2]), 4, Y(f.a) - 3); g.fillText("crítico " + fmt(f.c, c[2]), 4, Y(f.c) + (f.baixo ? 12 : -3));
+        // linha das leituras
+        var pts = dados.filter(function (d) { return d.ts >= agora - JANELA_MS; });
+        if (pts.length) {
+          g.strokeStyle = CORES.linha; g.lineWidth = 2; g.lineJoin = "round"; g.beginPath();
+          pts.forEach(function (d, i) { if (i) g.lineTo(X(d.ts), Y(d[k])); else g.moveTo(X(d.ts), Y(d[k])); });
+          g.stroke();
+          var u = pts[pts.length - 1], n = av ? av.sensores[k] : 0;
+          g.fillStyle = ["#1c8a45", "#e0a100", "#c22525"][n]; g.beginPath(); g.arc(X(u.ts), Y(u[k]), 5, 0, 7); g.fill();
+        }
+        document.getElementById("g-" + k).textContent = ult ? fmt(ult[k], c[2]) : "–";
+        var ch = document.getElementById("gc-" + k);
+        ch.className = "chip" + (av ? " " + NIVEL[av.sensores[k]].cls : "");
+        ch.textContent = av ? ["normal", "atenção", "crítico"][av.sensores[k]] : "";
+      });
+    }
+    var vivo = true;
+    (function tic() { if (!vivo || !caixa.isConnected) return; desenhar(); setTimeout(tic, 1000); })();
+    return { desenhar: desenhar, parar: function () { vivo = false; } };
+  }
+
   // ---------------- ficha da bomba (/e/BOMBA-001) ----------------
   function tela(app, codigo, e, cabecalho) {
     var CH_ATIVO = "alerta_ativo_" + codigo, CH_HIST = "atendimentos_" + codigo;
@@ -167,12 +264,29 @@
         '</li><li>Nenhum alerta pendente neste aparelho.</li></ul></section>';
     }
 
-    app.innerHTML = cabecalho(codigo, e.nome) + '<main><div id="m-msg"></div>' + corpo + blocoInscricao() +
+    var aoVivo = e.alerta.mqtt ? '<section class="cartao"><div class="rotulo">Sensores ao vivo</div>' +
+      '<p class="dica" id="g-estado" role="status" style="margin:4px 0 0"></p><div id="graf"></div></section>' : '';
+    app.innerHTML = cabecalho(codigo, e.nome) + '<main><div id="m-msg"></div>' + corpo + aoVivo + blocoInscricao() +
       '<details class="cartao-det"><summary>Sensores e limites</summary>' + tabelaLimites() + '</details>' +
       '<details class="cartao-det"><summary>Atendimentos (últimos 10)</summary>' + historico() + '</details>' +
       '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
       '<a href="/simulador.html">Simulador da bancada</a> · <a href="/">Todas as fichas</a></p></main>';
     if (ativo) document.querySelector("#app header").className = NIVEL[avaliar(e, { v: ativo.v, p: ativo.p, t: ativo.tc }).nivel].cls;
+
+    if (e.alerta.mqtt) {
+      var cn = conectar(e), gr = grafico(document.getElementById("graf"), e, function () { return cn.dados; });
+      var estadoEl = document.getElementById("g-estado");
+      var mostrarEstado = function () {
+        if (!estadoEl.isConnected) return;
+        var u = cn.dados[cn.dados.length - 1], idade = u ? (Date.now() - u.ts) / 1000 : null;
+        estadoEl.innerHTML = cn.estado !== "conectado" ? esc(cn.estado === "conectando" ? "Conectando aos sensores…" : "Sem conexão: " + cn.estado + ".")
+          : idade != null && idade < 5 ? '<b class="st-c-txt">● Ao vivo</b> · leitura a cada segundo'
+          : u ? "Sem leitura há " + esc(tempo(idade)) + ". Confira se a bancada (ou o simulador) está ligada."
+          : "Conectado. Aguardando os sensores: ligue a bancada ou abra o simulador.";
+      };
+      cn.ouvir(function () { gr.desenhar(); mostrarEstado(); });
+      (function tic() { if (!estadoEl.isConnected) return; mostrarEstado(); setTimeout(tic, 1000); })();
+    }
 
     var cop = document.getElementById("copiar-topico");
     cop.onclick = function () {
@@ -212,5 +326,6 @@
     }
   }
 
-  window.Monitor = { avaliar: avaliar, publicar: publicar, tela: tela, NIVEL: NIVEL, linhaLeituras: linhaLeituras };
+  window.Monitor = { avaliar: avaliar, publicar: publicar, tela: tela, NIVEL: NIVEL, linhaLeituras: linhaLeituras,
+    conectar: conectar, grafico: grafico };
 })();
