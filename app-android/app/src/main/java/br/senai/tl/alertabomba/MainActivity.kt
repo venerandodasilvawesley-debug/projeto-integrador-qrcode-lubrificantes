@@ -49,7 +49,7 @@ class MainActivity : Activity() {
         val linha = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(6), 0, 0) }
         linha.addView(botao("Ler QR Code") { lerQr() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         linha.addView(botao("Testar alarme") { testarAlarme() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = dp(6) })
-        linha.addView(botao("Recarregar") { web.reload() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = dp(6) })
+        linha.addView(botao("Atualizar") { procurarAtualizacao(true) }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = dp(6) })
         topo.addView(linha)
         raiz.addView(topo)
 
@@ -73,10 +73,32 @@ class MainActivity : Activity() {
         web.loadUrl(urlDe(intent) ?: "$SITE/e/$CODIGO")
         pedirNotificacoes()
         MonitorService.iniciar(this)
+        procurarAtualizacao(intent.getBooleanExtra("atualizar", false))
+    }
+
+    // confere se há versão nova; se houver, baixa e abre o instalador
+    private var atualizando = false
+    private fun procurarAtualizacao(avisarSeNaoTiver: Boolean) {
+        if (atualizando) return
+        atualizando = true
+        kotlin.concurrent.thread {
+            val v = Atualizacao.verificar(this)
+            val arq = v?.let { Atualizacao.baixar(this, it) }
+            runOnUiThread {
+                atualizando = false
+                if (v != null && arq != null) {
+                    android.widget.Toast.makeText(this, "Nova versão ${v.nome}: toque em Atualizar", android.widget.Toast.LENGTH_LONG).show()
+                    Atualizacao.instalar(this, arq)
+                } else if (avisarSeNaoTiver) {
+                    android.widget.Toast.makeText(this, "O app já está na versão mais nova", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.getBooleanExtra("atualizar", false)) procurarAtualizacao(true)
         urlDe(intent)?.let { web.loadUrl(it) }
     }
 
@@ -128,7 +150,7 @@ class MainActivity : Activity() {
             status.setTextColor(Color.parseColor("#F2B705")); return
         }
         status.setTextColor(Color.WHITE)
-        status.text = "Monitorando $CODIGO · " + when {
+        status.text = "v" + Atualizacao.versaoInstalada(this) + " · Monitorando $CODIGO · " + when {
             L != null && idade < 5 -> "ao vivo (" + NOMES_NIVEL[avaliar(Config(), L).nivel].lowercase() + ")"
             L != null -> "sem leitura há $idade s"
             else -> MonitorService.estado

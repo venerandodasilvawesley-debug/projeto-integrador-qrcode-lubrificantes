@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- pasta onde a atualização baixada fica antes de instalar -->
+<paths>
+    <cache-path name="atualizacao" path="atualizacao/" />
+</paths>

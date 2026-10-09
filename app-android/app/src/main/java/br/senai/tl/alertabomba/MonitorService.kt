@@ -67,6 +67,8 @@ class MonitorService : Service() {
             mqtt = MqttWs(config.mqttServidor, config.mqttTopico, { e -> estado = e; if (e != "Conectado") atualizarFixa(e) else atualizarFixa("Conectado. Aguardando leituras da $CODIGO") }, { receber(it) })
                 .also { it.iniciar() }
             ouvirNtfy()
+            // a cada 6 h confere se há versão nova do app e avisa
+            thread { while (ligado) { Atualizacao.verificar(this)?.let { Atualizacao.avisar(this, it) }; Thread.sleep(6 * 3600 * 1000L) } }
         }
     }
 
