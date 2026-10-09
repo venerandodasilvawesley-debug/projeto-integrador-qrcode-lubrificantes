@@ -4,3 +4,7 @@ __pycache__/
 .~lock.*
 .vercel/
 .env*
+app-android/.gradle/
+app-android/build/
+app-android/app/build/
+app-android/local.properties

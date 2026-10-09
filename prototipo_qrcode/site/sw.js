@@ -1,6 +1,6 @@
 // Service worker: guarda a ficha no aparelho para funcionar sem internet.
 // Com rede, busca a versão mais nova; sem rede (ou rede lenta), usa a cópia salva.
-const CACHE = "ficha-lubrificacao-v27";
+const CACHE = "ficha-lubrificacao-v28";
 // Sem estes a ficha não abre: a instalação só termina se todos forem salvos.
 const ESSENCIAIS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/inspecao.js",
   "/galao.js", "/troca.js", "/oleos.json", "/pop.js", "/pop-MEC-RED-001.json", "/monitor.js"];

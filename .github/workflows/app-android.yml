@@ -1,0 +1,53 @@
+# Compila o app Android "Alerta Bomba" (pasta app-android) e publica o APK
+# no release "app-android" do GitHub, sempre com a versão mais nova.
+name: App Android
+
+on:
+  push:
+    branches: [main]
+    paths: ["app-android/**", ".github/workflows/app-android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Compilar o APK
+        working-directory: app-android
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Renomear
+        run: cp app-android/app/build/outputs/apk/debug/app-debug.apk AlertaBomba.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AlertaBomba-apk
+          path: AlertaBomba.apk
+          retention-days: 7
+
+      - name: Publicar no release app-android
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-android
+          name: "App Android – Alerta Bomba"
+          prerelease: true
+          make_latest: false
+          body: |
+            APK do aplicativo **Alerta Bomba** (BOMBA-001), versão de execução ${{ github.run_number }}.
+            Baixe o arquivo **AlertaBomba.apk** no celular Android e instale (permitir "instalar apps desconhecidos").
+            No primeiro uso, toque nos botões amarelos para liberar notificações, alarme em tela cheia e bateria.
+          files: AlertaBomba.apk

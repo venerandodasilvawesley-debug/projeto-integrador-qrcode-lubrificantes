@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Tema" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">#123A5C</item>
+        <item name="android:colorPrimaryDark">#123A5C</item>
+        <item name="android:colorAccent">#E0A100</item>
+        <item name="android:statusBarColor">#123A5C</item>
+    </style>
+    <style name="TemaAlarme" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">#B3141B</item>
+        <item name="android:statusBarColor">#B3141B</item>
+    </style>
+</resources>

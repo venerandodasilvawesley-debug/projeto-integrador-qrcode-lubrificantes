@@ -415,6 +415,11 @@
     var plantaoEl = document.getElementById("plantao");
     function desenharPlantao() {
       if (!plantaoEl) return;
+      if (/AlertaBombaApp/.test(navigator.userAgent)) {
+        plantaoEl.className = "cartao ok";
+        plantaoEl.innerHTML = '<b>Alarme pelo aplicativo Alerta Bomba.</b> Ele acompanha os sensores mesmo com o celular bloqueado e abre a falha em tela cheia.';
+        return;
+      }
       plantaoEl.className = "cartao" + (plantao.ligado ? " ok" : "");
       plantaoEl.innerHTML = plantao.ligado
         ? '<b>Modo plantão ligado.</b> A tela fica acesa e, se uma leitura passar do limite, o alarme toca sozinho em tela cheia.' +
