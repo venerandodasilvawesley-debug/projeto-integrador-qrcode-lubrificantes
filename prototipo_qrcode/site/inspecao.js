@@ -89,8 +89,17 @@
       return '<dt>' + esc(l[0]) + '</dt><dd>' + esc(l[1]) + '</dd>';
     }).join("");
 
+    var temPop = !!(cfg.pop && window.Pop);
+    var popDoc = null;
+    if (temPop) window.Pop.carregar(cfg.pop.arquivo).then(function (d) { popDoc = d; }).catch(function () {});
+
     painel.innerHTML =
-      '<div class="insp-grade">' +
+      (temPop ? '<nav class="sub-abas" role="tablist">' +
+        '<button type="button" role="tab" id="i-aba-insp" aria-selected="true">Modelo 3D e checklist</button>' +
+        '<button type="button" role="tab" id="i-aba-pop" aria-selected="false">POP do redutor<small>' + esc(cfg.pop.codigo || "") + '</small></button>' +
+        '</nav>' : '') +
+      '<div id="i-sec-pop" hidden></div>' +
+      '<div class="insp-grade" id="i-sec-insp">' +
         '<section class="cartao insp-3d">' +
           '<div class="rotulo">Modelo 3D – vista explodida e em corte</div>' +
           '<div class="visor" id="i-visor"><div class="visor-msg">Carregando o modelo 3D…</div></div>' +
@@ -118,6 +127,48 @@
           '<details class="cartao-det" id="i-hist"><summary>Histórico de inspeções</summary><div id="i-hist-corpo"></div></details>' +
         '</div>' +
       '</div>';
+
+    // ---------------- sub-abas: Modelo 3D e checklist | POP ----------------
+    var popMontado = false, pecasPendentes = null;
+    function mostrarSub(nome) {
+      if (!temPop) return;
+      var pop = nome === "pop";
+      document.getElementById("i-sec-pop").hidden = !pop;
+      document.getElementById("i-sec-insp").hidden = pop;
+      document.getElementById("i-aba-pop").setAttribute("aria-selected", String(pop));
+      document.getElementById("i-aba-insp").setAttribute("aria-selected", String(!pop));
+      try { localStorage.setItem("sub_aba_inspecao", nome); } catch (err) {}
+      if (pop && !popMontado) {
+        popMontado = true;
+        window.Pop.montar(document.getElementById("i-sec-pop"), codigo, e, { verPecas: verPecasNo3D });
+      }
+      if (!pop) carregarModelo();
+    }
+    // botão "Ver peças desta etapa no 3D" do POP
+    function verPecasNo3D(ids) {
+      mostrarSub("insp");
+      if (visor) aplicarPecas(ids); else pecasPendentes = ids;
+      document.getElementById("i-visor").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    function aplicarPecas(ids) {
+      if (visor.isolada) visor.isolar(null);
+      visor.destacar(ids);
+      elInfo.innerHTML = '<span class="rotulo">Etapa do POP:</span> peças em destaque – ' +
+        ids.map(function (id) { return esc(nomePeca(id)); }).join(", ") + ".";
+    }
+    if (temPop) {
+      document.getElementById("i-aba-insp").onclick = function () { mostrarSub("insp"); };
+      document.getElementById("i-aba-pop").onclick = function () { mostrarSub("pop"); };
+    }
+
+    // ação corretiva do POP (item 11) para o item do checklist com Atenção ou Não conforme
+    function htmlAcao(it, status) {
+      var num = cfg.pop && cfg.pop.acoes && cfg.pop.acoes[it.id];
+      var a = num && popDoc && window.Pop.acao(popDoc, num);
+      if (!a || (status !== "A" && status !== "NC")) return "";
+      return '<div class="acao-pop"><span class="rotulo">Ação conforme ' + esc(popDoc.codigo) + ', item ' + esc(a.num) + '</span>' +
+        '<b>' + esc(a.titulo) + '</b><ul>' + a.itens.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>';
+    }
 
     var elCheck = document.getElementById("i-checklist");
     var elMsg = document.getElementById("i-msg");
@@ -272,6 +323,7 @@
           visor.vistaInicial(true);
         };
         destacarPasso();
+        if (pecasPendentes) { aplicarPecas(pecasPendentes); pecasPendentes = null; }
       }).catch(function () {
         caixa.innerHTML = '<div class="visor-msg">Não foi possível exibir o modelo 3D neste aparelho ' +
           '(é preciso um navegador com WebGL). O checklist continua funcionando.</div>';
@@ -453,7 +505,7 @@
               (reg.opcoes.indexOf(o.t) >= 0 ? ' checked' : '') + '><span>' + esc(o.t) + '</span></label>';
           }).join("") + '</div>';
       }
-      html += '<div class="sugestao" id="i-sug"></div>' +
+      html += '<div class="sugestao" id="i-sug"></div><div id="i-acao"></div>' +
         '<div class="rotulo" style="margin-top:12px">Condição encontrada</div>' +
         '<div class="status">' + ["C", "A", "NC", "NV"].map(function (s) {
           return '<label><input type="radio" name="i-st" value="' + s + '"' + (reg.status === s ? ' checked' : '') +
@@ -486,6 +538,7 @@
           var r = elCheck.querySelector('input[name=i-st][value="' + s + '"]');
           if (r) r.checked = true;
         }
+        document.getElementById("i-acao").innerHTML = htmlAcao(it, reg.status);
         guardarRascunho();
       }
 
@@ -732,6 +785,14 @@
     renderChecklist();
     renderHistorico();
 
-    return { mostrar: carregarModelo };
+    // ao abrir a aba Inspeção, volta para a sub-aba usada por último
+    return {
+      mostrar: function () {
+        if (!temPop) return carregarModelo();
+        var ultima = "insp";
+        try { ultima = localStorage.getItem("sub_aba_inspecao") === "pop" ? "pop" : "insp"; } catch (err) {}
+        mostrarSub(ultima);
+      }
+    };
   }
 })();

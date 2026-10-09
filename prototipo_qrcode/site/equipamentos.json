@@ -616,7 +616,23 @@
             ]
           }
         }
-      ]
+      ],
+      "pop": {
+        "codigo": "POP-MEC-RED-001",
+        "arquivo": "/pop-MEC-RED-001.json",
+        "acoes": {
+          "temperatura": "11.1",
+          "vedacao": "11.2",
+          "condicao_oleo": "11.3",
+          "ruido": "11.4",
+          "vibracao": "11.4",
+          "rolamentos": "11.4",
+          "engrenagens": "11.4",
+          "folgas": "11.4",
+          "nivel_oleo": "11.5",
+          "carcaca": "11.4"
+        }
+      }
     }
   }
 }
