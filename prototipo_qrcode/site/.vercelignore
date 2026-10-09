@@ -1,0 +1,2 @@
+# arquivos que não vão para o site (este arquivo substitui o .gitignore no deploy da Vercel)
+.vercel
