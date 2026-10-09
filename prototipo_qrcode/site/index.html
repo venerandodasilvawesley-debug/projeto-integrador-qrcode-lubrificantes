@@ -272,6 +272,21 @@ body.sem-rolagem{overflow:hidden}
 .passo-caixa .nav button:disabled{opacity:.4}
 .passo-caixa .galao-manual{display:block;margin-top:10px;text-align:left}
 .causa{margin-top:12px}.causa b{display:block}
+/* alarme em tela cheia (estilo alerta da Defesa Civil) */
+.alarme{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.alarme-c{background:#b3141b;color:#fff;animation:alarme-pisca 1s steps(2) infinite}
+.alarme-a{background:#f2b705;color:#14202b}
+@keyframes alarme-pisca{50%{background:#5c0a0d}}
+@media (prefers-reduced-motion:reduce){.alarme-c{animation:none}}
+.alarme-caixa{max-width:520px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px}
+.alarme-selo{font-weight:900;letter-spacing:1px;font-size:1.05rem;border:3px solid currentColor;border-radius:10px;padding:8px}
+.alarme-tag{font-size:3.4rem;font-weight:900;line-height:1}
+.alarme-nome{font-weight:700;opacity:.9}
+.alarme-causa{font-size:1.45rem;font-weight:800;line-height:1.2}
+.alarme-leit,.alarme-ver,.alarme-hora{font-size:1rem}
+.alarme-hora{opacity:.85}
+.alarme button{font:inherit;font-size:1.3rem;font-weight:900;padding:18px;border-radius:14px;border:0;background:#fff;color:#14202b;margin-top:8px}
+.alarme-a button{background:#14202b;color:#fff}
 .graf{margin-top:12px}.graf-topo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.95rem}
 .graf-topo output{font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
 .graf canvas{display:block;width:100%;height:110px;margin-top:4px;border-radius:8px;border:1px solid #dde3e9}

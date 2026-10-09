@@ -1,11 +1,11 @@
 // Service worker: guarda a ficha no aparelho para funcionar sem internet.
 // Com rede, busca a versão mais nova; sem rede (ou rede lenta), usa a cópia salva.
-const CACHE = "ficha-lubrificacao-v26";
+const CACHE = "ficha-lubrificacao-v27";
 // Sem estes a ficha não abre: a instalação só termina se todos forem salvos.
 const ESSENCIAIS = ["/", "/equipamentos.json", "/manifest.webmanifest", "/icone.svg", "/inspecao.js",
   "/galao.js", "/troca.js", "/oleos.json", "/pop.js", "/pop-MEC-RED-001.json", "/monitor.js"];
 // O modelo 3D é grande: é salvo em seguida, sem impedir a ficha de funcionar sem internet.
-const EXTRAS = ["/redutor3d.js", "/vendor/three.module.min.js", "/vendor/OrbitControls.js",
+const EXTRAS = ["/redutor3d.js", "/bomba3d.js", "/vendor/three.module.min.js", "/vendor/OrbitControls.js",
   "/fundo.jpg", "/apple-touch-icon.png", "/icone-192.png", "/vendor/jsQR.js", "/vendor/mqtt.min.js"];
 const ESPERA_MS = 3000;
 // O Safari (iPhone) pode não achar a cópia por causa do cabeçalho Vary; ignorar é seguro aqui.

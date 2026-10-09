@@ -98,7 +98,7 @@ export const PECAS = [
 
 const PI = Math.PI;
 
-function materiais() {
+export function materiais() {
   const m = (o) => new THREE.MeshStandardMaterial(o);
   return {
     verde: m({ color: 0x4fae45, roughness: 0.55, metalness: 0.1 }),
@@ -113,7 +113,7 @@ function materiais() {
 }
 
 // Anel (ou disco, se rIn = 0) com eixo em Y, centrado na origem.
-function anel(rOut, rIn, largura, segmentos) {
+export function anel(rOut, rIn, largura, segmentos) {
   const h = largura / 2;
   const pts = rIn > 0
     ? [[rIn, -h], [rOut, -h], [rOut, h], [rIn, h], [rIn, -h]]
@@ -122,13 +122,13 @@ function anel(rOut, rIn, largura, segmentos) {
 }
 
 // Gira uma geometria com eixo em Y para o eixo pedido.
-function noEixo(geo, eixo) {
+export function noEixo(geo, eixo) {
   if (eixo === "x") geo.rotateZ(-PI / 2);
   if (eixo === "z") geo.rotateX(PI / 2);
   return geo;
 }
 
-function malha(geo, mat, x, y, z) {
+export function malha(geo, mat, x, y, z) {
   const o = new THREE.Mesh(geo, mat);
   o.position.set(x || 0, y || 0, z || 0);
   return o;
@@ -246,7 +246,7 @@ function chaveta(M, comprimento, eixo) {
   return malha(geo, M.parafuso);
 }
 
-function rolamento(M, rOut, rIn, largura, eixo) {
+export function rolamento(M, rOut, rIn, largura, eixo) {
   const g = new THREE.Group();
   const e = (rOut - rIn) * 0.26;
   g.add(malha(noEixo(anel(rOut, rOut - e, largura, 48), eixo), M.aco));
@@ -400,10 +400,12 @@ const suave = (t) => t * t * (3 - 2 * t);
 /**
  * Cria o visualizador dentro de `caixa`.
  * opcoes.aoSelecionar(idPeca|null) é chamada quando o operador toca numa peça.
+ * `modelo` (opcional) troca o redutor por outro equipamento: { pecas, montar(M), materiais(), casca }.
  */
-export function criarVisualizador(caixa, opcoes) {
+export function criarVisualizador(caixa, opcoes, modelo) {
   opcoes = opcoes || {};
-  const M = materiais();
+  const PECAS_M = modelo ? modelo.pecas : PECAS;
+  const M = modelo && modelo.materiais ? Object.assign(materiais(), modelo.materiais()) : materiais();
   const cena = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 1, 5000);
   const render = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -417,7 +419,7 @@ export function criarVisualizador(caixa, opcoes) {
 
   const conjunto = new THREE.Group();
   cena.add(conjunto);
-  const objetos = montar(M);
+  const objetos = modelo ? modelo.montar(M) : montar(M);
   objetos.forEach((o) => conjunto.add(o));
 
   // cada malha recebe material próprio para poder ser destacada individualmente
@@ -427,6 +429,7 @@ export function criarVisualizador(caixa, opcoes) {
       m.material = m.material.clone();
       m.userData.peca = o.userData.peca;
       m.userData.raiz = o;
+      m.userData.opacidade = m.material.opacity; // peças de vidro (visor) já vêm transparentes
       malhas.push(m);
     }
   }));
@@ -438,7 +441,7 @@ export function criarVisualizador(caixa, opcoes) {
   const linhas = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   linhas.setAttribute("class", "chamadas");
   camadaBaloes.appendChild(linhas);
-  const baloes = PECAS.map((p, i) => {
+  const baloes = PECAS_M.map((p, i) => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "balao";
@@ -454,11 +457,11 @@ export function criarVisualizador(caixa, opcoes) {
 
   let explosao = 0, alvoExplosao = 1, destaque = [], selecionada = null, mostrarBaloes = true;
   let corte = false, isolada = null;
-  const internas = PECAS.filter((p) => p.interna).map((p) => p.id);
+  const internas = PECAS_M.filter((p) => p.interna).map((p) => p.id);
 
   // Vista em corte: tira o quarto da carcaça e das tampas voltado para a câmera (x > 0 e z > 0),
   // deixando à mostra a coroa, a rosca sem fim, os rolamentos e os eixos.
-  const CASCA = ["carcaca", "tampas-saida", "tampas-entrada", "juntas", "retentores", "parafusos", "bujoes"];
+  const CASCA = modelo ? modelo.casca : ["carcaca", "tampas-saida", "tampas-entrada", "juntas", "retentores", "parafusos", "bujoes"];
   const planosCorte = [new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)];
   const cortado = (m, p) => corte && CASCA.indexOf(m.userData.peca) >= 0 && p.x > 0 && p.z > 0;
   function aplicarCorte(sim) {
@@ -546,9 +549,10 @@ export function criarVisualizador(caixa, opcoes) {
       const ativo = foco.indexOf(m.userData.peca) >= 0;
       const apagado = foco.length > 0 && !ativo;
       m.material.emissive.setRGB(ativo ? brilho : 0, ativo ? brilho * 0.62 : 0, 0);
-      m.material.transparent = apagado;
-      m.material.opacity = apagado ? 0.16 : 1;
-      m.material.depthWrite = !apagado;
+      const op = m.userData.opacidade;
+      m.material.transparent = apagado || op < 1;
+      m.material.opacity = apagado ? Math.min(0.16, op) : op;
+      m.material.depthWrite = !apagado && op >= 1;
     });
   }
 
@@ -646,7 +650,7 @@ export function criarVisualizador(caixa, opcoes) {
   requestAnimationFrame(quadro);
 
   return {
-    pecas: PECAS,
+    pecas: PECAS_M,
     // 0 = montado, 1 = explodido
     explodir(t, animar) {
       alvoExplosao = Math.max(0, Math.min(1, t));

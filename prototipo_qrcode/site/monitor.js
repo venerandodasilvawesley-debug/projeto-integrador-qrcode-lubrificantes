@@ -38,18 +38,18 @@
     var causas = [];
     if (nv && np) causas.push({ titulo: "Cavitação provável: a pressão caiu e a vibração subiu ao mesmo tempo.", verificar: [
       "Filtro ou crivo da sucção entupido", "Válvula da sucção parcialmente fechada",
-      "Nível baixo no reservatório", "Entrada de ar na sucção (juntas e flanges)"] });
+      "Nível baixo no reservatório", "Entrada de ar na sucção (juntas e flanges)"], pecas: ["rotor", "tubulacao", "visor", "anel-desgaste"] });
     if (nt && (nv || np)) causas.push({ titulo: "Líquido quente: a pressão de vapor sobe e a cavitação aparece mais fácil.", verificar: [
-      "Temperatura do líquido no reservatório", "Bomba recirculando ou com vazão muito baixa"] });
+      "Temperatura do líquido no reservatório", "Bomba recirculando ou com vazão muito baixa"], pecas: ["carcaca", "tubulacao"] });
     if (nv && !np) causas.push({ titulo: "Causa mecânica provável: a vibração subiu, mas a pressão está normal.", verificar: [
       "Desalinhamento do acoplamento motor–bomba", "Parafusos da base frouxos",
-      "Rolamento do mancal com ruído ou folga", "Rotor desbalanceado ou danificado"] });
+      "Rolamento do mancal com ruído ou folga", "Rotor desbalanceado ou danificado"], pecas: ["acoplamento", "rolamentos", "base", "rotor"] });
     if (np && !nv) causas.push({ titulo: "Queda de pressão sem vibração.", verificar: [
       "Entrada de ar na sucção", "Vazamento na linha de recalque",
-      "Vazão acima do normal (válvula de recalque aberta demais)", "Desgaste do rotor"] });
+      "Vazão acima do normal (válvula de recalque aberta demais)", "Desgaste do rotor"], pecas: ["tubulacao", "rotor", "anel-desgaste"] });
     if (nt && !nv && !np) causas.push({ titulo: "Aquecimento sem vibração nem queda de pressão.", verificar: [
       "Bomba trabalhando com a válvula de recalque fechada", "Atrito no selo mecânico ou na gaxeta",
-      "Mancal sem lubrificação"] });
+      "Mancal sem lubrificação"], pecas: ["selo", "rolamentos", "suporte"] });
     return {
       nivel: Math.max(nv, np, nt), queda: queda, causas: causas,
       sensores: { v: nv, p: np, t: nt }
@@ -181,8 +181,72 @@
     return { desenhar: desenhar, parar: function () { vivo = false; } };
   }
 
+  // ---------------- alarme em tela cheia (estilo alerta da Defesa Civil) ----------------
+  var visor3d = null, desenhoAtual = 0; // a ficha é redesenhada; só o desenho mais recente reage às leituras
+  var plantao = { ligado: false, disparado: 0, audio: null, trava: null };
+  function ligarPlantao() {
+    plantao.ligado = true; plantao.disparado = 0;
+    // o navegador só libera som e vibração depois de um toque: este botão faz esse papel
+    try { plantao.audio = plantao.audio || new (window.AudioContext || window.webkitAudioContext)(); plantao.audio.resume(); } catch (err) {}
+    if (navigator.vibrate) navigator.vibrate(60);
+    if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (t) { plantao.trava = t; }, function () {});
+  }
+  function desligarPlantao() {
+    plantao.ligado = false;
+    if (plantao.trava) { plantao.trava.release().catch(function () {}); plantao.trava = null; }
+  }
+  // a tela fica acesa de novo quando a ficha volta para a frente
+  document.addEventListener("visibilitychange", function () {
+    if (plantao.ligado && !document.hidden && navigator.wakeLock && !plantao.trava)
+      navigator.wakeLock.request("screen").then(function (t) { plantao.trava = t; }, function () {});
+    if (document.hidden && plantao.trava) plantao.trava = null;
+  });
+
+  function sirene(critico) {
+    var ctx = plantao.audio;
+    if (!ctx) return function () {};
+    var osc = ctx.createOscillator(), vol = ctx.createGain();
+    osc.type = "square"; vol.gain.value = 0.18;
+    osc.connect(vol); vol.connect(ctx.destination);
+    var t0 = ctx.currentTime;
+    // sobe e desce como sirene (crítico) ou bipes duplos (atenção)
+    for (var i = 0; i < 120; i++) {
+      var t = t0 + i * 1.2;
+      if (critico) { osc.frequency.setValueAtTime(650, t); osc.frequency.linearRampToValueAtTime(1250, t + 0.6); osc.frequency.linearRampToValueAtTime(650, t + 1.2); }
+      else { osc.frequency.setValueAtTime(880, t); vol.gain.setValueAtTime(0.18, t); vol.gain.setValueAtTime(0, t + 0.15);
+        vol.gain.setValueAtTime(0.18, t + 0.3); vol.gain.setValueAtTime(0, t + 0.45); }
+    }
+    osc.start();
+    return function () { try { osc.stop(); osc.disconnect(); } catch (err) {} };
+  }
+
+  function telaCheia(codigo, e, L, av, aoCiente) {
+    var critico = av.nivel === 2, n = NIVEL[av.nivel];
+    var f = document.createElement("div");
+    f.id = "alarme"; f.className = "alarme " + (critico ? "alarme-c" : "alarme-a");
+    f.setAttribute("role", "alertdialog"); f.setAttribute("aria-label", "Alerta de falha " + codigo);
+    f.innerHTML = '<div class="alarme-caixa"><div class="alarme-selo">ALERTA DE FALHA · ' + esc(n.nome) + '</div>' +
+      '<div class="alarme-tag">' + esc(codigo) + '</div><div class="alarme-nome">' + esc(e.nome) + '</div>' +
+      '<div class="alarme-causa">' + esc(av.causas.length ? av.causas[0].titulo : "Leituras fora do normal.") + '</div>' +
+      '<div class="alarme-leit">' + esc(linhaLeituras(L, av)) + '</div>' +
+      (av.causas.length ? '<div class="alarme-ver"><b>Verificar:</b> ' + esc(av.causas[0].verificar.join(" · ")) + '</div>' : '') +
+      '<div class="alarme-hora">Detectado às ' + esc(hora(Date.now()).slice(11)) + ' pelos sensores da bomba</div>' +
+      '<button type="button" id="alarme-ok">CIENTE · IR ATÉ A BOMBA</button></div>';
+    document.body.appendChild(f);
+    var parar = sirene(critico);
+    var vib = function () { if (navigator.vibrate) navigator.vibrate(critico ? [1000, 300, 1000, 300] : [400, 200, 400, 1000]); };
+    vib(); var iv = setInterval(vib, 2600);
+    document.getElementById("alarme-ok").focus();
+    document.getElementById("alarme-ok").onclick = function () {
+      clearInterval(iv); parar(); if (navigator.vibrate) navigator.vibrate(0);
+      f.remove();
+      if (aoCiente) aoCiente();
+    };
+  }
+
   // ---------------- ficha da bomba (/e/BOMBA-001) ----------------
-  function tela(app, codigo, e, cabecalho) {
+  // opcoes.semChegada: redesenho logo depois do alarme (não é a leitura do QR Code na bomba)
+  function tela(app, codigo, e, cabecalho, opcoes) {
     var CH_ATIVO = "alerta_ativo_" + codigo, CH_HIST = "atendimentos_" + codigo;
     function ler(ch, padrao) { try { return JSON.parse(localStorage.getItem(ch)) || padrao; } catch (err) { return padrao; } }
     function gravar(ch, v) { try { if (v == null) localStorage.removeItem(ch); else localStorage.setItem(ch, JSON.stringify(v)); } catch (err) {} }
@@ -202,7 +266,7 @@
     var ativo = ler(CH_ATIVO, null);
     // 2) aberto pelo QR Code com um alerta pendente: confirma a chegada no equipamento
     var chegouAgora = false;
-    if (ativo && !veioDaNotificacao && !ativo.chegada) { ativo.chegada = Date.now(); gravar(CH_ATIVO, ativo); chegouAgora = true; }
+    if (ativo && !veioDaNotificacao && !ativo.chegada && !(opcoes && opcoes.semChegada)) { ativo.chegada = Date.now(); gravar(CH_ATIVO, ativo); chegouAgora = true; }
 
     var s = e.sensores;
     function tabelaLimites() {
@@ -260,13 +324,21 @@
           '<button type="submit" class="salvar">Encerrar o alerta</button></form>';
       }
     } else {
-      corpo = '<section class="semaforo st-c" style="box-shadow:none;border:0"><b>SEM ALERTA</b><ul><li>TAG ' + esc(codigo) + ' · ' + esc(e.nome) +
+      // muda de cor junto com o gráfico (leituras ao vivo)
+      corpo = '<section class="semaforo" id="m-status" style="box-shadow:none;border:0"><b>SEM LEITURA AO VIVO</b><ul><li>TAG ' + esc(codigo) + ' · ' + esc(e.nome) +
         '</li><li>Nenhum alerta pendente neste aparelho.</li></ul></section>';
     }
 
     var aoVivo = e.alerta.mqtt ? '<section class="cartao"><div class="rotulo">Sensores ao vivo</div>' +
       '<p class="dica" id="g-estado" role="status" style="margin:4px 0 0"></p><div id="graf"></div></section>' : '';
-    app.innerHTML = cabecalho(codigo, e.nome) + '<main><div id="m-msg"></div>' + corpo + aoVivo + blocoInscricao() +
+    var plantaoHtml = e.alerta.mqtt ? '<section class="cartao" id="plantao"></section>' : '';
+    var modelo3d = '<section class="cartao"><div class="rotulo">Modelo 3D da bomba</div>' +
+      '<div class="visor" id="b3d"><div class="visor-msg">Carregando o modelo 3D…</div></div>' +
+      '<div class="botoes"><button type="button" id="b3d-exp">Explodir</button><button type="button" id="b3d-corte" aria-pressed="false">Corte</button>' +
+      '<button type="button" id="b3d-girar" aria-pressed="false">Girar</button><button type="button" id="b3d-num" aria-pressed="true">Números</button>' +
+      '<button type="button" id="b3d-vista">Vista inicial</button></div>' +
+      '<div class="info-peca" id="b3d-info">Toque numa peça para ver a ficha dela. Em alerta, as peças ligadas à possível causa piscam.</div></section>';
+    app.innerHTML = cabecalho(codigo, e.nome) + '<main><div id="m-msg"></div>' + corpo + plantaoHtml + aoVivo + modelo3d + blocoInscricao() +
       '<details class="cartao-det"><summary>Sensores e limites</summary>' + tabelaLimites() + '</details>' +
       '<details class="cartao-det"><summary>Atendimentos (últimos 10)</summary>' + historico() + '</details>' +
       '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
@@ -284,9 +356,89 @@
           : u ? "Sem leitura há " + esc(tempo(idade)) + ". Confira se a bancada (ou o simulador) está ligada."
           : "Conectado. Aguardando os sensores: ligue a bancada ou abra o simulador.";
       };
-      cn.ouvir(function () { gr.desenhar(); mostrarEstado(); });
-      (function tic() { if (!estadoEl.isConnected) return; mostrarEstado(); setTimeout(tic, 1000); })();
+      var statusEl = document.getElementById("m-status");
+      var mostrarStatus = function () {
+        if (!statusEl || !statusEl.isConnected) return;
+        var u = cn.dados[cn.dados.length - 1], vivo = u && Date.now() - u.ts < 5000;
+        var av = vivo ? avaliar(e, u) : null, cls = av ? NIVEL[av.nivel].cls : "";
+        statusEl.className = "semaforo" + (cls ? " " + cls : "");
+        statusEl.innerHTML = '<b>' + (av ? esc(NIVEL[av.nivel].nome) : "SEM LEITURA AO VIVO") + '</b><ul><li>TAG ' + esc(codigo) + ' · ' + esc(e.nome) + '</li>' +
+          (av ? '<li>Ao vivo: ' + esc(linhaLeituras(u, av)) + '</li>' + (av.causas.length ? '<li>Possível causa: ' + esc(av.causas[0].titulo) + '</li>' : '') : '') +
+          '<li>Nenhum alerta pendente neste aparelho.</li></ul>';
+        document.querySelector("#app header").className = cls;
+      };
+      var meu = ++desenhoAtual;
+      cn.ouvir(function () { if (meu !== desenhoAtual) return; gr.desenhar(); mostrarEstado(); mostrarStatus(); destacar3d(); plantaoLeitura(); });
+      (function tic() { if (!estadoEl.isConnected) return; mostrarEstado(); mostrarStatus(); setTimeout(tic, 1000); })();
     }
+
+    // ---- modelo 3D: destaca as peças ligadas à possível causa e os sensores fora do limite ----
+    if (visor3d) { visor3d.destruir(); visor3d = null; }
+    var caixa3d = document.getElementById("b3d"), info3d = document.getElementById("b3d-info");
+    function destacar3d() {
+      if (!visor3d) return;
+      var L = ativo ? { v: ativo.v, p: ativo.p, t: ativo.tc } : null;
+      if (!L && canal && canal.dados.length && Date.now() - canal.dados[canal.dados.length - 1].ts < 5000) L = canal.dados[canal.dados.length - 1];
+      if (!L) return visor3d.destacar([]);
+      var av = avaliar(e, L), ids = [];
+      av.causas.forEach(function (c) { (c.pecas || []).forEach(function (p) { if (ids.indexOf(p) < 0) ids.push(p); }); });
+      [["v", "sensor-vibracao"], ["p", "sensor-pressao"], ["t", "sensor-temperatura"]].forEach(function (x) { if (av.sensores[x[0]]) ids.push(x[1]); });
+      if (String(ids) !== String(destacar3d.ultimo)) { destacar3d.ultimo = ids; visor3d.destacar(ids); }
+    }
+    function fichaPeca(id, tag) {
+      var p = visor3d && visor3d.pecas.filter(function (x) { return x.id === id; })[0];
+      if (!p) { info3d.textContent = "Toque numa peça para ver a ficha dela."; return; }
+      info3d.innerHTML = '<b>' + esc(p.nome) + '</b> <span class="dica">' + esc(p.tipo) + '</span><dl class="peca-ficha">' +
+        [["Tag", visor3d.unidades(id).map(function (u) { return codigo + "-" + u.tag; }).join(", ")], ["Material", p.material], ["Quantidade", p.qtd],
+          ["Especificação", p.espec], ["Função", p.funcao], ["Inspecionar", p.inspecao], ["Falhas comuns", p.falhas]]
+          .map(function (l) { return '<dt>' + esc(l[0]) + '</dt><dd>' + esc(l[1]) + '</dd>'; }).join("") + '</dl>';
+    }
+    import("/bomba3d.js").then(function (mod) {
+      if (!caixa3d.isConnected) return;
+      caixa3d.innerHTML = "";
+      visor3d = mod.criarVisualizador(caixa3d, { aoSelecionar: fichaPeca });
+      visor3d.explodir(0, false); visor3d.vistaInicial(false);
+      destacar3d();
+      var bExp = document.getElementById("b3d-exp");
+      bExp.onclick = function () { var alvo = visor3d.explosao > 0.5 ? 0 : 1; visor3d.explodir(alvo, true); visor3d.vistaInicial(true); bExp.textContent = alvo ? "Montar" : "Explodir"; };
+      [["b3d-corte", function (sim) { visor3d.corte(sim); if (sim) { visor3d.explodir(0, true); bExp.textContent = "Explodir"; } visor3d.vistaInicial(true); }],
+       ["b3d-girar", function (sim) { visor3d.girar(sim); }], ["b3d-num", function (sim) { visor3d.baloes(sim); }]].forEach(function (x) {
+        var b = document.getElementById(x[0]);
+        b.onclick = function () { var sim = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(sim)); x[1](sim); };
+      });
+      document.getElementById("b3d-vista").onclick = function () { visor3d.vistaInicial(true); };
+    }).catch(function () {
+      caixa3d.innerHTML = '<div class="visor-msg">Não foi possível exibir o modelo 3D neste aparelho (é preciso um navegador com WebGL).</div>';
+    });
+
+    // ---- modo plantão: com a ficha aberta, o alarme dispara sozinho em tela cheia (sirene + vibração) ----
+    var plantaoEl = document.getElementById("plantao");
+    function desenharPlantao() {
+      if (!plantaoEl) return;
+      plantaoEl.className = "cartao" + (plantao.ligado ? " ok" : "");
+      plantaoEl.innerHTML = plantao.ligado
+        ? '<b>Modo plantão ligado.</b> A tela fica acesa e, se uma leitura passar do limite, o alarme toca sozinho em tela cheia.' +
+          '<button type="button" class="sap" id="plantao-b">Desligar o modo plantão</button>'
+        : '<div class="rotulo">Alarme na tela</div><p style="margin:4px 0 0">Deixe a ficha aberta em modo plantão: quando a bomba sair do normal, ' +
+          'o celular toca uma sirene, vibra sem parar e mostra a falha em tela cheia, sem precisar apertar nada.</p>' +
+          '<button type="button" class="salvar" id="plantao-b">Ligar o modo plantão</button>';
+      document.getElementById("plantao-b").onclick = function () { if (plantao.ligado) desligarPlantao(); else ligarPlantao(); desenharPlantao(); };
+    }
+    function plantaoLeitura() {
+      if (!plantao.ligado || !canal || !canal.dados.length) return;
+      var u = canal.dados[canal.dados.length - 1], av = avaliar(e, u);
+      if (av.nivel === 0) { plantao.disparado = 0; return; }
+      if (av.nivel > plantao.disparado && !document.getElementById("alarme")) {
+        plantao.disparado = av.nivel;
+        telaCheia(codigo, e, u, av, function () {
+          // "Ciente": vira um alerta pendente, que só fecha com a leitura do QR Code na bomba
+          gravar(CH_ATIVO, { id: Date.now().toString(36), t: Date.now(), v: u.v, p: u.p, tc: u.t, recebido: Date.now(), chegada: null });
+          tela(app, codigo, e, cabecalho, { semChegada: true });
+          window.scrollTo(0, 0);
+        });
+      }
+    }
+    desenharPlantao();
 
     var cop = document.getElementById("copiar-topico");
     cop.onclick = function () {
