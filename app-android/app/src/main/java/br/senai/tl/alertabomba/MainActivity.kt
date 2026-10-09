@@ -184,6 +184,15 @@ class MainActivity : Activity() {
                 val i = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
                 startActivity(i)
             }
+        // Xiaomi, Redmi e POCO: permissão própria "Mostrar na tela de bloqueio" (não dá para pedir pelo app)
+        if (Build.MANUFACTURER.equals("xiaomi", true) && !xiaomiConferido())
+            faltam += "Xiaomi: ligar \"Mostrar na tela de bloqueio\" e \"Janelas pop-up em segundo plano\"" to {
+                getSharedPreferences("app", MODE_PRIVATE).edit().putBoolean("xiaomi_ok", true).apply()
+                val i = Intent("miui.intent.action.APP_PERM_EDITOR").putExtra("extra_pkgname", packageName)
+                try { startActivity(i) } catch (e: Exception) {
+                    startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
+                }
+            }
         if (!nm.isNotificationPolicyAccessGranted)
             faltam += "Tocar mesmo no Não perturbe (opcional)" to {
                 startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
@@ -196,6 +205,8 @@ class MainActivity : Activity() {
         })
         faltam.forEach { (rotulo, acao) -> painel.addView(botao(rotulo) { acao() }) }
     }
+
+    private fun xiaomiConferido() = getSharedPreferences("app", MODE_PRIVATE).getBoolean("xiaomi_ok", false)
 
     private fun testarAlarme() {
         val L = Leitura(5.2, 0.95, 33.0)

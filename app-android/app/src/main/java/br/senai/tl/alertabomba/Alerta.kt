@@ -32,11 +32,13 @@ object Alerta {
         private set
     private var sirene: Sirene? = null
     private var vibrador: Vibrator? = null
+    private var luz: android.os.PowerManager.WakeLock? = null
 
     fun iniciar(ctx: Context, d: DadosAlerta) {
         val app = ctx.applicationContext
         if (ativo != null) return
         ativo = d
+        acenderTela(app)
         sirene = Sirene(app, d.nivel == 2).also { it.tocar() }
         vibrar(app, d.nivel == 2)
         val abrir = Intent(app, AlarmeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -75,8 +77,20 @@ object Alerta {
         return "$SITE/e/$CODIGO?alerta=" + Uri.encode(j.toString()) + "&chegada=" + System.currentTimeMillis()
     }
 
+    // acende a tela na hora do alarme (como chamada recebida), para a tela cheia aparecer sem desbloquear
+    @Suppress("DEPRECATION")
+    private fun acenderTela(app: Context) {
+        try {
+            val pm = app.getSystemService(android.os.PowerManager::class.java)
+            luz = pm.newWakeLock(android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK or android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP or
+                android.os.PowerManager.ON_AFTER_RELEASE, "AlertaBomba:alarme").apply { acquire(60_000L) }
+        } catch (e: Exception) {}
+    }
+
     fun parar(ctx: Context) {
         val app = ctx.applicationContext
+        try { luz?.let { if (it.isHeld) it.release() } } catch (e: Exception) {}
+        luz = null
         sirene?.parar(); sirene = null
         vibrador?.cancel(); vibrador = null
         app.getSystemService(NotificationManager::class.java).cancel(ID_NOTIF)
