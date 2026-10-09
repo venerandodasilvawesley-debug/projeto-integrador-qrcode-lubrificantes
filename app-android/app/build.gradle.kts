@@ -38,4 +38,6 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    // leitor de QR Code dentro do app
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }

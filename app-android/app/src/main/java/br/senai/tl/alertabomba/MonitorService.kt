@@ -8,8 +8,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
-import android.media.RingtoneManager
 import android.os.Build
 import android.os.IBinder
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
@@ -28,13 +26,12 @@ class MonitorService : Service() {
 
     companion object {
         const val CANAL_FIXO = "monitorando"
-        const val CANAL_ALARME = "alarme_falha"
+        const val CANAL_ALARME = "alarme_falha_v2" // o som é a sirene do app, não o da notificação
         const val ID_FIXO = 1
         const val ID_ALARME = 2
         @Volatile var ultimaLeitura: Leitura? = null
         @Volatile var ultimaHora = 0L
         @Volatile var estado = "Desligado"
-        @Volatile var alarmeAberto = false
 
         fun iniciar(ctx: Context) {
             val i = Intent(ctx, MonitorService::class.java)
@@ -52,9 +49,7 @@ class MonitorService : Service() {
                 vibrationPattern = longArrayOf(0, 1000, 300, 1000, 300, 1000)
                 setBypassDnd(true)
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
-                    AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                setSound(null, null)
             })
         }
     }
@@ -119,37 +114,18 @@ class MonitorService : Service() {
         atualizarFixa(NOMES_NIVEL[a.nivel] + " · " + linhaLeituras(L, a))
         if (a.nivel == 0) { disparado = 0; return }
         // dispara uma vez por piora (atenção -> crítico dispara de novo)
-        if (a.nivel > disparado && !alarmeAberto) {
+        if (a.nivel > disparado && Alerta.ativo == null) {
             disparado = a.nivel
             dispararAlarme(L, a)
         }
     }
 
     private fun dispararAlarme(L: Leitura, a: Avaliacao) {
-        val i = Intent(this, AlarmeActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            putExtra("nivel", a.nivel)
-            putExtra("v", L.v); putExtra("p", L.p); putExtra("t", L.t)
-            putExtra("nome", config.nome)
-            putExtra("causa", a.causas.firstOrNull()?.titulo ?: "Leituras fora do normal.")
-            putExtra("verificar", a.causas.firstOrNull()?.verificar?.joinToString(" · ") ?: "")
-            putExtra("leituras", linhaLeituras(L, a))
-            putExtra("hora", System.currentTimeMillis())
-        }
-        val pi = PendingIntent.getActivity(this, 10, i, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val n = Notification.Builder(this, CANAL_ALARME)
-            .setSmallIcon(R.drawable.ic_notif)
-            .setContentTitle("$CODIGO – ${NOMES_NIVEL[a.nivel]}")
-            .setContentText(a.causas.firstOrNull()?.titulo ?: "Leituras fora do normal")
-            .setCategory(Notification.CATEGORY_ALARM)
-            .setVisibility(Notification.VISIBILITY_PUBLIC)
-            .setFullScreenIntent(pi, true)   // abre a tela de alarme por cima do bloqueio
-            .setContentIntent(pi)
-            .setOngoing(true)
-            .build()
-        getSystemService(NotificationManager::class.java).notify(ID_ALARME, n)
-        // com o app na frente, abre direto
-        try { startActivity(i) } catch (e: Exception) {}
+        Alerta.iniciar(this, DadosAlerta(
+            nivel = a.nivel, v = L.v, p = L.p, t = L.t, nome = config.nome,
+            causa = a.causas.firstOrNull()?.titulo ?: "Leituras fora do normal.",
+            verificar = a.causas.firstOrNull()?.verificar?.joinToString(" · ") ?: "",
+            leituras = linhaLeituras(L, a), hora = System.currentTimeMillis()))
     }
 
     private fun notificacaoFixa(texto: String): Notification {

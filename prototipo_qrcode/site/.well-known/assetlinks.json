@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.senai.tl.alertabomba",
+      "sha256_cert_fingerprints": ["17:2D:E0:66:82:C0:49:DF:64:2E:84:4C:E5:5B:D1:E3:50:EC:7F:CA:4C:89:48:1A:13:7D:7B:EB:15:81:DC:B6"]
+    }
+  }
+]

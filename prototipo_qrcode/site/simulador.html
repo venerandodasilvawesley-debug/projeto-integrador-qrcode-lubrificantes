@@ -129,7 +129,7 @@ a{color:#123a5c}
         var d = new Date();
         log.insertAdjacentHTML("afterbegin", '<li>' + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") +
           ":" + String(d.getSeconds()).padStart(2, "0") + ' · <span class="chip ' + window.Monitor.NIVEL[r.av.nivel].cls + '">' +
-          window.Monitor.NIVEL[r.av.nivel].nome + '</span> ' + motivo + '</li>');
+          window.Monitor.NIVEL[r.av.nivel].nome + '</span> ' + motivo + ' · nota SAP ' + window.Monitor.notaSap(r.alerta.t) + '</li>');
         estado.textContent = "Alerta enviado para o celular do mecânico.";
         enviado = r.av.nivel;
       }, function () {

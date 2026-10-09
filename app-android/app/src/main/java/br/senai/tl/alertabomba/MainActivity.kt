@@ -47,8 +47,9 @@ class MainActivity : Activity() {
         painel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         topo.addView(painel)
         val linha = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(6), 0, 0) }
-        linha.addView(botao("Testar alarme") { testarAlarme() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        linha.addView(botao("Recarregar ficha") { web.reload() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = dp(8) })
+        linha.addView(botao("Ler QR Code") { lerQr() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        linha.addView(botao("Testar alarme") { testarAlarme() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = dp(6) })
+        linha.addView(botao("Recarregar") { web.reload() }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = dp(6) })
         topo.addView(linha)
         raiz.addView(topo)
 
@@ -69,14 +70,40 @@ class MainActivity : Activity() {
         raiz.addView(web, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
         setContentView(raiz)
 
-        web.loadUrl(intent.getStringExtra("url") ?: "$SITE/e/$CODIGO")
+        web.loadUrl(urlDe(intent) ?: "$SITE/e/$CODIGO")
         pedirNotificacoes()
         MonitorService.iniciar(this)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.getStringExtra("url")?.let { web.loadUrl(it) }
+        urlDe(intent)?.let { web.loadUrl(it) }
+    }
+
+    // Endereço a abrir. Se o app foi aberto pelo QR Code da etiqueta (câmera do celular -> link
+    // .../e/BOMBA-001) com um alerta tocando, a leitura confirma a chegada e para o alarme.
+    private fun urlDe(i: Intent): String? {
+        i.getStringExtra("url")?.let { return it }
+        val dado = i.data?.toString() ?: return null
+        if (Alerta.ativo != null && Alerta.ehQrDaBomba(dado)) return Alerta.confirmarChegada(this) ?: "$SITE/e/$CODIGO"
+        return dado
+    }
+
+    private fun lerQr() {
+        com.google.zxing.integration.android.IntentIntegrator(this).apply {
+            setDesiredBarcodeFormats(com.google.zxing.integration.android.IntentIntegrator.QR_CODE)
+            setPrompt("Aponte para o QR Code da etiqueta $CODIGO"); setBeepEnabled(false); setOrientationLocked(false)
+        }.initiateScan()
+    }
+
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val r = com.google.zxing.integration.android.IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (r == null) { super.onActivityResult(requestCode, resultCode, data); return }
+        val texto = r.contents ?: return
+        if (!Alerta.ehQrDaBomba(texto)) { android.widget.Toast.makeText(this, "Este QR Code não é da $CODIGO.", android.widget.Toast.LENGTH_LONG).show(); return }
+        web.loadUrl(Alerta.confirmarChegada(this) ?: "$SITE/e/$CODIGO")
     }
 
     override fun onResume() {
@@ -96,6 +123,11 @@ class MainActivity : Activity() {
     private fun atualizarStatus() {
         val L = MonitorService.ultimaLeitura
         val idade = (System.currentTimeMillis() - MonitorService.ultimaHora) / 1000
+        Alerta.ativo?.let {
+            status.text = "⚠ ALERTA ATIVO · nota SAP ${it.nota} · leia o QR Code da bomba para parar o alarme"
+            status.setTextColor(Color.parseColor("#F2B705")); return
+        }
+        status.setTextColor(Color.WHITE)
         status.text = "Monitorando $CODIGO · " + when {
             L != null && idade < 5 -> "ao vivo (" + NOMES_NIVEL[avaliar(Config(), L).nivel].lowercase() + ")"
             L != null -> "sem leitura há $idade s"
@@ -146,13 +178,10 @@ class MainActivity : Activity() {
     private fun testarAlarme() {
         val L = Leitura(5.2, 0.95, 33.0)
         val a = avaliar(Config(), L)
-        startActivity(Intent(this, AlarmeActivity::class.java).apply {
-            putExtra("nivel", a.nivel); putExtra("v", L.v); putExtra("p", L.p); putExtra("t", L.t)
-            putExtra("nome", Config().nome)
-            putExtra("causa", "TESTE · " + (a.causas.firstOrNull()?.titulo ?: ""))
-            putExtra("verificar", a.causas.firstOrNull()?.verificar?.joinToString(" · ") ?: "")
-            putExtra("leituras", linhaLeituras(L, a)); putExtra("hora", System.currentTimeMillis())
-        })
+        Alerta.iniciar(this, DadosAlerta(nivel = a.nivel, v = L.v, p = L.p, t = L.t, nome = Config().nome,
+            causa = "TESTE · " + (a.causas.firstOrNull()?.titulo ?: ""),
+            verificar = a.causas.firstOrNull()?.verificar?.joinToString(" · ") ?: "",
+            leituras = linhaLeituras(L, a), hora = System.currentTimeMillis(), teste = true))
     }
 
     private fun botao(rotulo: String, acao: () -> Unit) = Button(this).apply {

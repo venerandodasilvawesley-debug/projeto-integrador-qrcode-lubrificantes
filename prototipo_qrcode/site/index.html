@@ -287,6 +287,7 @@ body.sem-rolagem{overflow:hidden}
 .alarme-hora{opacity:.85}
 .alarme button{font:inherit;font-size:1.3rem;font-weight:900;padding:18px;border-radius:14px;border:0;background:#fff;color:#14202b;margin-top:8px}
 .alarme-a button{background:#14202b;color:#fff}
+.sap-linha{margin:8px 0 0;padding-left:22px}.sap-linha li{margin:6px 0}.sap-linha .sap-falta{color:#5b6b7a;font-style:italic}
 .graf{margin-top:12px}.graf-topo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.95rem}
 .graf-topo output{font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
 .graf canvas{display:block;width:100%;height:110px;margin-top:4px;border-radius:8px;border:1px solid #dde3e9}
@@ -309,6 +310,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 <script src="/galao.js"></script>
 <script src="/troca.js"></script>
 <script src="/monitor.js"></script>
+<script src="/sap.js"></script>
 
 <script>
 (function () {
@@ -661,6 +663,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<details><summary>Histórico (últimos 10 registros)</summary>' +
         '<table><thead><tr><th>Data</th><th>Intervenção</th><th>Responsável</th></tr></thead>' +
         '<tbody id="historico">' + linhasHistorico(codigo) + '</tbody></table></details>' +
+      '<div id="sap-lub"></div>' +
       '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
         (e.tag_oleo ? '<a href="/etiqueta-galoes.html">Etiquetas dos galões</a> · ' : '') +
         '<button class="link" id="csv">Registros deste aparelho (CSV)</button> · ' +
@@ -934,6 +937,33 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       });
     }
 
+    // Registro no SAP PM (simulação): confirmação da ordem de lubrificação, saída do óleo para a ordem
+    // e documentos de medição, gerados a partir do registro, sem digitação.
+    function registrarSap(r) {
+      if (!window.SapPM) return "";
+      var t = Date.now(), N = window.SapPM.numero, ordem = N("ordem", t), docs = [];
+      docs.push({ etapa: "Ordem de lubrificação " + ordem + " confirmada", transacao: "IW41", titulo: "Confirmação da ordem " + ordem,
+        campos: [["Ordem", ordem + " – PM03 Preventiva (lubrificação)"], ["Operação", "0010 – " + (r.tipo === "Inspeção" ? "Inspeção da lubrificação" : r.tipo + " de óleo")],
+          ["Equipamento", codigo + " – " + e.nome], ["Executante", r.responsavel], ["Data/hora", r.data_hora],
+          ["Duração real", r.duracao_s != null ? duracao(r.duracao_s) : ""], ["Galão conferido", textoGalao(r.galao)],
+          ["Observação", r.observacao], ["Nº da confirmação", N("confirmacao", t)]] });
+      if (r.quantidade_ml > 0) docs.push({ etapa: "Saída de " + fmt(r.quantidade_ml) + " mL de óleo para a ordem", transacao: "MIGO (mov. 261)",
+        titulo: "Documento de material " + N("material", t),
+        campos: [["Documento de material", N("material", t)], ["Tipo de movimento", "261 – Saída de material para ordem"],
+          ["Material", (e.tag_oleo ? codigo + "-" + e.tag_oleo + " – " : "") + e.padrao_fabrica + " (" + e.viscosidade + ")"],
+          ["Quantidade", fmt(r.quantidade_ml) + " mL (" + fmt(Math.round(r.quantidade_ml) / 1000) + " L)"], ["Ordem", ordem]] });
+      var med = [];
+      if (r.temperatura_c != null) med.push(["Ponto " + codigo + "-TMP-01 (temperatura da carcaça)", fmt(r.temperatura_c) + " °C"]);
+      if (r.tipo === "Troca") med.push(["Contador " + codigo + "-HOR-OLEO (horas do óleo)", "zerado: óleo novo"]);
+      else if (r.horas_oleo != null) med.push(["Contador " + codigo + "-HOR-OLEO (horas do óleo)", milhar(r.horas_oleo) + " h"]);
+      if (med.length) docs.push({ etapa: "Medições gravadas (" + med.length + ")", transacao: "IK11", titulo: "Documento de medição " + N("medicao", t),
+        campos: med.concat([["Data/hora", r.data_hora], ["Ordem", ordem]]) });
+      window.SapPM.registrar(codigo, "Lubrificação", docs);
+      document.getElementById("sap-lub").innerHTML = window.SapPM.cartao(codigo, "Lubrificação");
+      return " SAP (simulação): ordem " + ordem + " confirmada" + (r.quantidade_ml > 0 ? ", saída do óleo lançada" : "") + (med.length ? ", medições gravadas" : "") + ".";
+    }
+    if (window.SapPM) document.getElementById("sap-lub").innerHTML = window.SapPM.cartao(codigo, "Lubrificação");
+
     function tipoAtual() { return document.querySelector("input[name=tipo]:checked").value; }
     function ajustarTipo() {
       var tipo = tipoAtual();
@@ -999,8 +1029,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       temp.value = ""; obs.value = ""; conf.checked = false; campoFoto();
       galaoReg = null; desenharGalaoReg();
       avisoTemp.style.display = "none";
+      var ultimo = lista[lista.length - 1], sapTxt = registrarSap(ultimo);
       avisar("ok", "Registro salvo neste aparelho." +
-        (lista[lista.length - 1].duracao_s != null ? " Tempo da intervenção: " + duracao(lista[lista.length - 1].duracao_s) + "." : ""));
+        (ultimo.duracao_s != null ? " Tempo da intervenção: " + duracao(ultimo.duracao_s) + "." : "") + sapTxt);
       inicioFicha = Date.now();
     });
   }
@@ -1052,7 +1083,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function conferirOffline(tentativa) {
     if (!("caches" in window)) return;
     var busca = { ignoreVary: true, ignoreSearch: true };
-    Promise.all(["/", "/equipamentos.json", "/inspecao.js", "/galao.js", "/troca.js", "/oleos.json", "/monitor.js"].map(function (a) { return caches.match(a, busca); }))
+    Promise.all(["/", "/equipamentos.json", "/inspecao.js", "/galao.js", "/troca.js", "/oleos.json", "/monitor.js", "/sap.js"].map(function (a) { return caches.match(a, busca); }))
       .then(function (r) {
         var ok = r.every(Boolean);
         estado.innerHTML = (ok ? '<b class="pronto">✓ Ficha salva neste aparelho: abre pelo QR Code mesmo sem internet.</b>'

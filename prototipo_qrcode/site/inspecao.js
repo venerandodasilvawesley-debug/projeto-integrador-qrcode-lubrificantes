@@ -125,6 +125,7 @@
           '<div id="i-msg"></div>' +
           '<section class="cartao" id="i-checklist"></section>' +
           '<details class="cartao-det" id="i-hist"><summary>Histórico de inspeções</summary><div id="i-hist-corpo"></div></details>' +
+          '<div id="i-sap"></div>' +
         '</div>' +
       '</div>';
 
@@ -682,7 +683,7 @@
       rascunho = null; guardarRascunho();
       renderChecklist(); renderHistorico();
       window.dispatchEvent(new Event("inspecao-salva"));
-      avisar(par.s === "C" ? "ok" : "alerta", "Inspeção salva neste aparelho. Parecer: " + par.t + "." + oleo);
+      avisar(par.s === "C" ? "ok" : "alerta", "Inspeção salva neste aparelho. Parecer: " + par.t + "." + oleo + registrarSap(reg, par));
     }
 
     function renderChecklist() {
@@ -693,8 +694,42 @@
       destacarPasso();
     }
 
+    // ---------------- registro no SAP PM (simulação) ----------------
+    // A inspeção salva gera: confirmação da ordem de inspeção, documentos de medição dos valores medidos
+    // e, se houver item em atenção ou não conforme, uma nota de manutenção com esses itens.
+    function registrarSap(reg, par) {
+      if (!window.SapPM) return "";
+      var t = Date.now(), N = window.SapPM.numero, ordem = N("ordem", t), docs = [];
+      var nomeSt = { C: "Conforme", A: "Atenção", NC: "Não conforme", NV: "Não verificado" };
+      docs.push({ etapa: "Ordem de inspeção " + ordem + " confirmada", transacao: "IW41", titulo: "Confirmação da ordem " + ordem,
+        campos: [["Ordem", ordem + " – PM03 Preventiva (inspeção)"], ["Equipamento", codigo + " – " + e.nome], ["Executante", reg.responsavel],
+          ["Data/hora", reg.data_hora], ["Duração real", reg.duracao_s != null ? Math.round(reg.duracao_s / 60) + " min" : ""],
+          ["Parecer", par.t], ["Observação", reg.observacao], ["Nº da confirmação", N("confirmacao", t)]] });
+      var med = itens.filter(function (it) { return it.medida && reg.itens[it.id] && reg.itens[it.id].valor != null; }).map(function (it) {
+        return ["Ponto " + codigo + "-" + it.id.toUpperCase().slice(0, 4) + " (" + (it.medida.curto || it.titulo) + ")", fmt(reg.itens[it.id].valor) + " " + it.medida.unidade];
+      });
+      if (reg.horimetro != null) med.push(["Contador " + codigo + "-HORIMETRO", fmt(reg.horimetro) + " h"]);
+      if (med.length) docs.push({ etapa: "Medições gravadas (" + med.length + ")", transacao: "IK11", titulo: "Documento de medição " + N("medicao", t),
+        campos: med.concat([["Data/hora", reg.data_hora], ["Ordem", ordem]]) });
+      var achados = itens.filter(function (it) { var x = reg.itens[it.id]; return x && (x.status === "A" || x.status === "NC"); });
+      if (achados.length) {
+        var nota = N("nota", t);
+        docs.push({ etapa: "Nota de manutenção " + nota + " aberta (" + achados.length + " item" + (achados.length > 1 ? "s" : "") + ")", transacao: "IW21",
+          titulo: "Nota de manutenção M1 nº " + nota,
+          campos: [["Nº da nota", nota], ["Tipo", "M1 – Nota de manutenção (achado de inspeção)"], ["Equipamento", codigo + " – " + e.nome],
+            ["Descrição", "Inspeção: " + achados.map(function (it) { return it.titulo; }).join(", ")],
+            ["Itens", achados.map(function (it) { var x = reg.itens[it.id]; return it.titulo + ": " + nomeSt[x.status] + (x.obs ? " (" + x.obs + ")" : ""); }).join("; ")],
+            ["Prioridade", par.s === "NC" ? "2 – Alta" : "3 – Média"], ["Ordem de origem", ordem], ["Notificador", reg.responsavel], ["Status", "MSPN – Nota pendente"]] });
+      }
+      window.SapPM.registrar(codigo, "Inspeção", docs);
+      renderSap();
+      return " SAP (simulação): ordem " + ordem + " confirmada" + (med.length ? ", medições gravadas" : "") + (achados.length ? ", nota aberta" : "") + ".";
+    }
+    function renderSap() { var el = document.getElementById("i-sap"); if (el && window.SapPM) el.innerHTML = window.SapPM.cartao(codigo, "Inspeção"); }
+
     // ---------------- histórico ----------------
     function renderHistorico() {
+      renderSap();
       var lista = minhas().slice().reverse();
       var corpo = document.getElementById("i-hist-corpo");
       document.querySelector("#i-hist > summary").textContent = "Histórico de inspeções (" + lista.length + ")";

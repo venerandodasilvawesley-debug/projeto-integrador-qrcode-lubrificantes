@@ -222,7 +222,7 @@
   }
 
   function telaCheia(codigo, e, L, av, aoCiente) {
-    var critico = av.nivel === 2, n = NIVEL[av.nivel];
+    var critico = av.nivel === 2, n = NIVEL[av.nivel], t0 = Date.now();
     var f = document.createElement("div");
     f.id = "alarme"; f.className = "alarme " + (critico ? "alarme-c" : "alarme-a");
     f.setAttribute("role", "alertdialog"); f.setAttribute("aria-label", "Alerta de falha " + codigo);
@@ -232,17 +232,75 @@
       '<div class="alarme-leit">' + esc(linhaLeituras(L, av)) + '</div>' +
       (av.causas.length ? '<div class="alarme-ver"><b>Verificar:</b> ' + esc(av.causas[0].verificar.join(" · ")) + '</div>' : '') +
       '<div class="alarme-hora">Detectado às ' + esc(hora(Date.now()).slice(11)) + ' pelos sensores da bomba</div>' +
-      '<button type="button" id="alarme-ok">CIENTE · IR ATÉ A BOMBA</button></div>';
+      '<div class="alarme-hora">Nota SAP M2 nº ' + notaSap(t0) + ' aberta automaticamente (simulação)</div>' +
+      '<button type="button" id="alarme-ok">CIENTE · IR ATÉ A BOMBA</button>' +
+      '<div class="alarme-hora">O alarme continua tocando até a leitura do QR Code na bomba.</div></div>';
     document.body.appendChild(f);
     var parar = sirene(critico);
     var vib = function () { if (navigator.vibrate) navigator.vibrate(critico ? [1000, 300, 1000, 300] : [400, 200, 400, 1000]); };
     vib(); var iv = setInterval(vib, 2600);
     document.getElementById("alarme-ok").focus();
+    // só a leitura do QR Code na bomba para o som (ver pararAlarme)
+    plantao.parar = function () { clearInterval(iv); parar(); if (navigator.vibrate) navigator.vibrate(0); plantao.parar = null; };
     document.getElementById("alarme-ok").onclick = function () {
-      clearInterval(iv); parar(); if (navigator.vibrate) navigator.vibrate(0);
       f.remove();
-      if (aoCiente) aoCiente();
+      if (aoCiente) aoCiente(t0);
     };
+  }
+
+  function pararAlarme() { if (plantao.parar) plantao.parar(); }
+  // a leitura do QR abre a ficha em outra aba: quando ela registra a chegada, esta aba para de tocar
+  window.addEventListener("storage", function (ev) {
+    if (!plantao.parar || !/^alerta_ativo_/.test(ev.key || "")) return;
+    var v = null; try { v = JSON.parse(ev.newValue); } catch (err) {}
+    if (!v || v.chegada) pararAlarme();
+  });
+
+  // ---------------- registro no SAP PM (simulação) ----------------
+  // Cada etapa do alerta gera o documento SAP correspondente, sem digitação. Nesta versão os documentos
+  // são montados e mostrados na tela; na proposta seriam criados direto no SAP (ex.: API OData de notas PM).
+  function notaSap(t) { return 10000000 + Math.floor(t / 1000) % 9000000; }
+  function docsSap(codigo, e, r, fim) {
+    var L = { v: r.v, p: r.p, t: r.tc }, av = avaliar(e, L), nota = notaSap(r.t);
+    var desc = codigo + " – " + NIVEL[av.nivel].nome + ": " + (av.causas.length ? av.causas[0].titulo : "leituras fora do normal");
+    var docs = [{
+      quando: r.t, etapa: "Nota de avaria aberta automaticamente", status: "MSPN · aberta",
+      titulo: "Nota de manutenção M2 nº " + nota, transacao: "IW21",
+      campos: [["Nº da nota", nota], ["Tipo", "M2 – Nota de avaria"], ["Equipamento", codigo + " – " + e.nome],
+        ["Local de instalação", e.local], ["Descrição", desc.slice(0, 120)],
+        ["Texto longo", linhaLeituras(L, av) + (av.causas.length ? ". Verificar: " + av.causas[0].verificar.join("; ") : "")],
+        ["Prioridade", av.nivel === 2 ? "1 – Muito alta" : "2 – Alta"], ["Início da avaria", hora(r.t)],
+        ["Notificador", "Monitoramento automático (sensores da bancada)"], ["Status", "MSPN – Nota pendente"]]
+    }, {
+      quando: r.t, etapa: "Leituras gravadas nos pontos de medição", status: "3 documentos",
+      titulo: "Documentos de medição – " + codigo, transacao: "IK11",
+      campos: [["Ponto " + codigo + "-SVB-01", fmt(r.v) + " mm/s (vibração no mancal)"], ["Ponto " + codigo + "-SPR-01", fmt(r.p, 2) + " bar (pressão)"],
+        ["Ponto " + codigo + "-STE-01", fmt(r.tc, 0) + " °C (temperatura da carcaça)"], ["Data/hora da medição", hora(r.t)], ["Nota de referência", nota]]
+    }];
+    if (r.chegada) docs.push({
+      quando: r.chegada, etapa: "Chegada confirmada pelo QR Code", status: "NOPR · em processamento",
+      titulo: "Nota " + nota + " – início do atendimento", transacao: "IW22",
+      campos: [["Nº da nota", nota], ["Início do atendimento", hora(r.chegada)], ["Tempo de resposta", tempo((r.chegada - r.t) / 1000)],
+        ["Confirmação", "Leitura do QR Code da etiqueta " + codigo + " no equipamento"], ["Status", "NOPR – Nota em processamento"]]
+    });
+    if (fim) docs.push({
+      quando: fim.encerrado, etapa: "Nota concluída", status: "NOCO · concluída",
+      titulo: "Nota " + nota + " – encerramento", transacao: "IW22",
+      campos: [["Nº da nota", nota], ["Causa encontrada", fim.encontrado.join("; ") || "Nenhuma das causas da lista"],
+        ["Observação", fim.observacao], ["Executante", fim.responsavel], ["Fim da avaria", hora(fim.encerrado)],
+        ["Tempo de resposta", fim.resposta_s != null ? tempo(fim.resposta_s) : ""], ["Duração do atendimento", fim.chegada ? tempo((fim.encerrado - fim.chegada) / 1000) : ""],
+        ["Status", "NOCO – Nota concluída"]]
+    });
+    return docs;
+  }
+  function cartaoSap(codigo, e, r, fim, idx) {
+    var docs = docsSap(codigo, e, r, fim);
+    return '<section class="cartao"><div class="rotulo">Registro no SAP PM · nota ' + notaSap(r.t) + ' (simulação)</div><ol class="sap-linha">' +
+      docs.map(function (d, i) {
+        return '<li><b>' + esc(d.etapa) + '</b> <span class="chip st-c">' + esc(d.status) + '</span><br><small>' + esc(hora(d.quando)) + ' · ' +
+          esc(d.transacao) + '</small> <button type="button" class="link" data-sap="' + idx + ':' + i + '">Ver documento</button></li>';
+      }).join("") + (fim ? '' : '<li class="sap-falta">' + (r.chegada ? 'Encerramento: registrado ao encerrar o alerta' : 'Chegada: registrada ao ler o QR Code na bomba') + '</li>') +
+      '</ol></section>';
   }
 
   // ---------------- ficha da bomba (/e/BOMBA-001) ----------------
@@ -254,20 +312,24 @@
     document.title = codigo + " – monitoramento";
 
     // 1) aberto pela notificação: guarda o alerta e tira os dados do endereço
-    var m = /[?&]alerta=([^&]+)/.exec(location.search), veioDaNotificacao = false;
+    var m = /[?&]alerta=([^&]+)/.exec(location.search), veioDaNotificacao = false, chegouPeloApp = false;
     if (m) {
       try {
         var novo = JSON.parse(decodeURIComponent(m[1]));
         var atual = ler(CH_ATIVO, null);
         if (!atual || atual.id !== novo.id) gravar(CH_ATIVO, { id: novo.id, t: novo.t, v: novo.v, p: novo.p, tc: novo.tc, recebido: Date.now(), chegada: null });
         veioDaNotificacao = true;
+        // o app Alerta Bomba já leu o QR Code da bomba: a chegada vem junto
+        var cg = /[?&]chegada=(\d+)/.exec(location.search);
+        if (cg) { var a2 = ler(CH_ATIVO, null); if (a2 && !a2.chegada) { a2.chegada = Number(cg[1]); gravar(CH_ATIVO, a2); chegouPeloApp = true; } }
       } catch (err) {}
       history.replaceState(null, "", "/e/" + codigo + location.hash);
     }
     var ativo = ler(CH_ATIVO, null);
     // 2) aberto pelo QR Code com um alerta pendente: confirma a chegada no equipamento
-    var chegouAgora = false;
-    if (ativo && !veioDaNotificacao && !ativo.chegada && !(opcoes && opcoes.semChegada)) { ativo.chegada = Date.now(); gravar(CH_ATIVO, ativo); chegouAgora = true; }
+    var chegouAgora = !!chegouPeloApp;
+    if (ativo && ativo.chegada) pararAlarme();
+    if (ativo && !veioDaNotificacao && !ativo.chegada && !(opcoes && opcoes.semChegada)) { ativo.chegada = Date.now(); gravar(CH_ATIVO, ativo); chegouAgora = true; pararAlarme(); }
 
     var s = e.sensores;
     function tabelaLimites() {
@@ -280,7 +342,8 @@
     function historico() {
       var h = ler(CH_HIST, []).slice(-10).reverse();
       return h.length ? '<table><thead><tr><th>Alerta</th><th>Resposta</th><th>Encontrado</th></tr></thead><tbody>' + h.map(function (r) {
-        return '<tr><td>' + esc(hora(r.t)) + '<br><span class="chip ' + NIVEL[r.nivel].cls + '">' + esc(NIVEL[r.nivel].nome) + '</span></td><td>' +
+        return '<tr><td>' + esc(hora(r.t)) + '<br><span class="chip ' + NIVEL[r.nivel].cls + '">' + esc(NIVEL[r.nivel].nome) + '</span>' +
+          '<br><button type="button" class="link" data-sap-hist="' + esc(r.id) + '">Nota SAP ' + notaSap(r.t) + '</button></td><td>' +
           (r.resposta_s != null ? esc(tempo(r.resposta_s)) : '–') + '</td><td>' + esc(r.encontrado.join("; ") || "Nada encontrado") +
           '<br><small>' + esc(r.responsavel) + (r.observacao ? ' · ' + esc(r.observacao) : '') + '</small></td></tr>';
       }).join("") + '</tbody></table>' : '<p class="dica">Nenhum atendimento registrado neste aparelho.</p>';
@@ -311,7 +374,8 @@
         corpo = topo + '<section class="cartao alerta"><div class="rotulo">Possível causa</div>' +
           av.causas.map(function (c) { return '<p style="margin:6px 0 0;font-weight:700">' + esc(c.titulo) + '</p>'; }).join("") + '</section>' +
           '<section class="cartao" style="text-align:center"><div class="grande">Vá até a bomba</div>' +
-          '<p>e leia o <b>QR Code da etiqueta ' + esc(codigo) + '</b> com a câmera do celular para confirmar a chegada.</p>' +
+          '<p>e leia o <b>QR Code da etiqueta ' + esc(codigo) + '</b> com a câmera do celular para confirmar a chegada.' +
+          (plantao.parar ? ' <b>O alarme só para com essa leitura.</b>' : '') + '</p>' +
           '<p class="dica" id="contador"></p></section>';
       } else {
         corpo = topo + (chegouAgora ? '<div class="cartao ok">Chegada confirmada pelo QR Code. Tempo de resposta: ' +
@@ -339,7 +403,8 @@
       '<button type="button" id="b3d-girar" aria-pressed="false">Girar</button><button type="button" id="b3d-num" aria-pressed="true">Números</button>' +
       '<button type="button" id="b3d-vista">Vista inicial</button></div>' +
       '<div class="info-peca" id="b3d-info">Toque numa peça para ver a ficha dela. Em alerta, as peças ligadas à possível causa piscam.</div></section>';
-    app.innerHTML = cabecalho(codigo, e.nome) + '<main><div id="m-msg"></div>' + corpo + plantaoHtml + aoVivo + modelo3d + blocoInscricao() +
+    var sapAtivo = ativo ? cartaoSap(codigo, e, ativo, null, "a") : '';
+    app.innerHTML = cabecalho(codigo, e.nome) + '<main><div id="m-msg"></div>' + corpo + sapAtivo + plantaoHtml + aoVivo + modelo3d + blocoInscricao() +
       '<details class="cartao-det"><summary>Sensores e limites</summary>' + tabelaLimites() + '</details>' +
       '<details class="cartao-det"><summary>Atendimentos (últimos 10)</summary>' + historico() + '</details>' +
       '<p class="rodape"><a href="/etiqueta-' + esc(codigo) + '.html">Etiqueta com QR Code</a> · ' +
@@ -436,15 +501,30 @@
       if (av.nivel === 0) { plantao.disparado = 0; return; }
       if (av.nivel > plantao.disparado && !document.getElementById("alarme")) {
         plantao.disparado = av.nivel;
-        telaCheia(codigo, e, u, av, function () {
+        telaCheia(codigo, e, u, av, function (t0) {
           // "Ciente": vira um alerta pendente, que só fecha com a leitura do QR Code na bomba
-          gravar(CH_ATIVO, { id: Date.now().toString(36), t: Date.now(), v: u.v, p: u.p, tc: u.t, recebido: Date.now(), chegada: null });
+          gravar(CH_ATIVO, { id: t0.toString(36), t: t0, v: u.v, p: u.p, tc: u.t, recebido: Date.now(), chegada: null });
           tela(app, codigo, e, cabecalho, { semChegada: true });
           window.scrollTo(0, 0);
         });
       }
     }
     desenharPlantao();
+
+    // documentos SAP (simulação): do alerta aberto e de cada atendimento do histórico
+    document.querySelector("#app main").addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-sap],[data-sap-hist]") : null;
+      if (!b || !window.DocSap) return;
+      var d;
+      if (b.hasAttribute("data-sap")) {
+        var k = b.getAttribute("data-sap").split(":");
+        d = docsSap(codigo, e, ler(CH_ATIVO, {}), null)[Number(k[1])];
+      } else {
+        var r = ler(CH_HIST, []).filter(function (x) { return x.id === b.getAttribute("data-sap-hist"); })[0];
+        if (r) { var lista = docsSap(codigo, e, r, r); d = lista[lista.length - 1]; }
+      }
+      if (d) window.DocSap(d.titulo + " (" + d.transacao + ")", "PM", d.campos);
+    });
 
     var cop = document.getElementById("copiar-topico");
     cop.onclick = function () {
@@ -479,11 +559,12 @@
         try { localStorage.setItem("responsavel", resp.value.trim()); } catch (err) {}
         gravar(CH_ATIVO, null);
         tela(app, codigo, e, cabecalho);
-        document.getElementById("m-msg").innerHTML = '<div class="cartao ok">Alerta encerrado e atendimento registrado neste aparelho.</div>';
+        document.getElementById("m-msg").innerHTML = '<div class="cartao ok">Alerta encerrado. Nota SAP ' + notaSap(ativo.t) +
+          ' concluída (NOCO) com a causa encontrada e o tempo de resposta (simulação).</div>';
       });
     }
   }
 
-  window.Monitor = { avaliar: avaliar, publicar: publicar, tela: tela, NIVEL: NIVEL, linhaLeituras: linhaLeituras,
+  window.Monitor = { notaSap: notaSap, avaliar: avaliar, publicar: publicar, tela: tela, NIVEL: NIVEL, linhaLeituras: linhaLeituras,
     conectar: conectar, grafico: grafico };
 })();

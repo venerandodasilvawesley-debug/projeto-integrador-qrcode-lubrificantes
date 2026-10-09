@@ -7,6 +7,7 @@
     <!-- alerta em tela cheia por cima da tela de bloqueio (como despertador e chamada) -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- monitoramento contínuo em segundo plano -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -30,6 +31,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- a câmera do celular lendo a etiqueta da bomba abre o app (App Link verificado pelo site) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="ficha-lubrificacao.vercel.app" android:path="/e/BOMBA-001" />
             </intent-filter>
         </activity>
 
