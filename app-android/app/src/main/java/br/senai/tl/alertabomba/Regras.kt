@@ -7,8 +7,8 @@ import java.util.Locale
 
 // Mesmas regras de site/monitor.js (função avaliar). Se mudar uma, mude a outra.
 
-const SITE = "https://ficha-lubrificacao.vercel.app"
-const CODIGO = "BOMBA-001"
+const val SITE = "https://ficha-lubrificacao.vercel.app"
+const val CODIGO = "BOMBA-001"
 
 data class Leitura(val v: Double, val p: Double, val t: Double)
 
