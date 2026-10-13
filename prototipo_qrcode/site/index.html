@@ -205,13 +205,15 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .vida-escala{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:#5b6b7a;margin-top:2px}
 .tipos span small{display:block;font-weight:600;font-size:.78rem}
 #vida-status b.fazer{display:block;margin-top:6px}
-/* análise de óleo: últimas coletas lado a lado */
-table.analise th{font-size:.78rem;color:#5b6b7a;white-space:nowrap}
-table.analise td:first-child{font-weight:700}table.analise td small{font-weight:600;color:#5b6b7a}
-table.analise .an-v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-.an-seta{font-size:.8rem;color:#3d4c5a}.an-igual{color:#9aa7b3}
-.an-exemplo{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:6px;background:#eef1f4;color:#3d4c5a;font-size:.78rem;font-weight:700}
-#analise .parecer{margin-top:8px}
+/* modelo 3D da lubrificação: rótulos de enchimento, nível e dreno */
+.marca{position:absolute;left:0;top:0;padding:3px 9px;border-radius:999px;border:2px solid #123a5c;background:#fff;color:#123a5c;
+  font:800 .8rem/1.2 system-ui,sans-serif;white-space:nowrap;pointer-events:auto;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.marca::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:10px;margin-left:-1px;background:#123a5c}
+.marca.ativo{background:#e0a100;border-color:#7a5600;color:#14202b;font-size:.95rem}.marca.ativo::after{background:#7a5600}
+.marca.atras{opacity:.4}
+#pontos-botoes{grid-template-columns:repeat(3,1fr)}
+#pontos-botoes button{font-size:1rem;padding:12px 4px;line-height:1.15}#pontos-botoes button small{display:block;font-weight:600;font-size:.72rem}
+#pontos-texto{margin-top:10px}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .nav button{font-size:1.1rem;padding:14px}
 .nav button.pri{background:#123a5c;color:#fff}
@@ -318,7 +320,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 <script src="/inspecao.js"></script>
 <script src="/galao.js"></script>
 <script src="/troca.js"></script>
-<script src="/analise.js"></script>
+<script src="/pontos.js"></script>
 <script src="/monitor.js"></script>
 <script src="/sap.js"></script>
 
@@ -575,6 +577,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     var alertas = e.alertas.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join("");
 
     var temInspecao = !!(e.inspecao && window.Inspecao);
+    var temPontos = !!(e.pontos_oleo && window.PontosOleo);
     var abas = temInspecao ? '<nav class="abas" role="tablist"><div>' +
       '<button type="button" role="tab" id="aba-lubrificacao" aria-controls="painel-lubrificacao">Lubrificação<small>ficha e registro</small></button>' +
       '<button type="button" role="tab" id="aba-inspecao" aria-controls="painel-inspecao">Inspeção<small>modelo 3D e checklist</small></button>' +
@@ -590,6 +593,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       e.nome + " · posição " + e.posicao) + abas + '<main>' +
       '<div id="painel-lubrificacao" role="tabpanel">' +
       '<div id="mensagem"></div>' +
+      // segurança vem antes de tudo: é a primeira coisa que o mecânico lê
+      '<section class="cartao alerta"><div class="rotulo">Segurança</div><ul>' + alertas +
+        '<li>EPIs: ' + esc(e.epis) + '.</li></ul></section>' +
       (e.vida_util_oleo ? '<section class="cartao" id="vida">' +
         '<div class="rotulo">Vida útil do óleo</div>' +
         '<div id="vida-status"></div>' +
@@ -623,7 +629,6 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         }).join("") + '</div>' +
         '</details>' +
       '</section>' : '') +
-      (e.analises_oleo && window.AnaliseOleo ? window.AnaliseOleo.cartao(codigo, e) : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
@@ -641,15 +646,14 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           '<div><div class="rotulo">Volume (' + esc(e.posicao) + ')</div><div class="grande">' +
             fmt(e.volume_ml) + ' mL</div></div>' +
         '</div>' +
-        '<div class="rotulo" style="margin-top:12px">Enchimento, dreno e nível</div>' +
-        '<div>' + esc(e.pontos) + '</div>' +
+        (temPontos ? '' : '<div class="rotulo" style="margin-top:12px">Enchimento, dreno e nível</div>' +
+        '<div>' + esc(e.pontos) + '</div>') +
         '<div class="acoes-oleo">' +
           (e.tag_oleo && window.Galao ? '<button type="button" class="sap" id="b-galao">Conferir o galão (QR)</button>' : '') +
           (e.passo_troca && window.PassoTroca ? '<button type="button" class="sap" id="b-passos">Passo a passo da troca</button>' : '') +
         '</div>' +
       '</section>' +
-      '<section class="cartao alerta"><div class="rotulo">Segurança</div><ul>' + alertas +
-        '<li>EPIs: ' + esc(e.epis) + '.</li></ul></section>' +
+      (temPontos ? window.PontosOleo.cartao(codigo, e) : '') +
       '<details><summary>Mais informações</summary><dl>' +
         '<dt>Modelo</dt><dd>' + esc(e.modelo) + '</dd>' +
         '<dt>Óleos equivalentes (mesma base)</dt><dd>' + esc(e.equivalentes.join("; ")) + '</dd>' +
@@ -733,11 +737,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           .filter(function (r) { return r.codigo === codigo; }).pop() || null;
       } catch (err) {}
       var COR = { "st-c": "VERDE", "st-a": "AMARELO", "st-nc": "VERMELHO" };
-      // na Lubrificação vale o pior entre a vida útil do óleo e o último laudo de análise
-      var analise = window.AnaliseOleo && window.AnaliseOleo.estado(e);
       var sinais = {
-        lubrificacao: { cls: analise ? window.AnaliseOleo.pior(estadoVida && estadoVida.s, analise.s) : estadoVida && estadoVida.s,
-          txt: (estadoVida ? estadoVida.txt : "Óleo: informe a última troca") + (analise && analise.s !== "st-c" ? " · " + analise.txt : "") },
+        lubrificacao: { cls: estadoVida && estadoVida.s, txt: estadoVida ? estadoVida.txt : "Óleo: informe a última troca" },
         inspecao: { cls: insp && DA_INSPECAO[insp.parecer], txt: insp ? "Última inspeção " + String(insp.data_hora).slice(0, 10) +
           " · " + (NOME_PARECER[insp.parecer] || "") : "Nenhuma inspeção registrada" }
       };
@@ -785,7 +786,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     var bGalao = document.getElementById("b-galao"), bPassos = document.getElementById("b-passos");
     if (bGalao) bGalao.onclick = function () { window.Galao.conferir(codigo, e); };
     if (bPassos) bPassos.onclick = abrirPassos;
-    if (e.analises_oleo && window.AnaliseOleo) window.AnaliseOleo.ligar(codigo, e, function () { return resp.value.trim(); });
+    if (temPontos) window.PontosOleo.ligar(codigo, e);
 
     // Vida útil do óleo: verde até 80 % do limite, amarelo nos últimos 20 %, vermelho depois do limite.
     var vida = { horas: null, limite: null };

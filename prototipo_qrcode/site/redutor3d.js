@@ -400,6 +400,8 @@ const suave = (t) => t * t * (3 - 2 * t);
 /**
  * Cria o visualizador dentro de `caixa`.
  * opcoes.aoSelecionar(idPeca|null) é chamada quando o operador toca numa peça.
+ * opcoes.marcas = [{ tag, texto }] põe um rótulo com nome sobre a unidade (ex.: Enchimento, Nível, Dreno);
+ * opcoes.aoMarca(tag) é chamada quando o operador toca no rótulo.
  * `modelo` (opcional) troca o redutor por outro equipamento: { pecas, montar(M), materiais(), casca }.
  */
 export function criarVisualizador(caixa, opcoes, modelo) {
@@ -455,7 +457,23 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     return { el: b, peca: p.id, ancora, centro };
   });
 
-  let explosao = 0, alvoExplosao = 1, destaque = [], selecionada = null, mostrarBaloes = true;
+  // rótulos com nome, presos a uma unidade (tag) do modelo
+  const camadaMarcas = document.createElement("div");
+  camadaMarcas.className = "baloes marcas";
+  caixa.appendChild(camadaMarcas);
+  const marcas = (opcoes.marcas || []).map((mc) => {
+    const ancora = objetos.find((o) => o.userData.tag === mc.tag);
+    if (!ancora) return null;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "marca";
+    b.textContent = mc.texto;
+    b.addEventListener("click", (ev) => { ev.stopPropagation(); if (opcoes.aoMarca) opcoes.aoMarca(mc.tag); });
+    camadaMarcas.appendChild(b);
+    return { el: b, tag: mc.tag, ancora };
+  }).filter(Boolean);
+
+  let explosao = 0, alvoExplosao = 1, destaque = [], destaqueTags = [], selecionada = null, mostrarBaloes = true;
   let corte = false, isolada = null;
   const internas = PECAS_M.filter((p) => p.interna).map((p) => p.id);
 
@@ -494,8 +512,10 @@ export function criarVisualizador(caixa, opcoes, modelo) {
   }
 
   // enquadra o conjunto (montado ou explodido) na mesma direção da figura de referência
-  let camAlvo = null;
-  function vistaInicial(animar) {
+  // dirOpc = [x, y, z] muda o lado de onde a câmera olha (null volta ao padrão); sem ele, mantém o lado atual
+  let camAlvo = null, dirAtual = null;
+  function vistaInicial(animar, dirOpc) {
+    if (dirOpc !== undefined) dirAtual = dirOpc;
     const salvo = explosao;
     explosao = alvoExplosao; aplicarExplosao();
     const pontos = [];
@@ -507,7 +527,7 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     });
     explosao = salvo; aplicarExplosao();
     const centro = new THREE.Box3().setFromPoints(pontos).getCenter(new THREE.Vector3());
-    const dir = new THREE.Vector3(1, 0.62, 1).normalize();
+    const dir = (dirAtual ? new THREE.Vector3(...dirAtual) : new THREE.Vector3(1, 0.62, 1)).normalize();
     // eixos da câmera olhando para o centro
     const direita = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), dir).normalize();
     const cima = new THREE.Vector3().crossVectors(dir, direita);
@@ -546,7 +566,8 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     const foco = isolada ? [] : selecionada ? [selecionada] : destaque;
     const brilho = 0.35 + 0.25 * Math.sin(tempo / 260);
     malhas.forEach((m) => {
-      const ativo = foco.indexOf(m.userData.peca) >= 0;
+      // destaque por unidade (tag): acende só aquela unidade, sem apagar o resto do conjunto
+      const ativo = foco.indexOf(m.userData.peca) >= 0 || destaqueTags.indexOf(m.userData.raiz.userData.tag) >= 0;
       const apagado = foco.length > 0 && !ativo;
       m.material.emissive.setRGB(ativo ? brilho : 0, ativo ? brilho * 0.62 : 0, 0);
       const op = m.userData.opacidade;
@@ -602,6 +623,22 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     linhas.innerHTML = svg;
   }
 
+  const centroMarcas = new THREE.Vector3();
+  function atualizarMarcas() {
+    if (!marcas.length) return;
+    const w = caixa.clientWidth, h = caixa.clientHeight;
+    const olhar = v.copy(camera.position).sub(controles.target).normalize().clone();
+    marcas.forEach((mc) => {
+      new THREE.Box3().setFromObject(mc.ancora).getCenter(centroMarcas);
+      // do outro lado do redutor: o rótulo fica apagado
+      mc.el.classList.toggle("atras", centroMarcas.clone().sub(controles.target).normalize().dot(olhar) < -0.15);
+      mc.el.classList.toggle("ativo", destaqueTags.indexOf(mc.tag) >= 0);
+      centroMarcas.project(camera);
+      const x = Math.min(w - 8, Math.max(8, (centroMarcas.x + 1) / 2 * w)), y = Math.min(h - 8, Math.max(30, (1 - centroMarcas.y) / 2 * h));
+      mc.el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) translate(-50%,-100%) translateY(-10px)";
+    });
+  }
+
   // toque/clique numa peça
   const raio = new THREE.Raycaster(), ponteiro = new THREE.Vector2();
   let inicio = null;
@@ -645,6 +682,7 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     atualizarMateriais(agora);
     render.render(cena, camera);
     atualizarBaloes();
+    atualizarMarcas();
   }
   aplicarExplosao();
   requestAnimationFrame(quadro);
@@ -658,6 +696,8 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     },
     get explosao() { return alvoExplosao; },
     destacar(ids) { destaque = ids || []; selecionada = null; },
+    // acende só as unidades com estes tags (ex.: BUJ-02 = bujão de dreno)
+    destacarTags(tags) { destaqueTags = tags || []; },
     selecionar(id) { selecionada = id || null; },
     girar(sim) { controles.autoRotate = !!sim; },
     // vista em corte (por dentro)
