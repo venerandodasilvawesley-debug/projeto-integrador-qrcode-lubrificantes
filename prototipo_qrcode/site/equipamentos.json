@@ -129,6 +129,11 @@
       "modelo": "Código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
       "local": "Oficina de mecânica do SENAI Três Lagoas",
       "posicao": "bancada",
+      "tag_oleo": "OLE-04",
+      "cor_oleo": {
+        "nome": "Laranja",
+        "hex": "#ef6c00"
+      },
       "lubrificante": "Óleo sintético PAO (CLP PAO)",
       "padrao_fabrica": "óleo sintético CLP PAO",
       "viscosidade": "ISO VG 460",

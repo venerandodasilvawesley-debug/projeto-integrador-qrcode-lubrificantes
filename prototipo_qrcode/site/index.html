@@ -1070,7 +1070,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       var o = oleos[cod];
       if (!o) return telaNaoEncontrado();
       document.title = "Galão " + cod;
-      var usam = Object.keys(equipamentos).filter(function (c) { return equipamentos[c].tag_oleo === cod; });
+      // conta também o óleo da ficha de lubrificação, que pode ser outro (bloco "lubrificacao")
+      var usam = Object.keys(equipamentos).filter(function (c) {
+        return equipamentos[c].tag_oleo === cod || daLubrificacao(equipamentos[c]).tag_oleo === cod;
+      });
       app.innerHTML = cabecalho("Galão " + cod, o.nome) + '<main><section class="cartao">' +
         '<div class="rotulo">Óleo deste galão</div><div class="grande">' + esc(o.base) + '</div>' +
         '<div>' + esc(o.nome) + ' · ' + esc(o.viscosidade) + '</div>' +
