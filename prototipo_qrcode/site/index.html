@@ -205,6 +205,13 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .vida-escala{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:#5b6b7a;margin-top:2px}
 .tipos span small{display:block;font-weight:600;font-size:.78rem}
 #vida-status b.fazer{display:block;margin-top:6px}
+/* análise de óleo: últimas coletas lado a lado */
+table.analise th{font-size:.78rem;color:#5b6b7a;white-space:nowrap}
+table.analise td:first-child{font-weight:700}table.analise td small{font-weight:600;color:#5b6b7a}
+table.analise .an-v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.an-seta{font-size:.8rem;color:#3d4c5a}.an-igual{color:#9aa7b3}
+.an-exemplo{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:6px;background:#eef1f4;color:#3d4c5a;font-size:.78rem;font-weight:700}
+#analise .parecer{margin-top:8px}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .nav button{font-size:1.1rem;padding:14px}
 .nav button.pri{background:#123a5c;color:#fff}
@@ -224,6 +231,8 @@ table.resumo button.link{text-align:left}
   padding:24px 16px;color:#fff;
   background:linear-gradient(rgba(10,30,50,.35),rgba(10,30,50,.55)),#123a5c url(/fundo.jpg) center/cover no-repeat}
 .escolhendo header,.escolhendo .abas,.escolhendo main{display:none}
+/* QR Code separado (/l/ só lubrificação, /i/ só inspeção): sem abas e sem tela de escolha */
+.uma-aba .abas{display:none}
 #escolha>div{width:100%;max-width:720px;margin:0 auto}
 #escolha h1{margin:0;font-size:2.4rem;letter-spacing:.5px;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.6)}
 #escolha p{margin:6px 0 22px;font-size:1.1rem;text-shadow:0 1px 6px rgba(0,0,0,.7)}
@@ -309,6 +318,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 <script src="/inspecao.js"></script>
 <script src="/galao.js"></script>
 <script src="/troca.js"></script>
+<script src="/analise.js"></script>
 <script src="/monitor.js"></script>
 <script src="/sap.js"></script>
 
@@ -528,10 +538,11 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   }
 
   // O QR Code abre primeiro a tela de escolha (Lubrificação ou Inspeção); depois, as abas trocam de página.
-  function prepararAbas(codigo, e) {
+  // "so" fixa uma única página (QR Code separado de lubrificação ou de inspeção).
+  function prepararAbas(codigo, e, so) {
     var inspecao = window.Inspecao.montar(document.getElementById("painel-inspecao"), codigo, e);
     var nomes = ["lubrificacao", "inspecao"];
-    function daHash() { return nomes.indexOf(location.hash.slice(1)) < 0 ? "" : location.hash.slice(1); }
+    function daHash() { return so || (nomes.indexOf(location.hash.slice(1)) < 0 ? "" : location.hash.slice(1)); }
     function mostrar(nome) {
       document.body.classList.toggle("escolhendo", !nome);
       if (!nome) { document.title = codigo; return; }
@@ -555,7 +566,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     mostrar(daHash());
   }
 
-  function telaFicha(codigo, e) {
+  function telaFicha(codigo, e, so) {
     document.title = codigo + " – ficha de lubrificação";
     var tipos = TIPOS.map(function (t, i) {
       return '<label><input type="radio" name="tipo" value="' + esc(t) + '"' +
@@ -573,7 +584,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<a href="#lubrificacao">Lubrificação<small>ficha e registro</small><span class="sinal" id="sinal-lubrificacao" role="status"></span></a>' +
       '<a href="#inspecao">Inspeção<small>modelo 3D e checklist</small><span class="sinal" id="sinal-inspecao" role="status"></span></a>' +
       '</nav></div></div>' : '';
-    app.innerHTML = escolha + cabecalho(codigo, e.nome + " · posição " + e.posicao) + abas + '<main>' +
+    if (!temInspecao) so = "";
+    document.body.classList.toggle("uma-aba", !!so);
+    app.innerHTML = escolha + cabecalho(codigo + (so ? (so === "inspecao" ? " · Inspeção" : " · Lubrificação") : ""),
+      e.nome + " · posição " + e.posicao) + abas + '<main>' +
       '<div id="painel-lubrificacao" role="tabpanel">' +
       '<div id="mensagem"></div>' +
       (e.vida_util_oleo ? '<section class="cartao" id="vida">' +
@@ -609,6 +623,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         }).join("") + '</div>' +
         '</details>' +
       '</section>' : '') +
+      (e.analises_oleo && window.AnaliseOleo ? window.AnaliseOleo.cartao(codigo, e) : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
@@ -670,8 +685,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<a href="/">Todas as fichas</a></p></div>' +
       '<div id="painel-inspecao" role="tabpanel" hidden></div></main>';
     if (temInspecao) {
-      document.querySelector("header div").insertAdjacentHTML("afterbegin", '<a class="voltar" href="#">‹ Opções</a>');
-      prepararAbas(codigo, e);
+      if (!so) document.querySelector("header div").insertAdjacentHTML("afterbegin", '<a class="voltar" href="#">‹ Opções</a>');
+      prepararAbas(codigo, e, so);
     }
 
     var qtd = document.getElementById("quantidade");
@@ -718,8 +733,11 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           .filter(function (r) { return r.codigo === codigo; }).pop() || null;
       } catch (err) {}
       var COR = { "st-c": "VERDE", "st-a": "AMARELO", "st-nc": "VERMELHO" };
+      // na Lubrificação vale o pior entre a vida útil do óleo e o último laudo de análise
+      var analise = window.AnaliseOleo && window.AnaliseOleo.estado(e);
       var sinais = {
-        lubrificacao: { cls: estadoVida && estadoVida.s, txt: estadoVida ? estadoVida.txt : "Óleo: informe a última troca" },
+        lubrificacao: { cls: analise ? window.AnaliseOleo.pior(estadoVida && estadoVida.s, analise.s) : estadoVida && estadoVida.s,
+          txt: (estadoVida ? estadoVida.txt : "Óleo: informe a última troca") + (analise && analise.s !== "st-c" ? " · " + analise.txt : "") },
         inspecao: { cls: insp && DA_INSPECAO[insp.parecer], txt: insp ? "Última inspeção " + String(insp.data_hora).slice(0, 10) +
           " · " + (NOME_PARECER[insp.parecer] || "") : "Nenhuma inspeção registrada" }
       };
@@ -728,7 +746,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         if (el) { el.className = "sinal" + (x.cls ? " " + x.cls : ""); el.innerHTML = (x.cls ? '<b>' + COR[x.cls] + '</b> · ' : '') + esc(x.txt); }
       });
       // filete do cabeçalho: o da aba aberta
-      var aba = location.hash.slice(1), cab = document.querySelector("#app header");
+      var aba = so || location.hash.slice(1), cab = document.querySelector("#app header");
       if (cab) cab.className = (sinais[aba] && sinais[aba].cls) || "";
     }
     window.addEventListener("inspecao-salva", atualizarSemaforo);
@@ -767,6 +785,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     var bGalao = document.getElementById("b-galao"), bPassos = document.getElementById("b-passos");
     if (bGalao) bGalao.onclick = function () { window.Galao.conferir(codigo, e); };
     if (bPassos) bPassos.onclick = abrirPassos;
+    if (e.analises_oleo && window.AnaliseOleo) window.AnaliseOleo.ligar(codigo, e, function () { return resp.value.trim(); });
 
     // Vida útil do óleo: verde até 80 % do limite, amarelo nos últimos 20 %, vermelho depois do limite.
     var vida = { horas: null, limite: null };
@@ -1060,12 +1079,13 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   function iniciar(equipamentos) {
     var g = location.pathname.match(/^\/g\/(OLE-\d{2})\/?$/i);
     if (g && window.Galao) return telaGalao(g[1].toUpperCase(), equipamentos);
-    var m = location.pathname.match(/^\/e\/([A-Za-z0-9-]{1,20})\/?$/);
+    // /e/ = ficha com as duas páginas; /l/ = QR Code só da lubrificação; /i/ = QR Code só da inspeção
+    var m = location.pathname.match(/^\/([eli])\/([A-Za-z0-9-]{1,20})\/?$/);
     if (!m) return telaInicial(equipamentos);
-    var codigo = m[1].toUpperCase();
+    var codigo = m[2].toUpperCase(), so = { l: "lubrificacao", i: "inspecao" }[m[1]] || "";
     if (!Object.prototype.hasOwnProperty.call(equipamentos, codigo)) return telaNaoEncontrado();
     if (equipamentos[codigo].tipo === "monitoramento" && window.Monitor) return window.Monitor.tela(app, codigo, equipamentos[codigo], cabecalho);
-    telaFicha(codigo, equipamentos[codigo]);
+    telaFicha(codigo, equipamentos[codigo], so);
   }
 
   var faixa = document.getElementById("offline");

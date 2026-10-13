@@ -42,7 +42,7 @@ body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-
 <body>
 <div class="instrucoes">
 <p><b>Etiqueta de {codigo}</b> – QR Code de {lado} cm de lado, correção de erros nível H.</p>
-<p>Endereço codificado: <code>{url}</code></p>
+<p>Endereço codificado: {url}</p>
 <p>Imprima em escala 100% (sem "ajustar à página"). <a href="/e/{codigo}">Voltar à ficha</a></p>
 </div>
 {etiqueta}{etiqueta}
@@ -52,7 +52,7 @@ body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-
 
 ETIQUETA = """<div class="etiqueta">{svg}
 <div class="txt"><div class="cod">{codigo}</div>
-<b>LUBRIFICAÇÃO, INSPEÇÃO E POP</b><br>{nome}<br>Aponte a câmera do celular para o código.{oleo}</div></div>
+<b>{titulo}</b><br>{nome}<br>Aponte a câmera do celular para o código.{oleo}</div></div>
 """
 
 
@@ -140,13 +140,20 @@ def main():
 
     equipamentos = json.loads((SITE / "equipamentos.json").read_text(encoding="utf-8"))
     for codigo, e in equipamentos.items():
-        url = f"{base}/e/{codigo}"
-        etiqueta = ETIQUETA.format(svg=qr_svg(url), codigo=html.escape(codigo),
-                                   nome=html.escape(e["nome"]), oleo=faixa_oleo(codigo, e))
+        # com lubrificação e inspeção, cada trabalho tem o seu QR Code: /l/ e /i/
+        if e.get("inspecao"):
+            partes = [("LUBRIFICAÇÃO", f"{base}/l/{codigo}", faixa_oleo(codigo, e)),
+                      ("INSPEÇÃO E POP", f"{base}/i/{codigo}", "")]
+        else:
+            partes = [("MONITORAMENTO" if e.get("tipo") == "monitoramento" else "LUBRIFICAÇÃO",
+                       f"{base}/e/{codigo}", faixa_oleo(codigo, e))]
+        etiqueta = "".join(ETIQUETA.format(svg=qr_svg(url), codigo=html.escape(codigo), titulo=titulo,
+                                           nome=html.escape(e["nome"]), oleo=oleo) for titulo, url, oleo in partes)
+        urls = " · ".join(f"<code>{html.escape(url)}</code>" for _, url, _ in partes)
         destino = SITE / f"etiqueta-{codigo}.html"
         destino.write_text(MODELO.format(codigo=html.escape(codigo), lado=html.escape(args.lado),
-                                         url=html.escape(url), etiqueta=etiqueta), encoding="utf-8")
-        print(f"{destino.name}: {url}")
+                                         url=urls, etiqueta=etiqueta), encoding="utf-8")
+        print(f"{destino.name}: " + " | ".join(url for _, url, _ in partes))
     etiquetas_galoes(base, args.lado)
 
 

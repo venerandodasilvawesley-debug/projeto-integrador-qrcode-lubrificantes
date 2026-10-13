@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/e/:codigo", "destination": "/index.html" },
+    { "source": "/l/:codigo", "destination": "/index.html" },
+    { "source": "/i/:codigo", "destination": "/index.html" },
     { "source": "/g/:codigo", "destination": "/index.html" }
   ]
 }
