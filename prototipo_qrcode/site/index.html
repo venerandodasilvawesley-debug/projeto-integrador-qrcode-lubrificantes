@@ -533,6 +533,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           (r.temperatura_c != null ? ' · ' + fmt(r.temperatura_c) + ' °C' : '') +
           (r.horas_oleo != null ? '<br>Óleo com ' + milhar(r.horas_oleo) + ' h' : '') +
           (r.duracao_s != null ? '<br>Tempo: ' + duracao(r.duracao_s) : '') +
+          (r.bloqueio === "externa" ? '<br>Por fora, máquina funcionando' : r.tipo === "Inspeção" && r.bloqueio ? '<br>Bujão aberto, máquina bloqueada' : '') +
           (r.galao ? '<br>Galão: ' + esc(textoGalao(r.galao)) : '') +
           (r.foto ? '<br><button type="button" class="link" data-foto="' + esc(r.foto) + '">Ver foto</button>' : '') +
           '</td><td>' + esc(r.responsavel) +
@@ -683,8 +684,15 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<label>Observação – opcional<input type="text" id="observacao" maxlength="200"></label>' +
         '<div id="galao-reg"></div>' +
         '<div id="foto-registro"></div>' +
-        '<label class="confirma"><input type="checkbox" id="confirmado">' +
+        // Complemento e Troca abrem o redutor: exigem bloqueio. A Inspeção só exige se o bujão de nível for aberto;
+        // olhar vazamento, ouvir o ruído e medir a temperatura é por fora, com a máquina funcionando.
+        '<label class="confirma" id="conf-loto"><input type="checkbox" id="confirmado">' +
           'Equipamento bloqueado (LOTO) e bocal limpo</label>' +
+        '<div id="conf-insp" style="display:none"><label style="margin-top:12px">Como foi a inspeção</label>' +
+          '<div class="tipos dois">' +
+            '<label><input type="radio" name="modo-insp" value="externa"><span>Só por fora<small>máquina funcionando, sem abrir nada</small></span></label>' +
+            '<label><input type="radio" name="modo-insp" value="bloqueado"><span>Abri o bujão de nível<small>máquina parada e bloqueada (LOTO)</small></span></label>' +
+          '</div></div>' +
         '<button type="submit" class="salvar">Salvar registro</button>' +
       '</form>' +
       '<details><summary>Histórico (últimos 10 registros)</summary>' +
@@ -996,6 +1004,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     function ajustarTipo() {
       var tipo = tipoAtual();
       campoQtd.style.display = tipo === "Inspeção" ? "none" : "block";
+      document.getElementById("conf-loto").style.display = tipo === "Inspeção" ? "none" : "";
+      document.getElementById("conf-insp").style.display = tipo === "Inspeção" ? "block" : "none";
       qtd.value = tipo === "Inspeção" ? "0" : (tipo === "Troca" && e.volume_ml != null ? fmt(e.volume_ml) : "");
       desenharGalaoReg();
     }
@@ -1024,7 +1034,10 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       var responsavel = resp.value.trim();
 
       if (!responsavel) return avisar("erro", "Informe o responsável.");
-      if (!conf.checked) return avisar("erro", "Confirme o bloqueio (LOTO) e a limpeza do bocal.");
+      var modoInsp = document.querySelector("input[name=modo-insp]:checked");
+      if (tipo === "Inspeção" && !modoInsp)
+        return avisar("erro", "Marque como foi a inspeção: só por fora ou com o bujão de nível aberto (máquina bloqueada).");
+      if (tipo !== "Inspeção" && !conf.checked) return avisar("erro", "Confirme o bloqueio (LOTO) e a limpeza do bocal.");
       if (tipo !== "Inspeção" && galaoReg && !galaoReg.certo && !galaoReg.manual)
         return avisar("erro", "O último galão lido é o errado (" + galaoReg.codigo + "). Pegue o galão certo e confira de novo antes de salvar.");
       if (quantidade == null || quantidade < 0 || quantidade > 20000)
@@ -1038,6 +1051,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         horas_oleo: horasEl ? vida.horas : null, limite_oleo_h: horasEl ? vida.limite : null,
         duracao_s: Date.now() - inicioFicha < 144e5 ? Math.round((Date.now() - inicioFicha) / 1000) : null,
         foto: fotoReg,
+        bloqueio: tipo === "Inspeção" ? modoInsp.value : "bloqueado",
         galao: tipo !== "Inspeção" && galaoReg ? { certo: !!galaoReg.certo, manual: !!galaoReg.manual, codigo: galaoReg.codigo } : null });
       try {
         gravarRegistros(lista);
@@ -1055,6 +1069,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         vida.horas = 0; horasEl.value = "0"; guardarVida(); atualizarVida();
       }
       temp.value = ""; obs.value = ""; conf.checked = false; campoFoto();
+      if (modoInsp) modoInsp.checked = false;
       galaoReg = null; desenharGalaoReg();
       avisoTemp.style.display = "none";
       var ultimo = lista[lista.length - 1], sapTxt = registrarSap(ultimo);
