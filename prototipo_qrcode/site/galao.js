@@ -146,7 +146,7 @@
             resultado = { certo: true, codigo: cod, oleo: o };
             corpo.innerHTML = '<div class="galao-res st-c"><b>ÓLEO CERTO</b>' +
               '<span>' + esc(cod) + ' · ' + esc(o ? o.nome : e.padrao_fabrica) + '</span>' + cor +
-              '<span>Pode abastecer ' + esc(String(e.volume_ml).replace(".", ",")) + ' mL.</span></div>';
+              '<span>Pode abastecer' + (e.volume_ml != null ? ' ' + esc(String(e.volume_ml).replace(".", ",")) + ' mL' : '') + '.</span></div>';
             if (navigator.vibrate) navigator.vibrate(120);
           } else if (cod) {
             resultado = { certo: false, codigo: cod, oleo: o };

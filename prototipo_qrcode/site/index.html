@@ -509,7 +509,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
 
   function telaInicial(equipamentos) {
     var itens = Object.keys(equipamentos).map(function (c) {
-      var e = equipamentos[c];
+      var e = daLubrificacao(equipamentos[c]);
       return '<a class="cartao" href="/e/' + esc(c) + '"><div class="rotulo">' + esc(c) +
         '</div><b>' + esc(e.nome) + '</b><br><span>' + esc(e.modelo) + '</span></a>';
     }).join("");
@@ -570,7 +570,12 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     mostrar(daHash());
   }
 
-  function telaFicha(codigo, e, so) {
+  // Lubrificação e Inspeção são trabalhos de grupos diferentes e podem usar redutores de referência diferentes:
+  // o bloco "lubrificacao" do cadastro vale só para a ficha de lubrificação; a Inspeção recebe o cadastro como está.
+  function daLubrificacao(e) { return e.lubrificacao ? Object.assign({}, e, e.lubrificacao) : e; }
+
+  function telaFicha(codigo, cadastro, so) {
+    var e = daLubrificacao(cadastro);
     document.title = codigo + " – ficha de lubrificação";
     var tipos = TIPOS.map(function (t, i) {
       return '<label><input type="radio" name="tipo" value="' + esc(t) + '"' +
@@ -591,8 +596,9 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '</nav></div></div>' : '';
     if (!temInspecao) so = "";
     document.body.classList.toggle("uma-aba", !!so);
+    var doCabecalho = so === "inspecao" ? cadastro : e;
     app.innerHTML = escolha + cabecalho(codigo + (so ? (so === "inspecao" ? " · Inspeção" : " · Lubrificação") : ""),
-      e.nome + " · posição " + e.posicao) + abas + '<main>' +
+      doCabecalho.nome + " · posição " + doCabecalho.posicao) + abas + '<main>' +
       '<div id="painel-lubrificacao" role="tabpanel">' +
       '<div id="mensagem"></div>' +
       // segurança vem antes de tudo: é a primeira coisa que o mecânico lê
@@ -642,11 +648,11 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
           '<div class="tag-grande">Tag <code>' + esc(codigo + "-" + e.tag_oleo) + '</code></div>' +
           (e.cor_oleo ? '<div class="cor-galao"><i style="background:' + esc(e.cor_oleo.hex) + '"></i>Cor do galão: <b>' +
             esc(e.cor_oleo.nome.toUpperCase()) + '</b></div>' : '') +
-          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + fmt(e.volume_ml) + " mL por troca") + '</div>' : '') +
+          esc(e.padrao_fabrica + " · " + e.viscosidade + " · " + (e.volume_ml != null ? fmt(e.volume_ml) + " mL por troca" : "volume a confirmar")) + '</div>' : '') +
         '<div class="duplo">' +
           '<div><div class="rotulo">Viscosidade</div><div class="grande">' + esc(e.viscosidade) + '</div></div>' +
           '<div><div class="rotulo">Volume (' + esc(e.posicao) + ')</div><div class="grande">' +
-            fmt(e.volume_ml) + ' mL</div></div>' +
+            (e.volume_ml != null ? fmt(e.volume_ml) + ' mL' : 'A confirmar') + '</div></div>' +
         '</div>' +
         (temPontos ? '' : '<div class="rotulo" style="margin-top:12px">Enchimento, dreno e nível</div>' +
         '<div>' + esc(e.pontos) + '</div>') +
@@ -692,7 +698,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       '<div id="painel-inspecao" role="tabpanel" hidden></div></main>';
     if (temInspecao) {
       if (!so) document.querySelector("header div").insertAdjacentHTML("afterbegin", '<a class="voltar" href="#">‹ Opções</a>');
-      prepararAbas(codigo, e, so);
+      prepararAbas(codigo, cadastro, so);
     }
 
     var qtd = document.getElementById("quantidade");
@@ -809,7 +815,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         return;
       }
       var pct = Math.round(h / lim * 100), classe, titulo, fazer;
-      var oleo = fmt(e.volume_ml) + " mL de " + e.padrao_fabrica +
+      var oleo = (e.volume_ml != null ? fmt(e.volume_ml) + " mL de " : "") + e.padrao_fabrica + " " + e.viscosidade +
         (e.tag_oleo ? " (pedir no almoxarifado pelo tag " + codigo + "-" + e.tag_oleo +
           (e.cor_oleo ? ", galão de cor " + e.cor_oleo.nome.toLowerCase() : "") + ")" : "");
       if (h > lim) {
@@ -990,7 +996,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     function ajustarTipo() {
       var tipo = tipoAtual();
       campoQtd.style.display = tipo === "Inspeção" ? "none" : "block";
-      qtd.value = tipo === "Inspeção" ? "0" : (tipo === "Troca" ? fmt(e.volume_ml) : "");
+      qtd.value = tipo === "Inspeção" ? "0" : (tipo === "Troca" && e.volume_ml != null ? fmt(e.volume_ml) : "");
       desenharGalaoReg();
     }
     document.querySelectorAll("input[name=tipo]").forEach(function (r) {
@@ -1021,7 +1027,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
       if (!conf.checked) return avisar("erro", "Confirme o bloqueio (LOTO) e a limpeza do bocal.");
       if (tipo !== "Inspeção" && galaoReg && !galaoReg.certo && !galaoReg.manual)
         return avisar("erro", "O último galão lido é o errado (" + galaoReg.codigo + "). Pegue o galão certo e confira de novo antes de salvar.");
-      if (quantidade == null || quantidade < 0 || quantidade > 1000)
+      if (quantidade == null || quantidade < 0 || quantidade > 20000)
         return avisar("erro", "Informe a quantidade aplicada, em mL.");
       if (temp.value.trim() && (temperatura == null || temperatura < -20 || temperatura > 200))
         return avisar("erro", "Temperatura inválida.");

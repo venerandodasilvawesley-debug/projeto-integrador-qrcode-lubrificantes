@@ -11,10 +11,13 @@
   }
 
   // troca {volume}, {oleo}, {tag}... pelos dados do equipamento
+  // {dose} = quanto abastecer: "30 mL de ..." ou, sem volume cadastrado, o óleo "até o bujão de nível"
   function preencher(texto, codigo, e) {
+    var oleo = e.padrao_fabrica + " (" + e.viscosidade + ")";
     var dados = {
-      volume: String(e.volume_ml).replace(".", ","),
-      oleo: e.padrao_fabrica + " (" + e.viscosidade + ")",
+      volume: e.volume_ml != null ? String(e.volume_ml).replace(".", ",") : "",
+      oleo: oleo,
+      dose: e.volume_ml != null ? String(e.volume_ml).replace(".", ",") + " mL de " + oleo : oleo + ", até o bujão de nível",
       tag: e.tag_oleo ? codigo + "-" + e.tag_oleo : "",
       cor: e.cor_oleo ? e.cor_oleo.nome.toUpperCase() : "",
       epis: e.epis, pontos: e.pontos, descarte: e.descarte

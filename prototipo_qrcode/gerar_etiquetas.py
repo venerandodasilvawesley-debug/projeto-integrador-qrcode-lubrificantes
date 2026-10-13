@@ -141,19 +141,21 @@ def main():
     equipamentos = json.loads((SITE / "equipamentos.json").read_text(encoding="utf-8"))
     for codigo, e in equipamentos.items():
         # com lubrificação e inspeção, cada trabalho tem o seu QR Code: /l/ e /i/
+        # a ficha de lubrificação pode ter dados próprios (bloco "lubrificacao"), diferentes dos da inspeção
+        lub = {**e, **e.get("lubrificacao", {})}
         if e.get("inspecao"):
-            partes = [("LUBRIFICAÇÃO", f"{base}/l/{codigo}", faixa_oleo(codigo, e)),
-                      ("INSPEÇÃO E POP", f"{base}/i/{codigo}", "")]
+            partes = [("LUBRIFICAÇÃO", f"{base}/l/{codigo}", faixa_oleo(codigo, lub), lub["nome"]),
+                      ("INSPEÇÃO E POP", f"{base}/i/{codigo}", "", e["nome"])]
         else:
             partes = [("MONITORAMENTO" if e.get("tipo") == "monitoramento" else "LUBRIFICAÇÃO",
-                       f"{base}/e/{codigo}", faixa_oleo(codigo, e))]
+                       f"{base}/e/{codigo}", faixa_oleo(codigo, lub), lub["nome"])]
         etiqueta = "".join(ETIQUETA.format(svg=qr_svg(url), codigo=html.escape(codigo), titulo=titulo,
-                                           nome=html.escape(e["nome"]), oleo=oleo) for titulo, url, oleo in partes)
-        urls = " · ".join(f"<code>{html.escape(url)}</code>" for _, url, _ in partes)
+                                           nome=html.escape(nome), oleo=oleo) for titulo, url, oleo, nome in partes)
+        urls = " · ".join(f"<code>{html.escape(p[1])}</code>" for p in partes)
         destino = SITE / f"etiqueta-{codigo}.html"
         destino.write_text(MODELO.format(codigo=html.escape(codigo), lado=html.escape(args.lado),
                                          url=urls, etiqueta=etiqueta), encoding="utf-8")
-        print(f"{destino.name}: " + " | ".join(url for _, url, _ in partes))
+        print(f"{destino.name}: " + " | ".join(p[1] for p in partes))
     etiquetas_galoes(base, args.lado)
 
 

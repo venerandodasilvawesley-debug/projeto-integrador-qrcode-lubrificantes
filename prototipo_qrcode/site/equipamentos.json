@@ -20,38 +20,6 @@
     "volume_ml": 30,
     "volumes_por_posicao": "posição 1 = 30 mL; posições 2 e 4 = 55 mL; posição 3 = 35 mL; posições 5 e 6 = 40 mL",
     "pontos": "Não informados no catálogo para o tamanho 28. Confirmar no redutor instalado ou com o fabricante antes da intervenção.",
-    "pontos_oleo": {
-      "titulo": "Enchimento, nível e dreno · redutor da oficina",
-      "modelo": "/redutor_oficina3d.js",
-      "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: o nível é conferido pelo bujão, e qual dos dois vale depende da posição de montagem.",
-      "pontos": [
-        {
-          "tags": ["RSP-01"],
-          "nome": "Enchimento",
-          "sub": "respiro, em cima",
-          "texto": "É por aqui que entra o óleo. Retire o respiro de latão e abasteça por este furo. Recoloque o respiro limpo e desobstruído e, antes de ligar, confira se o lacre do respiro foi retirado (adesivo \"Retire o lacre\").",
-          "vista": [0.45, 1, 0.9],
-          "fotos": [{ "src": "/fotos/red-enchimento.jpg", "legenda": "Face de cima: respiro de latão, ao lado da placa." }]
-        },
-        {
-          "tags": ["NIV-01", "NIV-02"],
-          "nome": "Nível",
-          "sub": "2 bujões laterais",
-          "texto": "Não há visor: com o redutor parado, retire o bujão de nível e confira se o óleo chega ao furo. São dois bujões de nível na face da tampa cega; o que vale depende da posição em que o redutor está montado.",
-          "vista": [1, 0.3, 0.5],
-          "fotos": [{ "src": "/fotos/red-nivel-dreno.jpg", "legenda": "Face da tampa cega: dois bujões de nível e, embaixo, o de dreno." }]
-        },
-        {
-          "tags": ["DRE-01", "DRE-02"],
-          "nome": "Dreno",
-          "sub": "bujões de baixo",
-          "texto": "Por aqui escoa o óleo usado: bujão mais baixo da face da tampa cega e bujão da base. Coloque o recipiente embaixo, retire primeiro o respiro e depois o bujão de dreno.",
-          "vista": [1, -0.75, 0.75],
-          "fotos": [{ "src": "/fotos/red-nivel-dreno.jpg", "legenda": "Dreno: o bujão mais baixo da face da tampa cega." },
-                    { "src": "/fotos/red-dreno-base.jpg", "legenda": "Bujão da base (parte de baixo do redutor)." }]
-        }
-      ]
-    },
     "vida_util_oleo": [
       {
         "temp_c": 80,
@@ -156,6 +124,153 @@
     "limite_carcaca_c": 75,
     "aviso_temperatura": "Carcaça acima de 75 °C indica óleo acima do limite de 90 °C.",
     "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005).",
+    "lubrificacao": {
+      "nome": "Redutor coroa e rosca WEG-Cestari (redutor da oficina)",
+      "modelo": "Código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
+      "local": "Oficina de mecânica do SENAI Três Lagoas",
+      "posicao": "bancada",
+      "lubrificante": "Óleo sintético PAO (CLP PAO)",
+      "padrao_fabrica": "óleo sintético CLP PAO",
+      "viscosidade": "ISO VG 460",
+      "equivalentes": [
+        "Mobil SHC 634",
+        "Shell Omala S4 GXV 460",
+        "Klübersynth GEM 4-460 N",
+        "(sintéticos PAO ISO VG 460: conferir a ficha técnica antes de usar)"
+      ],
+      "volume_ml": null,
+      "volumes_por_posicao": "A placa não informa o volume. Confirmar no manual do fabricante ou medir no primeiro abastecimento (abastecer até o bujão de nível e anotar quanto entrou).",
+      "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível por bujão na face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
+      "pontos_oleo": {
+        "titulo": "Enchimento, nível e dreno · redutor da oficina",
+        "modelo": "/redutor_oficina3d.js",
+        "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: o nível é conferido pelo bujão, e qual dos dois vale depende da posição de montagem.",
+        "pontos": [
+          {
+            "tags": [
+              "RSP-01"
+            ],
+            "nome": "Enchimento",
+            "sub": "respiro, em cima",
+            "texto": "É por aqui que entra o óleo. Retire o respiro de latão e abasteça por este furo. Recoloque o respiro limpo e desobstruído e, antes de ligar, confira se o lacre do respiro foi retirado (adesivo \"Retire o lacre\").",
+            "vista": [
+              0.45,
+              1,
+              0.9
+            ],
+            "fotos": [
+              {
+                "src": "/fotos/red-enchimento.jpg",
+                "legenda": "Face de cima: respiro de latão, ao lado da placa."
+              }
+            ]
+          },
+          {
+            "tags": [
+              "NIV-01",
+              "NIV-02"
+            ],
+            "nome": "Nível",
+            "sub": "2 bujões laterais",
+            "texto": "Não há visor: com o redutor parado, retire o bujão de nível e confira se o óleo chega ao furo. São dois bujões de nível na face da tampa cega; o que vale depende da posição em que o redutor está montado.",
+            "vista": [
+              1,
+              0.3,
+              0.5
+            ],
+            "fotos": [
+              {
+                "src": "/fotos/red-nivel-dreno.jpg",
+                "legenda": "Face da tampa cega: dois bujões de nível e, embaixo, o de dreno."
+              }
+            ]
+          },
+          {
+            "tags": [
+              "DRE-01",
+              "DRE-02"
+            ],
+            "nome": "Dreno",
+            "sub": "bujões de baixo",
+            "texto": "Por aqui escoa o óleo usado: bujão mais baixo da face da tampa cega e bujão da base. Coloque o recipiente embaixo, retire primeiro o respiro e depois o bujão de dreno.",
+            "vista": [
+              1,
+              -0.75,
+              0.75
+            ],
+            "fotos": [
+              {
+                "src": "/fotos/red-nivel-dreno.jpg",
+                "legenda": "Dreno: o bujão mais baixo da face da tampa cega."
+              },
+              {
+                "src": "/fotos/red-dreno-base.jpg",
+                "legenda": "Bujão da base (parte de baixo do redutor)."
+              }
+            ]
+          }
+        ]
+      },
+      "analise_oleo": "Sem coleta para laboratório neste projeto. A condição do óleo é acompanhada pelo aspecto do óleo no dreno (cor, transparência e partículas), pela temperatura da carcaça e pelas horas de uso.",
+      "passo_troca": [
+        {
+          "titulo": "Separar o material",
+          "texto": "Pegue no almoxarifado o galão {cor} (tag {tag}): {oleo}. Leve também um recipiente identificado para o óleo usado, panos limpos e os EPIs: {epis}.",
+          "pecas": []
+        },
+        {
+          "titulo": "Desligar e bloquear",
+          "texto": "Desligue o equipamento, bloqueie e etiquete (LOTO). Espere a carcaça esfriar até poder ser tocada com segurança.",
+          "pecas": []
+        },
+        {
+          "titulo": "Limpar em volta dos bujões",
+          "texto": "Limpe a carcaça ao redor do respiro e dos bujões de nível e de dreno antes de abrir, para não entrar sujeira no redutor.",
+          "pecas": [],
+          "foto": "/fotos/red-nivel-dreno.jpg"
+        },
+        {
+          "titulo": "Drenar o óleo usado",
+          "texto": "Coloque o recipiente sob o bujão de dreno. Retire o respiro (o ar entra e o óleo escorre melhor) e depois o bujão de dreno, o mais baixo. Deixe escorrer até parar de pingar.",
+          "pecas": [],
+          "foto": "/fotos/red-nivel-dreno.jpg"
+        },
+        {
+          "titulo": "Olhar o óleo que saiu",
+          "texto": "Observe o óleo usado: leitoso indica água; brilho dourado indica desgaste da coroa de bronze; partículas de aço indicam desgaste dos rolamentos ou da rosca. Se achar algo, anote na observação do registro.",
+          "pecas": []
+        },
+        {
+          "titulo": "Fechar o dreno",
+          "texto": "Limpe o bujão de dreno, confira a vedação (troque se estiver danificada) e recoloque o bujão.",
+          "pecas": [],
+          "foto": "/fotos/red-nivel-dreno.jpg"
+        },
+        {
+          "titulo": "Conferir o galão",
+          "texto": "Leia o QR Code do galão antes de abrir. A ficha diz se é o óleo certo para este redutor.",
+          "pecas": [],
+          "tipo": "galao"
+        },
+        {
+          "titulo": "Abastecer",
+          "texto": "Abasteça pelo furo do respiro (enchimento): {dose}. Com o redutor parado, confira o nível pelo bujão de nível.",
+          "pecas": [],
+          "foto": "/fotos/red-enchimento.jpg"
+        },
+        {
+          "titulo": "Fechar e testar",
+          "texto": "Recoloque o bujão de nível e o respiro limpo e desobstruído, com o lacre retirado. Limpe a carcaça, retire o bloqueio e ligue o equipamento. Confira se não há vazamento nos bujões e retentores e se o ruído está normal.",
+          "pecas": [],
+          "foto": "/fotos/red-enchimento.jpg"
+        },
+        {
+          "titulo": "Descartar o óleo usado",
+          "texto": "{descarte}",
+          "pecas": []
+        }
+      ]
+    },
     "inspecao": {
       "modelo3d": "WCR28",
       "ficha_tecnica": [
