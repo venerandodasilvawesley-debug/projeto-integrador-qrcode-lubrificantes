@@ -128,7 +128,7 @@
       "nome": "Redutor coroa e rosca WEG-Cestari (redutor da oficina)",
       "modelo": "Código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
       "local": "Oficina de mecânica do SENAI Três Lagoas",
-      "posicao": "bancada",
+      "posicao": "vertical",
       "tag_oleo": "OLE-04",
       "cor_oleo": {
         "nome": "Laranja",
@@ -143,8 +143,8 @@
         "Klübersynth GEM 4-460 N",
         "(sintéticos PAO ISO VG 460: conferir a ficha técnica antes de usar)"
       ],
-      "volume_ml": null,
-      "volumes_por_posicao": "A placa não informa o volume. Confirmar no manual do fabricante ou medir no primeiro abastecimento (abastecer até o bujão de nível e anotar quanto entrou).",
+      "volume_ml": 600,
+      "volumes_por_posicao": "600 mL na posição de montagem vertical (informado pela equipe; a placa não traz o volume). Em outra posição o volume muda: confirmar no manual do fabricante.",
       "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível por bujão na face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
       "pontos_oleo": {
         "titulo": "Enchimento, nível e dreno · redutor da oficina",
@@ -178,7 +178,7 @@
             ],
             "nome": "Nível",
             "sub": "2 bujões laterais",
-            "texto": "Não há visor: com o redutor parado, retire o bujão de nível e confira se o óleo chega ao furo. São dois bujões de nível na face da tampa cega; o que vale depende da posição em que o redutor está montado.",
+            "texto": "Não há visor: no Complemento ou na Troca, com o redutor parado e bloqueado, retire o bujão de nível e confira se o óleo chega ao furo. Na inspeção visual não se abre o bujão. São dois bujões de nível na face da tampa cega; o que vale depende da posição em que o redutor está montado.",
             "vista": [
               1,
               0.3,
