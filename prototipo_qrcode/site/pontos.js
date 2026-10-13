@@ -1,5 +1,6 @@
 // Modelo 3D na ficha de lubrificação: mostra onde ficam o enchimento, o nível e o dreno.
-// Um toque no botão (ou no rótulo do modelo) vira o redutor para aquele ponto e acende o bujão.
+// Um toque no botão (ou no rótulo do modelo) vira o redutor para aquele ponto, acende os bujões
+// e mostra a foto do redutor real com o ponto marcado.
 (function () {
   "use strict";
 
@@ -8,21 +9,19 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function preencher(texto, e) {
-    var dados = { volume: String(e.volume_ml).replace(".", ","), oleo: e.padrao_fabrica + " (" + e.viscosidade + ")" };
-    return String(texto).replace(/\{(\w+)\}/g, function (m, k) { return dados[k] != null ? dados[k] : m; });
-  }
+  var DICA = "Toque em Enchimento, Nível ou Dreno para ver onde fica. Arraste o modelo para girar.";
 
   function cartao(codigo, e) {
     var p = e.pontos_oleo;
     return '<section class="cartao" id="pontos">' +
-      '<div class="rotulo">Enchimento, nível e dreno · modelo 3D</div>' +
-      '<div class="botoes" id="pontos-botoes">' + p.pontos.map(function (x) {
-        return '<button type="button" aria-pressed="false" data-tag="' + esc(x.tag) + '">' + esc(x.nome) +
+      '<div class="rotulo">' + esc(p.titulo || "Enchimento, nível e dreno · modelo 3D") + '</div>' +
+      '<div class="botoes" id="pontos-botoes">' + p.pontos.map(function (x, i) {
+        return '<button type="button" aria-pressed="false" data-i="' + i + '">' + esc(x.nome) +
           '<small>' + esc(x.sub || "") + '</small></button>';
       }).join("") + '</div>' +
       '<div class="visor" id="pontos-visor"><div class="visor-msg">Carregando o modelo 3D…</div></div>' +
-      '<div class="info-peca" id="pontos-texto">Toque em Enchimento, Nível ou Dreno para ver onde fica. Arraste o modelo para girar.</div>' +
+      '<div class="info-peca" id="pontos-texto">' + DICA + '</div>' +
+      '<div id="pontos-fotos"></div>' +
       (p.nota ? '<p class="dica" style="margin-bottom:0">' + esc(p.nota) + '</p>' : '') +
       '</section>';
   }
@@ -30,36 +29,43 @@
   function ligar(codigo, e) {
     var p = e.pontos_oleo, caixa = document.getElementById("pontos-visor");
     if (!caixa) return;
-    var visor = null, atual = null;
+    var visor = null, atual = -1;
     var botoes = [].slice.call(document.querySelectorAll("#pontos-botoes button"));
-    var texto = document.getElementById("pontos-texto");
+    var texto = document.getElementById("pontos-texto"), fotos = document.getElementById("pontos-fotos");
 
-    function escolher(tag) {
-      atual = tag === atual ? null : tag;
-      var x = p.pontos.filter(function (q) { return q.tag === atual; })[0];
-      botoes.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-tag") === atual)); });
-      texto.innerHTML = x ? '<b>' + esc(x.nome) + (x.sub ? ' – ' + esc(x.sub) : '') + '</b><br>' + esc(preencher(x.texto, e)) +
-          '<br><small>Tag ' + esc(codigo + "-" + x.tag) + '</small>'
-        : 'Toque em Enchimento, Nível ou Dreno para ver onde fica. Arraste o modelo para girar.';
+    function escolher(i) {
+      atual = i === atual ? -1 : i;
+      var x = p.pontos[atual];
+      botoes.forEach(function (b, n) { b.setAttribute("aria-pressed", String(n === atual)); });
+      texto.innerHTML = x ? '<b>' + esc(x.nome) + (x.sub ? ' – ' + esc(x.sub) : '') + '</b><br>' + esc(x.texto) +
+          '<br><small>Tag ' + esc(x.tags.map(function (t) { return codigo + "-" + t; }).join(" · ")) + '</small>' : DICA;
+      fotos.innerHTML = x && x.fotos ? x.fotos.map(function (f) {
+        return '<figure><img loading="lazy" alt="' + esc(f.legenda) + '" src="' + esc(f.src) + '"><figcaption>' + esc(f.legenda) + '</figcaption></figure>';
+      }).join("") : "";
       if (!visor) return;
-      visor.destacarTags(x ? [x.tag] : []);
+      visor.destacarTags(x ? x.tags : []);
       visor.vistaInicial(true, x ? x.vista : null);
     }
-    botoes.forEach(function (b) { b.onclick = function () { escolher(b.getAttribute("data-tag")); }; });
+    botoes.forEach(function (b, n) { b.onclick = function () { escolher(n); }; });
 
     // o modelo 3D é pesado: só carrega quando o cartão aparece na tela
     function carregar() {
-      import("/redutor3d.js").then(function (mod) {
+      import(p.modelo || "/redutor3d.js").then(function (mod) {
         if (!caixa.isConnected) return;
         caixa.innerHTML = "";
+        var marcas = [];
+        p.pontos.forEach(function (x, n) { x.tags.forEach(function (t) { marcas.push({ tag: t, texto: x.nome, i: n }); }); });
         visor = mod.criarVisualizador(caixa, {
-          marcas: p.pontos.map(function (x) { return { tag: x.tag, texto: x.nome }; }),
-          aoMarca: escolher
+          marcas: marcas,
+          aoMarca: function (tag) {
+            var m = marcas.filter(function (q) { return q.tag === tag; })[0];
+            if (m && m.i !== atual) escolher(m.i);
+          }
         });
         visor.explodir(0, false);
         visor.baloes(false);
-        var x = p.pontos.filter(function (q) { return q.tag === atual; })[0];
-        visor.destacarTags(x ? [x.tag] : []);
+        var x = p.pontos[atual];
+        visor.destacarTags(x ? x.tags : []);
         visor.vistaInicial(false, x ? x.vista : null);
       }).catch(function () {
         caixa.innerHTML = '<div class="visor-msg">Modelo 3D indisponível neste aparelho.</div>';
