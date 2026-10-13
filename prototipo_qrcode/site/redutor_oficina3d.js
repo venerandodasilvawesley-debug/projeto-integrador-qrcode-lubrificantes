@@ -10,7 +10,8 @@ export const PECAS = [
   { id: "carcaca", sigla: "CAR", nome: "Carcaça" },
   { id: "respiro", sigla: "RSP", nome: "Respiro (enchimento)" },
   { id: "nivel", sigla: "NIV", nome: "Bujões de nível" },
-  { id: "dreno", sigla: "DRE", nome: "Bujões de dreno" }
+  { id: "dreno", sigla: "DRE", nome: "Bujões de dreno" },
+  { id: "etiqueta", sigla: "QR", nome: "Etiqueta com QR Code" }
 ];
 
 function materiais() {
@@ -87,7 +88,21 @@ function bujao(M, eixo, r) {
   return g;
 }
 
-function montar(M) {
+// etiqueta com o QR Code da ficha (a mesma imagem da etiqueta impressa), colada na carcaça
+function etiqueta(M, imagem) {
+  const g = new THREE.Group();
+  const tex = new THREE.TextureLoader().load(imagem);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.NearestFilter; // mantém os quadradinhos nítidos de perto
+  const frente = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, metalness: 0 });
+  const face = new THREE.PlaneGeometry(38, 38);
+  face.rotateY(Math.PI / 2); // voltada para +X
+  g.add(malha(new THREE.BoxGeometry(0.8, 42, 42), M.zinco, -0.5, 0, 0));
+  g.add(malha(face, frente, 0.05, 0, 0));
+  return g;
+}
+
+function montar(M, qr) {
   const L = [];
   const add = (id, obj, pos, tag, local) => {
     obj.position.set(...pos);
@@ -100,11 +115,15 @@ function montar(M) {
   add("nivel", bujao(M, "x", 8), [75, -22, -34], "NIV-02", "face da tampa cega, no meio");
   add("dreno", bujao(M, "x", 6.5), [75, -82, 0], "DRE-01", "face da tampa cega, embaixo");
   add("dreno", bujao(M, "y", 8), [8, -89, 33], "DRE-02", "base do redutor");
+  if (qr) add("etiqueta", etiqueta(M, qr), [76, 62, 33], "QR-01", "face da tampa cega, em cima");
   return L;
 }
 
-const MODELO = { pecas: PECAS, montar, materiais, casca: [] };
-
+// opcoes.qr = endereço da imagem do QR Code da ficha; sem ela, o modelo fica sem a etiqueta
 export function criarVisualizador(caixaEl, opcoes) {
-  return criarBase(caixaEl, opcoes, MODELO);
+  const qr = opcoes && opcoes.qr;
+  return criarBase(caixaEl, opcoes, {
+    pecas: qr ? PECAS : PECAS.filter((p) => p.id !== "etiqueta"),
+    montar: (M) => montar(M, qr), materiais, casca: []
+  });
 }

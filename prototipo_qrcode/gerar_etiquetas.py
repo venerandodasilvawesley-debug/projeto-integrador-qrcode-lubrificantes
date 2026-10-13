@@ -156,6 +156,11 @@ def main():
         destino.write_text(MODELO.format(codigo=html.escape(codigo), lado=html.escape(args.lado),
                                          url=urls, etiqueta=etiqueta), encoding="utf-8")
         print(f"{destino.name}: " + " | ".join(p[1] for p in partes))
+        # o mesmo QR Code da lubrificação, em imagem, para aparecer colado no modelo 3D da ficha
+        img = lub.get("pontos_oleo", {}).get("qr")
+        if img:
+            subprocess.run(["qrencode", "-t", "PNG", "-l", "H", "-m", "2", "-s", "12", "-o", str(SITE / img.lstrip("/")), partes[0][1]], check=True)
+            print(f"{img}: {partes[0][1]}")
     etiquetas_galoes(base, args.lado)
 
 

@@ -149,6 +149,7 @@
       "pontos_oleo": {
         "titulo": "Enchimento, nível e dreno · redutor da oficina",
         "modelo": "/redutor_oficina3d.js",
+        "qr": "/fotos/qr-lubrificacao-RED-001.png",
         "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: o nível é conferido pelo bujão, e qual dos dois vale depende da posição de montagem.",
         "pontos": [
           {
@@ -213,6 +214,14 @@
                 "legenda": "Bujão da base (parte de baixo do redutor)."
               }
             ]
+          },
+          {
+            "tags": ["QR-01"],
+            "nome": "QR Code",
+            "sub": "etiqueta",
+            "sem_brilho": true,
+            "texto": "É a etiqueta desta ficha: o mecânico aponta o celular para ela, junto ao redutor, e a ficha de lubrificação abre. No modelo é o QR Code de verdade: aproxime com dois dedos para ver. A posição mostrada é uma sugestão: cole em uma superfície lisa e limpa, longe de respingos de óleo, onde dê para ler sem encostar em parte quente ou móvel.",
+            "vista": [1, 0.35, 0.7]
           }
         ]
       },

@@ -9,7 +9,7 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  var DICA = "Toque em Enchimento, Nível ou Dreno para ver onde fica. Arraste o modelo para girar.";
+  var DICA = "Toque num dos botões para ver onde fica. Arraste o modelo para girar.";
 
   function cartao(codigo, e) {
     var p = e.pontos_oleo;
@@ -43,7 +43,8 @@
         return '<figure><img loading="lazy" alt="' + esc(f.legenda) + '" src="' + esc(f.src) + '"><figcaption>' + esc(f.legenda) + '</figcaption></figure>';
       }).join("") : "";
       if (!visor) return;
-      visor.destacarTags(x ? x.tags : []);
+      // a etiqueta do QR Code não acende: o brilho atrapalharia a leitura do código
+      visor.destacarTags(x && !x.sem_brilho ? x.tags : []);
       visor.vistaInicial(true, x ? x.vista : null);
     }
     botoes.forEach(function (b, n) { b.onclick = function () { escolher(n); }; });
@@ -56,6 +57,7 @@
         var marcas = [];
         p.pontos.forEach(function (x, n) { x.tags.forEach(function (t) { marcas.push({ tag: t, texto: x.nome, i: n }); }); });
         visor = mod.criarVisualizador(caixa, {
+          qr: p.qr,
           marcas: marcas,
           aoMarca: function (tag) {
             var m = marcas.filter(function (q) { return q.tag === tag; })[0];
@@ -65,7 +67,7 @@
         visor.explodir(0, false);
         visor.baloes(false);
         var x = p.pontos[atual];
-        visor.destacarTags(x ? x.tags : []);
+        visor.destacarTags(x && !x.sem_brilho ? x.tags : []);
         visor.vistaInicial(false, x ? x.vista : null);
       }).catch(function () {
         caixa.innerHTML = '<div class="visor-msg">Modelo 3D indisponível neste aparelho.</div>';
