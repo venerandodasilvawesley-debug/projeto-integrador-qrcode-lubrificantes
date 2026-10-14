@@ -126,7 +126,7 @@
     "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005).",
     "lubrificacao": {
       "nome": "Redutor coroa e rosca WEG-Cestari (redutor da oficina)",
-      "modelo": "Código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
+      "modelo": "Linha Magma M, tamanho 06 · código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
       "local": "Oficina de mecânica do SENAI Três Lagoas",
       "posicao": "vertical",
       "tag_oleo": "OLE-04",
@@ -138,13 +138,13 @@
       "padrao_fabrica": "óleo sintético CLP PAO",
       "viscosidade": "ISO VG 460",
       "equivalentes": [
-        "Mobil SHC 634",
-        "Shell Omala S4 GXV 460",
-        "Klübersynth GEM 4-460 N",
-        "(sintéticos PAO ISO VG 460: conferir a ficha técnica antes de usar)"
+        "ExxonMobil SHC 634",
+        "Shell Omala S4 GX 460",
+        "Klübersynth EG4-460",
+        "(sintéticos ISO VG 460 recomendados no manual WEG-Cestari, seção 6.6; o manual cita também Klüber Syntheso D460 EP e Lubrax Syntesis Gear 0-460: conferir se a base é PAO antes de usar)"
       ],
-      "volume_ml": 600,
-      "volumes_por_posicao": "600 mL na posição de montagem vertical (informado pela equipe; a placa não traz o volume). Em outra posição o volume muda: confirmar no manual do fabricante.",
+      "volume_ml": 870,
+      "volumes_por_posicao": "0,87 L (870 mL), conforme o manual da linha coroa e rosca WEG-Cestari, seção 6.2 (Magma M, tamanho 06 simples). O manual informa que esse volume vale para todas as posições de trabalho.",
       "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível por bujão na face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
       "pontos_oleo": {
         "titulo": "Enchimento, nível e dreno · redutor da oficina",
