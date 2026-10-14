@@ -9,7 +9,7 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  var DICA = "Toque num dos botões para ver onde fica. Arraste o modelo para girar.";
+  var DICA = "Toque num dos botões para ver onde fica. Arraste para os lados para girar o modelo; com dois dedos, aproxima.";
 
   function cartao(codigo, e) {
     var p = e.pontos_oleo;
