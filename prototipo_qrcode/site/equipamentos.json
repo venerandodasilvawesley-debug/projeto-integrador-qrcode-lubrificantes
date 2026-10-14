@@ -144,6 +144,7 @@
         "(sintéticos ISO VG 460 recomendados no manual WEG-Cestari, seção 6.6; o manual cita também Klüber Syntheso D460 EP e Lubrax Syntesis Gear 0-460: conferir se a base é PAO antes de usar)"
       ],
       "volume_ml": 870,
+      "data_ultima_troca": "2026-10-14",
       "volumes_por_posicao": "0,87 L (870 mL), conforme o manual da linha coroa e rosca WEG-Cestari, seção 6.2 (Magma M, tamanho 06 simples). O manual informa que esse volume vale para todas as posições de trabalho.",
       "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível por bujão na face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
       "pontos_oleo": {
