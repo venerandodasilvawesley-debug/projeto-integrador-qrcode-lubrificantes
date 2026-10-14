@@ -146,12 +146,12 @@
       "volume_ml": 870,
       "data_ultima_troca": "2026-10-14",
       "volumes_por_posicao": "0,87 L (870 mL), conforme o manual da linha coroa e rosca WEG-Cestari, seção 6.2 (Magma M, tamanho 06 simples). O manual informa que esse volume vale para todas as posições de trabalho.",
-      "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível por bujão na face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
+      "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível pelo bujão do meio da face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
       "pontos_oleo": {
         "titulo": "Enchimento, nível e dreno · redutor da oficina",
         "modelo": "/redutor_oficina3d.js",
         "qr": "/fotos/qr-lubrificacao-RED-001.png",
-        "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: o nível é conferido pelo bujão, e qual dos dois vale depende da posição de montagem.",
+        "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: na posição de montagem adotada (vertical, placa para cima), o nível é conferido pelo bujão do meio da face da tampa cega.",
         "pontos": [
           {
             "tags": [
@@ -174,12 +174,11 @@
           },
           {
             "tags": [
-              "NIV-01",
               "NIV-02"
             ],
             "nome": "Nível",
-            "sub": "2 bujões laterais",
-            "texto": "Não há visor: no Complemento ou na Troca, com o redutor parado e bloqueado, retire o bujão de nível e confira se o óleo chega ao furo. Na inspeção visual não se abre o bujão. São dois bujões de nível na face da tampa cega; o que vale depende da posição em que o redutor está montado.",
+            "sub": "bujão do meio",
+            "texto": "Não há visor: no Complemento ou na Troca, com o redutor parado e bloqueado, retire o bujão de nível e confira se o óleo chega ao furo. Nesta posição de montagem, o bujão de nível é o do meio da face da tampa cega (o de cima não é usado). Na inspeção visual não se abre o bujão.",
             "vista": [
               1,
               0.3,
@@ -188,7 +187,7 @@
             "fotos": [
               {
                 "src": "/fotos/red-nivel-dreno.jpg",
-                "legenda": "Face da tampa cega: dois bujões de nível e, embaixo, o de dreno."
+                "legenda": "Face da tampa cega: bujão de nível (no meio) e, embaixo, o de dreno."
               }
             ]
           },
@@ -208,7 +207,7 @@
             "fotos": [
               {
                 "src": "/fotos/red-nivel-dreno.jpg",
-                "legenda": "Dreno: o bujão mais baixo da face da tampa cega."
+                "legenda": "Dreno: o bujão mais baixo da face da tampa cega (no meio fica o de nível)."
               },
               {
                 "src": "/fotos/red-dreno-base.jpg",
@@ -217,12 +216,18 @@
             ]
           },
           {
-            "tags": ["QR-01"],
+            "tags": [
+              "QR-01"
+            ],
             "nome": "QR Code",
             "sub": "etiqueta",
             "sem_brilho": true,
             "texto": "É a etiqueta desta ficha: o mecânico aponta o celular para ela, junto ao redutor, e a ficha de lubrificação abre. No modelo é o QR Code de verdade: aproxime com dois dedos para ver. A posição mostrada é uma sugestão: cole em uma superfície lisa e limpa, longe de respingos de óleo, onde dê para ler sem encostar em parte quente ou móvel.",
-            "vista": [1, 0.35, 0.7]
+            "vista": [
+              1,
+              0.35,
+              0.7
+            ]
           }
         ]
       },
