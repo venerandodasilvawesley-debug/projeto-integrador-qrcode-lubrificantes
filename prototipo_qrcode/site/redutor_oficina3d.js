@@ -208,7 +208,10 @@ function etiqueta(M, imagem) {
   const tex = new THREE.TextureLoader().load(imagem);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.magFilter = THREE.NearestFilter; // mantém os quadradinhos nítidos de perto
-  const frente = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, metalness: 0 });
+  // luz própria (emissiveMap = a própria imagem): a etiqueta não fica preta quando a face
+  // está de costas para a luz da cena, como acontecia de frente em alguns computadores
+  const frente = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, metalness: 0,
+    emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.55 });
   const face = new THREE.PlaneGeometry(38, 38);
   face.rotateY(Math.PI / 2); // voltada para +X
   g.add(malha(new THREE.BoxGeometry(0.8, 42, 42), M.zinco, -0.5, 0, 0));

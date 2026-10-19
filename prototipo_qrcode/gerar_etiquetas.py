@@ -169,7 +169,11 @@ def main():
         # o mesmo QR Code da lubrificação, em imagem, para aparecer colado no modelo 3D da ficha
         img = lub.get("pontos_oleo", {}).get("qr")
         if img:
-            subprocess.run(["qrencode", "-t", "PNG", "-l", "H", "-m", "2", "-s", "12", "-o", str(SITE / img.lstrip("/")), partes[0][1]], check=True)
+            destino_img = SITE / img.lstrip("/")
+            subprocess.run(["qrencode", "-t", "PNG", "-l", "H", "-m", "2", "-s", "12", "-o", str(destino_img), partes[0][1]], check=True)
+            # PNG de 1 bit com paleta virava textura preta em algumas placas de vídeo: grava em RGB de 8 bits
+            from PIL import Image
+            Image.open(destino_img).convert("RGB").save(destino_img, optimize=True)
             print(f"{img}: {partes[0][1]}")
     etiquetas_galoes(base, args.lado)
 
