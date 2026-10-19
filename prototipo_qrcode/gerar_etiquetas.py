@@ -27,8 +27,13 @@ MODELO = """<!doctype html>
 <style>
 body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#000;background:#fff}}
 .instrucoes{{max-width:560px;margin:14px;font-size:.95rem}}
-.etiqueta{{display:inline-flex;gap:.3cm;align-items:center;border:1px solid #000;
-  border-radius:.2cm;padding:.25cm;margin:.5cm;page-break-inside:avoid}}
+.etiqueta{{display:inline-block;vertical-align:top;border:.06cm solid #627c42;
+  border-radius:.2cm;overflow:hidden;margin:.5cm;page-break-inside:avoid}}
+/* faixa verde com as ondas (identidade visual); sai na impressão com as cores */
+.faixa{{background:#627c42 url(/ondas.svg) center/cover no-repeat;color:#fff;font-weight:800;font-size:10pt;
+  letter-spacing:.3px;padding:.12cm .25cm;text-shadow:0 1px 2px rgba(0,0,0,.6);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.corpo{{display:flex;gap:.3cm;align-items:center;padding:.25cm}}
 .etiqueta svg{{display:block;width:{lado}cm;height:{lado}cm}}
 .txt{{max-width:4.2cm;font-size:9pt;line-height:1.25}}
 .cod{{font-size:17pt;font-weight:800;line-height:1.1}}
@@ -50,9 +55,9 @@ body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-
 </html>
 """
 
-ETIQUETA = """<div class="etiqueta">{svg}
+ETIQUETA = """<div class="etiqueta"><div class="faixa">{titulo}</div><div class="corpo">{svg}
 <div class="txt"><div class="cod">{codigo}</div>
-<b>{titulo}</b><br>{nome}<br>Aponte a câmera do celular para o código.{oleo}</div></div>
+{nome}<br>Aponte a câmera do celular para o código.{oleo}</div></div></div>
 """
 
 
@@ -86,9 +91,14 @@ GALOES = """<!doctype html>
 <style>
 body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#000;background:#fff}}
 .instrucoes{{max-width:560px;margin:14px;font-size:.95rem}}
-.etiqueta{{display:inline-flex;gap:.3cm;align-items:center;border:.25cm solid #000;
-  border-radius:.25cm;padding:.25cm;margin:.5cm;page-break-inside:avoid;
+.etiqueta{{display:inline-block;vertical-align:top;border:.25cm solid #000;
+  border-radius:.25cm;overflow:hidden;margin:.5cm;page-break-inside:avoid;
   -webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* faixa verde com as ondas (identidade visual); sai na impressão com as cores */
+.faixa{{background:#627c42 url(/ondas.svg) center/cover no-repeat;color:#fff;font-weight:800;font-size:10pt;
+  letter-spacing:.3px;padding:.12cm .25cm;text-shadow:0 1px 2px rgba(0,0,0,.6);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.corpo{{display:flex;gap:.3cm;align-items:center;padding:.25cm}}
 .etiqueta svg{{display:block;width:{lado}cm;height:{lado}cm}}
 .txt{{max-width:4.6cm;font-size:9pt;line-height:1.25}}
 .cod{{font-size:17pt;font-weight:800;line-height:1.1}}
@@ -107,9 +117,9 @@ OLE-02 e OLE-03 são óleos de exemplo, para demonstrar o aviso de óleo errado.
 </html>
 """
 
-GALAO = """<div class="etiqueta" style="border-color:{hex}">{svg}
+GALAO = """<div class="etiqueta" style="border-color:{hex}"><div class="faixa">GALÃO {cor}</div><div class="corpo">{svg}
 <div class="txt"><div class="cod">{codigo}</div>
-<b>GALÃO {cor}</b><br>{nome}<br>{base} · {visc}</div></div>
+{nome}<br>{base} · {visc}</div></div></div>
 """
 
 

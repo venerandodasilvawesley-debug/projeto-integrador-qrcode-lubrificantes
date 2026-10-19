@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#123a5c">
+<meta name="theme-color" content="#627c42">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icone.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -14,7 +14,7 @@
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   background:#eef1f4;color:#14202b;font-size:17px;line-height:1.4}
 main{max-width:560px;margin:0 auto;padding:12px 14px 40px}
-header{background:#123a5c;color:#fff;padding:14px}
+header{background:#627c42 url(/ondas.svg) center/cover no-repeat;text-shadow:0 1px 3px rgba(0,0,0,.5);color:#fff;padding:14px}
 header div{max-width:560px;margin:0 auto}
 header b{font-size:1.5rem;letter-spacing:.5px}
 header span{display:block;opacity:.9;font-size:.95rem}
@@ -45,7 +45,7 @@ input[type=text],input[type=date]{width:100%;font-size:1.15rem;padding:12px;marg
 .tipos input{position:absolute;opacity:0}
 .tipos span{display:block;text-align:center;padding:14px 4px;border:2px solid #b8c4cf;
   border-radius:10px;font-weight:700;background:#fff}
-.tipos input:checked+span{background:#123a5c;border-color:#123a5c;color:#fff}
+.tipos input:checked+span{background:#4a5e31;border-color:#4a5e31;color:#fff}
 .tipos input:focus-visible+span{outline:3px solid #e0a100}
 .confirma{display:flex;gap:12px;align-items:center;background:#eef1f4;border-radius:10px;
   padding:12px;font-weight:700}
@@ -55,18 +55,18 @@ button.salvar{width:100%;margin-top:16px;padding:16px;font-family:inherit;font-s
 #aviso-temp{display:none;color:#c22525;font-weight:700;margin-top:6px}
 table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
 td,th{text-align:left;padding:6px 4px;border-bottom:1px solid #dde3e9;vertical-align:top}
-a,button.link{color:#123a5c}
+a,button.link{color:#4a5e31}
 button.link{background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer}
 .rodape{margin-top:18px;font-size:.85rem;text-align:center}
 #estado-offline{max-width:560px;margin:0 auto 24px;padding:0 14px;color:#3d4c5a}
 #estado-offline b.pronto{color:#14602f}#estado-offline b.salvando{color:#8a6300}
 /* abas: Lubrificação | Inspeção */
-.abas{position:sticky;top:0;z-index:5;background:#123a5c;padding:0 14px 10px}
+.abas{position:sticky;top:0;z-index:5;background:#627c42;padding:0 14px 10px}
 .abas div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .abas button{font:inherit;font-weight:800;font-size:1.05rem;padding:12px 6px;border:2px solid #fff;
   border-radius:10px;background:transparent;color:#fff;cursor:pointer;line-height:1.15}
 .abas button small{display:block;font-weight:600;font-size:.78rem;opacity:.85}
-.abas button[aria-selected=true]{background:#fff;color:#123a5c}
+.abas button[aria-selected=true]{background:#fff;color:#4a5e31}
 .abas button:focus-visible{outline:3px solid #e0a100}
 main.larga,.larga .abas div{max-width:1180px}
 .larga header div{max-width:1180px}
@@ -83,10 +83,10 @@ main.larga,.larga .abas div{max-width:1180px}
 .visor-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
   padding:20px;color:#5b6b7a;font-weight:600}
 .baloes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.balao{position:absolute;left:0;top:0;width:26px;height:26px;padding:0;border-radius:50%;border:2px solid #123a5c;
-  background:#fff;color:#123a5c;font:700 12px/22px system-ui,sans-serif;text-align:center;pointer-events:auto;cursor:pointer}
+.balao{position:absolute;left:0;top:0;width:26px;height:26px;padding:0;border-radius:50%;border:2px solid #4a5e31;
+  background:#fff;color:#4a5e31;font:700 12px/22px system-ui,sans-serif;text-align:center;pointer-events:auto;cursor:pointer}
 .chamadas{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.chamadas line{stroke:#123a5c;stroke-width:1.5}.chamadas circle{fill:#123a5c}
+.chamadas line{stroke:#4a5e31;stroke-width:1.5}.chamadas circle{fill:#4a5e31}
 .balao.ativo{background:#e0a100;border-color:#7a5600;color:#14202b}
 .balao.apagado{opacity:.35}
 .visor-ctrl{margin-top:10px}
@@ -94,8 +94,8 @@ main.larga,.larga .abas div{max-width:1180px}
 .faixa input{flex:1;min-width:0;height:28px}
 .botoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin-top:8px}
 .botoes button,.nav button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 4px;border-radius:10px;
-  border:2px solid #123a5c;background:#fff;color:#123a5c;cursor:pointer}
-.botoes button[aria-pressed=true]{background:#123a5c;color:#fff}
+  border:2px solid #4a5e31;background:#fff;color:#4a5e31;cursor:pointer}
+.botoes button[aria-pressed=true]{background:#4a5e31;color:#fff}
 .info-peca{margin-top:10px;background:#eef1f4;border-radius:10px;padding:10px;font-size:.92rem}
 .legenda{box-shadow:none;padding:6px 0 0;margin-top:6px}
 .legenda table.bom{font-size:.88rem}.bom td:first-child{font-weight:800;width:2em}.bom button.link{text-align:left;font-weight:700}
@@ -112,28 +112,28 @@ main.larga,.larga .abas div{max-width:1180px}
 .sap-fundo{position:fixed;inset:0;background:rgba(20,32,43,.65);z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:10px}
 .sap-doc{background:#fff;border-radius:14px;padding:16px;width:100%;max-width:520px;max-height:92vh;overflow:auto}
 .sap-doc h2{margin:6px 0 0}.sap-doc dt{font-size:.8rem;color:#5b6b7a;text-transform:uppercase;letter-spacing:.4px}
-.sap-selo{display:inline-block;background:#123a5c;color:#fff;border-radius:6px;padding:3px 8px;font-size:.78rem;font-weight:700}
-button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;font-weight:800;border:2px solid #123a5c;
-  border-radius:10px;background:#fff;color:#123a5c;font-family:inherit}
+.sap-selo{display:inline-block;background:#4a5e31;color:#fff;border-radius:6px;padding:3px 8px;font-size:.78rem;font-weight:700}
+button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;font-weight:800;border:2px solid #4a5e31;
+  border-radius:10px;background:#fff;color:#4a5e31;font-family:inherit}
 .foto-campo{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
-.foto-btn{display:inline-block;margin:0;padding:10px 14px;font-weight:800;border:2px solid #123a5c;border-radius:10px;background:#fff;color:#123a5c;cursor:pointer}
+.foto-btn{display:inline-block;margin:0;padding:10px 14px;font-weight:800;border:2px solid #4a5e31;border-radius:10px;background:#fff;color:#4a5e31;cursor:pointer}
 .foto-btn input{position:absolute;opacity:0;width:1px;height:1px}.foto-btn:focus-within{outline:3px solid #e0a100}
 .foto-mini{display:block;max-width:120px;max-height:120px;border-radius:8px;border:1px solid #b8c4cf}
 .foto-grande{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:8px}
 .cor-galao{display:flex;align-items:center;gap:8px;margin:0 0 6px}
 .cor-galao i{width:34px;height:22px;border-radius:5px;border:2px solid #14202b;flex:none}
 .sub-abas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.sub-abas button{font:inherit;font-weight:800;padding:12px 8px;border-radius:10px;border:2px solid #123a5c;background:#fff;
-  color:#123a5c;cursor:pointer;line-height:1.15}
+.sub-abas button{font:inherit;font-weight:800;padding:12px 8px;border-radius:10px;border:2px solid #4a5e31;background:#fff;
+  color:#4a5e31;cursor:pointer;line-height:1.15}
 .sub-abas button small{display:block;font-weight:600;font-size:.75rem;opacity:.8}
-.sub-abas button[aria-selected=true]{background:#123a5c;color:#fff}
+.sub-abas button[aria-selected=true]{background:#4a5e31;color:#fff}
 .pop-cab h2{margin:4px 0 8px;font-size:1.2rem}
 .pop-ctrl{margin-top:10px;font-size:.9rem}.pop-ctrl th{color:#5b6b7a;font-size:.75rem;text-transform:uppercase;white-space:nowrap}
 .pop-exec{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;
   background:#eef1f4;border-radius:10px;padding:10px}
-.pop-exec button,.pop-3d{font:inherit;font-weight:700;font-size:.9rem;padding:10px 12px;border-radius:10px;border:2px solid #123a5c;
-  background:#fff;color:#123a5c;cursor:pointer}
-.pop-3d{margin-top:6px;background:#123a5c;color:#fff}
+.pop-exec button,.pop-3d{font:inherit;font-weight:700;font-size:.9rem;padding:10px 12px;border-radius:10px;border:2px solid #4a5e31;
+  background:#fff;color:#4a5e31;cursor:pointer}
+.pop-3d{margin-top:6px;background:#4a5e31;color:#fff}
 .pop-sum ol{margin:6px 0 0;padding-left:22px}.pop-sum li{margin:4px 0}
 .pop-doc{padding:4px 14px 14px}
 .pop-sec{box-shadow:none;border-bottom:1px solid #dde3e9;border-radius:0;margin:0;padding:12px 0}
@@ -142,7 +142,7 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .pop-corpo h4{margin:14px 0 6px;font-size:1rem}
 .pop-corpo ul{padding-left:22px}.pop-corpo li{margin:4px 0}
 .pop-num{list-style:none;padding:0;margin:6px 0}.pop-num li{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
-.pop-n{font-weight:800;color:#123a5c;min-width:2.2em}
+.pop-n{font-weight:800;color:#4a5e31;min-width:2.2em}
 .pop-ck{width:26px;height:26px;flex:none;margin:0}
 .pop-num li:has(.pop-ck:checked){color:#5b6b7a;text-decoration:line-through;text-decoration-color:#9aa7b3}
 .pop-etapa{border:1px solid #dde3e9;border-radius:10px;padding:4px 12px 12px;margin-top:10px}
@@ -151,23 +151,23 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .pop-nota{background:#fff3cd;border-left:6px solid #e0a100;border-radius:8px;padding:8px 10px}
 .pop-def{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px}.pop-def dt{margin:0}.pop-def dd{margin:0}
 @media (max-width:480px){.pop-def{grid-template-columns:1fr}.pop-def dt{margin-top:6px}}
-.pop-aplic,.pop-comp{background:#eef4fb;border-left:6px solid #123a5c;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.92rem}
+.pop-aplic,.pop-comp{background:#eef3e6;border-left:6px solid #4a5e31;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.92rem}
 .pop-aprov{margin-top:8px}.pop-aprov td{height:34px;border-bottom:1px solid #9aa7b3}
 .acao-pop{margin-top:10px;background:#fbdcdc;border-left:6px solid #c22525;border-radius:8px;padding:10px 12px;font-size:.92rem}
 .acao-pop .rotulo{display:block}.acao-pop ul{margin:6px 0 0;padding-left:20px}
 .peca-acoes{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
-.peca-acoes button.sec{background:#fff;color:#123a5c}
-.peca-acoes button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 14px;border-radius:10px;border:2px solid #123a5c;
-  background:#123a5c;color:#fff;cursor:pointer}
+.peca-acoes button.sec{background:#fff;color:#4a5e31}
+.peca-acoes button{font:inherit;font-weight:700;font-size:.9rem;padding:10px 14px;border-radius:10px;border:2px solid #4a5e31;
+  background:#4a5e31;color:#fff;cursor:pointer}
 .cartao-det{margin-top:12px}
 .ficha dt{font-size:.8rem;color:#5b6b7a;text-transform:uppercase;letter-spacing:.4px}
 .progresso .barra{height:6px;background:#dde3e9;border-radius:3px;overflow:hidden}
-.progresso .barra i{display:block;height:100%;background:#123a5c}
+.progresso .barra i{display:block;height:100%;background:#4a5e31}
 .pontos{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 12px}
 .ponto{width:34px;height:34px;border-radius:50%;border:2px solid #b8c4cf;background:#fff;font:700 .8rem system-ui,sans-serif;
   color:#14202b;cursor:pointer;padding:0}
-.ponto.atual{border-color:#123a5c;box-shadow:0 0 0 3px #e0a100}
-.secao-tag{display:inline-block;background:#123a5c;color:#fff;border-radius:6px;padding:3px 8px;font-size:.8rem;font-weight:700}
+.ponto.atual{border-color:#4a5e31;box-shadow:0 0 0 3px #e0a100}
+.secao-tag{display:inline-block;background:#4a5e31;color:#fff;border-radius:6px;padding:3px 8px;font-size:.8rem;font-weight:700}
 .dica{font-size:.92rem;color:#3d4c5a}
 .ref{background:#eef1f4;border-left:6px solid #5b6b7a;border-radius:8px;padding:8px 10px;margin:8px 0 12px;font-size:.92rem}
 .verificar{margin:6px 0 8px;padding-left:22px}.verificar li{margin:4px 0}
@@ -180,7 +180,7 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .opcoes input,.status input{position:absolute;opacity:0}
 .opcoes span,.status span{display:flex;align-items:center;justify-content:center;min-height:52px;text-align:center;
   padding:8px 6px;border:2px solid #b8c4cf;border-radius:10px;font-weight:700;background:#fff;font-size:.95rem;cursor:pointer}
-.opcoes input:checked+span{background:#123a5c;border-color:#123a5c;color:#fff}
+.opcoes input:checked+span{background:#4a5e31;border-color:#4a5e31;color:#fff}
 .status input:checked+span.st-c{background:#1c8a45;border-color:#1c8a45;color:#fff}
 .status input:checked+span.st-a{background:#e0a100;border-color:#e0a100;color:#14202b}
 .status input:checked+span.st-nc{background:#c22525;border-color:#c22525;color:#fff}
@@ -206,9 +206,9 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 .tipos span small{display:block;font-weight:600;font-size:.78rem}
 #vida-status b.fazer{display:block;margin-top:6px}
 /* modelo 3D da lubrificação: rótulos de enchimento, nível e dreno */
-.marca{position:absolute;left:0;top:0;padding:3px 9px;border-radius:999px;border:2px solid #123a5c;background:#fff;color:#123a5c;
+.marca{position:absolute;left:0;top:0;padding:3px 9px;border-radius:999px;border:2px solid #4a5e31;background:#fff;color:#4a5e31;
   font:800 .8rem/1.2 system-ui,sans-serif;white-space:nowrap;pointer-events:auto;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.marca::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:10px;margin-left:-1px;background:#123a5c}
+.marca::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:10px;margin-left:-1px;background:#4a5e31}
 .marca.ativo{background:#e0a100;border-color:#7a5600;color:#14202b;font-size:.95rem}.marca.ativo::after{background:#7a5600}
 .marca.atras{opacity:.4}
 #pontos-botoes{grid-template-columns:repeat(auto-fit,minmax(105px,1fr))}
@@ -220,7 +220,7 @@ button.sap{display:block;width:100%;margin-top:10px;padding:12px;font-size:1rem;
 #pontos-fotos figcaption{font-size:.85rem;color:#3d4c5a;margin-top:4px}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .nav button{font-size:1.1rem;padding:14px}
-.nav button.pri{background:#123a5c;color:#fff}
+.nav button.pri{background:#4a5e31;color:#fff}
 textarea{width:100%;font:inherit;padding:10px;margin-top:4px;border:2px solid #b8c4cf;border-radius:10px}
 .pend{margin:6px 0;padding-left:20px}.pend li{margin:4px 0}
 .etapas{margin:6px 0 0;padding-left:24px}
@@ -235,7 +235,7 @@ table.resumo button.link{text-align:left}
 #escolha{display:none}
 .escolhendo #escolha{display:flex;flex-direction:column;justify-content:center;min-height:100vh;min-height:100dvh;
   padding:24px 16px;color:#fff;
-  background:linear-gradient(rgba(10,30,50,.35),rgba(10,30,50,.55)),#123a5c url(/fundo.jpg) center/cover no-repeat}
+  background:linear-gradient(rgba(10,30,50,.35),rgba(10,30,50,.55)),#4a5e31 url(/fundo.jpg) center/cover no-repeat}
 .escolhendo header,.escolhendo .abas,.escolhendo main{display:none}
 /* QR Code separado (/l/ só lubrificação, /i/ só inspeção): sem abas e sem tela de escolha */
 .uma-aba .abas{display:none}
@@ -247,7 +247,7 @@ table.resumo button.link{text-align:left}
 .escolha-botoes a{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:1.5rem;line-height:1.15;
   padding:26px 10px;border:3px solid #fff;border-radius:16px;background:rgba(18,58,92,.88);color:#fff;
   box-shadow:0 4px 14px rgba(0,0,0,.35)}
-.escolha-botoes a:first-child{background:#fff;color:#123a5c}
+.escolha-botoes a:first-child{background:#fff;color:#4a5e31}
 .escolha-botoes a small{display:block;font-weight:600;font-size:1rem;opacity:.9}
 .escolha-botoes a:focus-visible{outline:3px solid #e0a100}
 /* semáforo do equipamento (gestão visual): faixa na tela de escolha e filete sob o cabeçalho */
@@ -295,7 +295,7 @@ body.sem-rolagem{overflow:hidden}
 .galao-cor i{width:34px;height:22px;border-radius:5px;border:2px solid #fff}
 .galao-caixa .nav button{background:#fff}.galao-caixa .nav button.pri{background:#e0a100;border-color:#e0a100;color:#14202b}
 .passo-topo{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700;margin-bottom:8px}
-.passo-topo button{font:inherit;font-weight:700;border:2px solid #123a5c;border-radius:10px;background:#fff;color:#123a5c;padding:6px 12px}
+.passo-topo button{font:inherit;font-weight:700;border:2px solid #4a5e31;border-radius:10px;background:#fff;color:#4a5e31;padding:6px 12px}
 .passo-img{margin-top:10px}.passo-img .foto-grande{max-height:45vh}
 .passo-visor{height:min(70vw,320px);min-height:220px}
 .passo-caixa h2{font-size:1.5rem;margin:14px 0 6px}
