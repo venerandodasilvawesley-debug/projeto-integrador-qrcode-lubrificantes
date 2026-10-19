@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Kit da cronometragem – RED-001</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; margin: 0; }
+  .pagina { page-break-after: always; }
+  .pagina:last-child { page-break-after: auto; }
+  h1 { font-size: 15pt; margin: 0 0 4px; }
+  h2 { font-size: 12pt; margin: 14px 0 4px; }
+  .sub { font-size: 9.5pt; color: #333; margin-bottom: 10px; }
+  ol, ul { margin: 4px 0 4px 20px; padding: 0; }
+  li { margin: 3px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td { border: 1px solid #000; padding: 5px 6px; text-align: left; vertical-align: middle; }
+  th { background: #e6e6e6; font-size: 10pt; }
+  td.alto { height: 30px; }
+  .caixa { border: 1.5px solid #000; padding: 10px 12px; margin-bottom: 12px; }
+  .linha { border-bottom: 1px solid #000; display: inline-block; min-width: 140px; height: 16px; }
+  .meia { height: 128mm; overflow: hidden; }
+  .corte { border-top: 1px dashed #777; margin: 6px 0 10px; font-size: 8pt; color: #777; text-align: center; }
+  .op { display: inline-block; margin-right: 18px; }
+  .op::before { content: ""; display: inline-block; width: 11px; height: 11px; border: 1px solid #000; margin-right: 5px; vertical-align: -1px; }
+  .gab td:first-child { width: 32%; font-weight: bold; }
+  .peq { font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<!-- 1. Roteiro do cronometrista -->
+<section class="pagina">
+  <h1>Roteiro do cronometrista – cronometragem RED-001</h1>
+  <div class="sub">PI Técnico em Mecânica – Sistema de identificação de lubrificantes por QR Code · Redutor WEG-Cestari, 1:25, posição vertical</div>
+
+  <h2>Antes do dia</h2>
+  <ol>
+    <li>Imprimir: 10 ordens de serviço, 5 formulários de papel, 1 folha de coleta e este roteiro.</li>
+    <li>Imprimir a etiqueta do redutor (<i>ficha-lubrificacao.vercel.app/etiqueta-RED-001.html</i>), plastificar e colar no redutor com fita dupla-face.</li>
+    <li>Deixar junto ao redutor o material do método tradicional: o <b>manual do fabricante</b> (impresso ou em PDF num celular) e o formulário de papel com caneta.</li>
+    <li>Testar o QR Code com o celular que será usado: tem que abrir a ficha. Abrir uma vez com internet, para a ficha funcionar mesmo sem rede.</li>
+    <li>Escolher os 5 participantes (alunos da turma) e numerar de 1 a 5.</li>
+  </ol>
+
+  <h2>Ordem dos métodos (para não favorecer nenhum)</h2>
+  <table>
+    <tr><th>Participante</th><th>1º método</th><th>2º método</th></tr>
+    <tr><td>1, 3 e 5</td><td>Tradicional (placa + manual + papel)</td><td>QR Code (celular)</td></tr>
+    <tr><td>2 e 4</td><td>QR Code (celular)</td><td>Tradicional (placa + manual + papel)</td></tr>
+  </table>
+
+  <h2>Como medir (cronômetro do celular, botão “Volta”)</h2>
+  <ol>
+    <li>Explique só a regra: “Você vai receber uma ordem de serviço. Fale em voz alta cada resposta quando encontrar”. Não mostre onde estão as informações.</li>
+    <li><b>Iniciar</b> o cronômetro no momento em que entregar a ordem de serviço.</li>
+    <li><b>Volta 1 = Etapa A</b>: quando o participante falar o <b>lubrificante e a viscosidade</b>.</li>
+    <li><b>Volta 2 = Etapa B</b>: quando falar o <b>volume</b> e <b>apontar</b> o enchimento, o nível e o dreno no redutor.</li>
+    <li><b>Parar = Etapa C</b>: quando o registro estiver pronto (formulário preenchido e assinado, ou “Salvar” tocado no celular).</li>
+    <li>Anotar na folha de coleta o tempo de cada volta, em segundos, e se as respostas estavam certas (gabarito abaixo).</li>
+    <li>Ninguém ajuda durante a tarefa. Se o participante errar, deixe seguir e anote o erro: errar também é resultado.</li>
+    <li>O participante só faz o 2º método depois de todos terminarem o 1º, para os outros não verem as respostas.</li>
+  </ol>
+
+  <h2>Gabarito (só para o cronometrista)</h2>
+  <table class="gab">
+    <tr><td>A. Lubrificante</td><td>Óleo sintético PAO (CLP PAO), viscosidade <b>ISO VG 460</b></td></tr>
+    <tr><td>B. Volume</td><td><b>0,87 L</b> (870 mL)</td></tr>
+    <tr><td>B. Enchimento</td><td>Pelo <b>respiro</b> de latão, na face de cima</td></tr>
+    <tr><td>B. Nível</td><td><b>Bujão do meio</b> da face da tampa cega (não tem visor)</td></tr>
+    <tr><td>B. Dreno</td><td><b>Bujão mais baixo</b> da face da tampa cega e bujão da <b>base</b></td></tr>
+    <tr><td>C. Registro</td><td>Tipo “Inspeção”, equipamento RED-001, nome do executante</td></tr>
+  </table>
+  <p class="peq">A aplicação do óleo não é feita: é igual nos dois métodos. O deslocamento até a sala de manutenção também não entra, por isso o ganho medido é uma estimativa conservadora.</p>
+</section>
+
+<!-- 2. Ordens de serviço (2 por folha) -->
+<section class="pagina">
+  <div class="meia">
+    <div class="caixa">
+      <h1>ORDEM DE SERVIÇO Nº ______</h1>
+      <p><b>Equipamento:</b> RED-001 – Redutor coroa e rosca WEG-Cestari (oficina de mecânica)<br>
+      <b>Posição de trabalho:</b> vertical (placa do fabricante para cima)<br>
+      <b>Serviço:</b> inspeção de lubrificação<br>
+      <b>Participante nº:</b> ____ &nbsp;&nbsp; <b>Método:</b> <span class="op">Tradicional</span><span class="op">QR Code</span></p>
+      <p><b>Tarefa – fale cada resposta em voz alta assim que encontrar:</b></p>
+      <ol>
+        <li>Qual é o lubrificante deste redutor e a viscosidade?</li>
+        <li>Qual é o volume de óleo? Mostre no redutor onde fica o enchimento, o nível e o dreno.</li>
+        <li>Registre a inspeção (no formulário de papel ou no celular, conforme o método).</li>
+      </ol>
+      <p class="peq">Não é preciso abrir o redutor nem aplicar óleo.</p>
+    </div>
+  </div>
+  <div class="corte">✂ recortar aqui</div>
+  <div class="meia">
+    <div class="caixa">
+      <h1>ORDEM DE SERVIÇO Nº ______</h1>
+      <p><b>Equipamento:</b> RED-001 – Redutor coroa e rosca WEG-Cestari (oficina de mecânica)<br>
+      <b>Posição de trabalho:</b> vertical (placa do fabricante para cima)<br>
+      <b>Serviço:</b> inspeção de lubrificação<br>
+      <b>Participante nº:</b> ____ &nbsp;&nbsp; <b>Método:</b> <span class="op">Tradicional</span><span class="op">QR Code</span></p>
+      <p><b>Tarefa – fale cada resposta em voz alta assim que encontrar:</b></p>
+      <ol>
+        <li>Qual é o lubrificante deste redutor e a viscosidade?</li>
+        <li>Qual é o volume de óleo? Mostre no redutor onde fica o enchimento, o nível e o dreno.</li>
+        <li>Registre a inspeção (no formulário de papel ou no celular, conforme o método).</li>
+      </ol>
+      <p class="peq">Não é preciso abrir o redutor nem aplicar óleo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Formulário de papel do método tradicional (2 por folha) -->
+<section class="pagina">
+  <div class="meia">
+    <div class="caixa">
+      <h1>REGISTRO DE LUBRIFICAÇÃO</h1>
+      <table>
+        <tr><td style="width:34%">Data</td><td>____/____/______ &nbsp; Hora: ____:____</td></tr>
+        <tr><td>Equipamento (código)</td><td class="alto"></td></tr>
+        <tr><td>Tipo de intervenção</td><td><span class="op">Inspeção</span><span class="op">Complemento</span><span class="op">Troca</span></td></tr>
+        <tr><td>Lubrificante e viscosidade</td><td class="alto"></td></tr>
+        <tr><td>Quantidade aplicada</td><td class="alto"></td></tr>
+        <tr><td>Nível do óleo</td><td><span class="op">Correto</span><span class="op">Baixo</span></td></tr>
+        <tr><td>Vazamento</td><td><span class="op">Não</span><span class="op">Sim – onde:</span> ______________</td></tr>
+        <tr><td>Observações</td><td class="alto"></td></tr>
+        <tr><td>Executante / assinatura</td><td class="alto"></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="corte">✂ recortar aqui</div>
+  <div class="meia">
+    <div class="caixa">
+      <h1>REGISTRO DE LUBRIFICAÇÃO</h1>
+      <table>
+        <tr><td style="width:34%">Data</td><td>____/____/______ &nbsp; Hora: ____:____</td></tr>
+        <tr><td>Equipamento (código)</td><td class="alto"></td></tr>
+        <tr><td>Tipo de intervenção</td><td><span class="op">Inspeção</span><span class="op">Complemento</span><span class="op">Troca</span></td></tr>
+        <tr><td>Lubrificante e viscosidade</td><td class="alto"></td></tr>
+        <tr><td>Quantidade aplicada</td><td class="alto"></td></tr>
+        <tr><td>Nível do óleo</td><td><span class="op">Correto</span><span class="op">Baixo</span></td></tr>
+        <tr><td>Vazamento</td><td><span class="op">Não</span><span class="op">Sim – onde:</span> ______________</td></tr>
+        <tr><td>Observações</td><td class="alto"></td></tr>
+        <tr><td>Executante / assinatura</td><td class="alto"></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Folha de coleta -->
+<section class="pagina">
+  <h1>Folha de coleta de tempos</h1>
+  <div class="sub">Redutor RED-001 · Local: ______________________________ · Data: ____/____/______ · Cronometrista: ______________________</div>
+  <h2>Método tradicional (placa + manual + papel)</h2>
+  <table>
+    <tr><th>Part.</th><th>Etapa A (s)</th><th>Etapa B (s)</th><th>Etapa C (s)</th><th>Total (s)</th><th>A certa?</th><th>B certa?</th><th>Observação</th></tr>
+    <tr><td>1</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>2</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>3</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>4</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>5</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+  </table>
+  <h2>Método com QR Code (celular)</h2>
+  <table>
+    <tr><th>Part.</th><th>Etapa A (s)</th><th>Etapa B (s)</th><th>Etapa C (s)</th><th>Total (s)</th><th>A certa?</th><th>B certa?</th><th>Observação</th></tr>
+    <tr><td>1</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>2</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>3</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>4</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+    <tr><td>5</td><td class="alto"></td><td></td><td></td><td></td><td>S / N</td><td>S / N</td><td></td></tr>
+  </table>
+  <p class="peq">Ordem: participantes 1, 3 e 5 começam pelo tradicional; 2 e 4 pelo QR Code. Etapa A = lubrificante e viscosidade; Etapa B = volume e pontos; Etapa C = registro.
+  Tempos em segundos, um por volta do cronômetro (não o tempo acumulado). Depois, passar os números para a planilha <b>Cronometragem_QRCode.xlsx</b>.</p>
+</section>
+
+</body>
+</html>
