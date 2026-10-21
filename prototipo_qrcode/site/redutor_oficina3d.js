@@ -13,7 +13,7 @@ import { criarVisualizador as criarBase, anel, noEixo, malha, rolamento } from "
 const CONFIRMAR = " Sem manual de peças: conferir o código gravado na peça ao desmontar.";
 export const PECAS = [
   { id: "carcaca", sigla: "CAR", nome: "Carcaça", tipo: "Carcaça fundida com pés de fixação e flange para motor",
-    material: "Metal fundido, pintado de azul (ferro fundido ou alumínio: confirmar com o teste do ímã)", qtd: "1",
+    material: "Ferro fundido, pintado de azul", qtd: "1",
     espec: "Medida pela equipe: altura 225 mm, largura 116 mm. Massa do redutor 18,1 kg (sem óleo e sem os bujões).",
     funcao: "Aloja e alinha a coroa e a rosca sem fim, guarda o óleo e troca calor com o ar.",
     inspecao: "Trincas, pintura queimada (superaquecimento), vazamentos e aperto dos pés.",
