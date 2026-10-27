@@ -60,10 +60,18 @@
   }
 
   // conteúdo do cartão: última análise (ou "sem análise"), histórico e formulário de nova análise
-  function conteudo(codigo, e, todos, msg) {
+  // demo: última análise de outro equipamento, usada como ensaio de aprendizagem enquanto este não tem a sua
+  function conteudo(codigo, e, todos, msg, demo) {
     var a = e.analise, o = oleoDe(e), ult = todos[todos.length - 1], ref = a.referencia;
     var h = (msg ? '<div class="cartao ok">' + esc(msg) + '</div>' : '');
-    if (!ult) {
+    if (!ult && demo) {
+      var rd = avaliar(demo.e, demo.ult), nd = NIVEL[rd.nivel];
+      h += '<div class="rotulo">Última análise do óleo</div>' +
+        '<div class="semaforo ' + nd.cls + '" style="margin:6px 0 10px"><b>' + nd.txt + '</b>Viscosidade ' + sinal(rd.variacao) +
+        ' em relação ao óleo novo · ' + esc(data(demo.ult.data)) + '</div>' +
+        '<p class="dica">' + esc(a.demonstracao.texto) + ' <a href="/e/' + esc(demo.codigo) + '">Ver a análise completa</a></p>' +
+        (a.como ? '<details><summary>Como será a análise deste redutor</summary>' + lista(a.como) + '</details>' : '');
+    } else if (!ult) {
       h += '<div class="rotulo">Análise do óleo em laboratório</div>' +
         '<div class="grande">Sem análise</div><span class="chip st-nv">' + esc(a.proposta ? "Proposta do projeto" : "Sem ensaio") + '</span>' +
         (a.proposta_texto ? '<p class="dica">' + esc(a.proposta_texto) + '</p>' : '') +
@@ -133,11 +141,25 @@
 
   // cartão embutido na ficha de lubrificação (redutor)
   function cartao(el, codigo, e) {
+    var demo = null;
     function desenhar(msg) {
-      el.innerHTML = conteudo(codigo, e, analises(codigo, e), msg);
+      var todos = analises(codigo, e);
+      el.innerHTML = conteudo(codigo, e, todos, msg, todos.length ? null : demo);
       ligar(el, codigo, desenhar);
     }
     desenhar();
+    // sem análise própria: mostra o ensaio de aprendizagem (equipamento indicado em analise.demonstracao)
+    var dem = e.analise.demonstracao;
+    if (dem && !analises(codigo, e).length) {
+      fetch("/equipamentos.json").then(function (r) { return r.json(); }).then(function (eqs) {
+        var de = eqs[dem.codigo];
+        if (!de || !de.analise) return;
+        var lst = analises(dem.codigo, de);
+        if (!lst.length) return;
+        demo = { codigo: dem.codigo, e: de, ult: lst[lst.length - 1] };
+        desenhar();
+      }).catch(function () {});
+    }
   }
 
   // ficha própria (/e/TOR-001)

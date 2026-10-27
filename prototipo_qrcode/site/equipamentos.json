@@ -292,7 +292,7 @@
       ],
       "analise": {
         "proposta": true,
-        "proposta_texto": "O óleo deste redutor ainda não foi analisado. A proposta é repetir aqui o ensaio feito no óleo do torno (TOR-001): medir a viscosidade do óleo usado no laboratório e comparar com o óleo novo.",
+        "proposta_texto": "O óleo deste redutor ainda não foi analisado: a amostra será coletada na próxima troca e o resultado aparecerá aqui.",
         "como": [
           "Coletar a amostra na troca do óleo, pelo dreno: o redutor tem só 0,87 L, então não se retira óleo só para analisar.",
           "Medir também o óleo novo, no mesmo aparelho, rotor e rotação, para servir de referência.",
@@ -314,7 +314,11 @@
           "densidade20": 0.87,
           "fonte": "Mobil SHC 600 Series – valores típicos; densidade aproximada"
         },
-        "ensaios": []
+        "ensaios": [],
+        "demonstracao": {
+          "codigo": "TOR-001",
+          "texto": "Ensaio de aprendizagem: a equipe fez a análise no laboratório do SENAI com o óleo usado de um torno da oficina, para dominar o método. O óleo deste redutor será analisado na próxima troca."
+        }
       }
     },
     "inspecao": {

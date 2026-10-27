@@ -662,6 +662,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         }).join("") + '</div>' +
         '</details>' +
       '</section>' : '') +
+      (e.analise && window.AnaliseOleo ? '<section class="cartao" id="analise-oleo"></section>' : '') +
       '<section class="cartao">' +
         '<div class="rotulo">Lubrificante</div>' +
         '<div class="grande">' + esc(e.lubrificante) + '</div>' +
@@ -687,7 +688,6 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '</div>' +
       '</section>' +
       (temPontos ? window.PontosOleo.cartao(codigo, e) : '') +
-      (e.analise && window.AnaliseOleo ? '<section class="cartao" id="analise-oleo"></section>' : '') +
       '<details><summary>Mais informações</summary><dl>' +
         '<dt>Modelo</dt><dd>' + esc(e.modelo) + '</dd>' +
         '<dt>Óleos equivalentes (mesma base)</dt><dd>' + esc(e.equivalentes.join("; ")) + '</dd>' +
