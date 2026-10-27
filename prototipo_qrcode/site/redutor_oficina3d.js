@@ -238,8 +238,7 @@ function carcaca(M) {
     p(cil(4.1, 6, "x", 14), M.azulEscuro, -134.5, y, z); // ponta pintada
   }
 
-  // face de cima: placa de identificação (foto da placa real, com os rebites) e adesivo "Retire o lacre"
-  p(deitado(34, 27.7), M.adesivo, 3, 89.12, 3);
+  // face de cima: placa de identificação (peça "placa") e, no meio, a etiqueta do QR (peça "etiqueta")
   return g;
 }
 const deitado = (w, h) => new THREE.PlaneGeometry(w, h).rotateX(-Math.PI / 2);
@@ -327,7 +326,29 @@ function parafusosSaida(M) {
 // tampa cega preta da rosca (+X)
 function tampaCega(M) { return grupo(malha(noEixo(anel(21.5, 0, 2.4), "x"), M.borracha, 79.6, -52, 0)); }
 // tampa central da flange (fundo vermelho), com 4 parafusos Allen
-function tampaFlange(M) { return grupo(malha(noEixo(anel(37, 17, 1.2, 64), "x"), M.primer, -118, -52, 0)); }
+// formato da foto: miolo redondo com 4 orelhas, uma em cada parafuso Allen, e furo central do retentor
+function tampaFlange(M) {
+  const forma = new THREE.Shape(), furo = new THREE.Path(), N = 160;
+  const raio = (t) => {
+    let r = 21;
+    for (let i = 0; i < 4; i++) {
+      let d = Math.abs(t - (i * Math.PI / 2 + 0.25)) % (2 * Math.PI);
+      if (d > Math.PI) d = 2 * Math.PI - d;
+      r = Math.max(r, 21 + 13 * Math.exp(-Math.pow(d / 0.32, 2)));
+    }
+    return r;
+  };
+  // ponto da forma: x = -z e y = y (depois de girar 90° em Y, a espessura fica no eixo X)
+  for (let k = 0; k <= N; k++) {
+    const t = (k / N) * 2 * Math.PI, r = raio(t);
+    if (k === 0) forma.moveTo(-Math.cos(t) * r, Math.sin(t) * r); else forma.lineTo(-Math.cos(t) * r, Math.sin(t) * r);
+  }
+  furo.absarc(0, 0, 17, 0, 2 * Math.PI, true);
+  forma.holes.push(furo);
+  const geo = new THREE.ExtrudeGeometry(forma, { depth: 2, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.6, bevelSegments: 2 });
+  geo.rotateY(Math.PI / 2);
+  return grupo(malha(geo, M.primer, -120.2, -52, 0));
+}
 function parafusosFlange(M) {
   const g = new THREE.Group();
   for (let i = 0; i < 4; i++) {
@@ -370,10 +391,21 @@ function etiqueta(M, imagem) {
   // está de costas para a luz da cena, como acontecia de frente em alguns computadores
   const frente = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, metalness: 0,
     emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.55 });
-  // deitada na face de cima, como foi colada no redutor da oficina (abaixo da etiqueta que já existia)
-  const face = new THREE.PlaneGeometry(24, 24).rotateX(-Math.PI / 2);
-  g.add(malha(new THREE.BoxGeometry(27, 0.6, 27), M.zinco, 0, -0.3, 0));
-  g.add(malha(face, frente, 0, 0.05, 0));
+  // como na foto da face de cima: etiqueta de papel branca, deitada, logo abaixo da placa vermelha,
+  // com o texto à esquerda e o QR Code à direita
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 256;
+  const x = c.getContext("2d");
+  x.fillStyle = "#f7f7f4"; x.fillRect(0, 0, 512, 256);
+  x.fillStyle = "#1b1b1b"; x.font = "bold 64px sans-serif"; x.fillText("RED-001", 26, 100);
+  x.font = "bold 30px sans-serif"; x.fillText("LUBRIFICAÇÃO", 28, 150);
+  x.font = "24px sans-serif"; x.fillText("Aponte a câmera", 28, 196);
+  const papel = new THREE.CanvasTexture(c);
+  papel.colorSpace = THREE.SRGBColorSpace;
+  const fundo = new THREE.MeshStandardMaterial({ map: papel, roughness: 0.9, metalness: 0,
+    emissive: 0xffffff, emissiveMap: papel, emissiveIntensity: 0.45 });
+  g.add(malha(new THREE.PlaneGeometry(60, 30).rotateX(-Math.PI / 2), fundo, 0, 0.02, 0));
+  g.add(malha(new THREE.PlaneGeometry(24, 24).rotateX(-Math.PI / 2), frente, 16, 0.06, 0));
   return g;
 }
 
@@ -390,12 +422,12 @@ function montar(M, qr) {
   const O = [0, 0, 0];
   add("carcaca", carcaca(M), O, O, "CAR-01", "carcaça");
   add("placa", placa(M), O, [0, 30, 0], "PLC-01", "face de cima, junto ao respiro");
-  add("respiro", respiro(M), [5, 89, 34], [0, 70, 0], "RSP-01", "face de cima, junto ao adesivo \"Retire o lacre\"");
+  add("respiro", respiro(M), [5, 89, 34], [0, 70, 0], "RSP-01", "face de cima, na borda, abaixo da etiqueta do QR");
   add("nivel", bujao(M, "x", 9), [75, 68, 0], [55, 0, 0], "NIV-01", "face da tampa cega, em cima");
   add("nivel", bujao(M, "x", 8), [75, -22, -34], [55, 0, 0], "NIV-02", "face da tampa cega, no meio");
   add("dreno", bujao(M, "x", 6.5), [75, -82, 0], [55, 0, 0], "DRE-01", "face da tampa cega, embaixo");
   add("dreno", bujao(M, "y", 8), [8, -89, 33], [0, -35, 45], "DRE-02", "base do redutor");
-  if (qr) add("etiqueta", etiqueta(M, qr), [31, 89.3, -42], [0, 45, 0], "QR-01", "face de cima, abaixo da etiqueta já existente");
+  if (qr) add("etiqueta", etiqueta(M, qr), [4, 89.2, 6], [0, 45, 0], "QR-01", "face de cima, no meio, abaixo da placa de identificação");
   // eixo de saída: a coroa e o lado da tampa saem para a frente (+Z), o eixo e o lado de trás para trás
   add("coroa", coroa(M), O, [0, 0, 150], "COR-01", "coroa de bronze, no eixo de saída");
   add("chaveta", grupo(malha(caixa(8, 5, 28), M.parafuso, 0, 37.5, 0)), O, [0, 32, 150], "CHV-01", "chaveta entre a coroa e o eixo de saída");
