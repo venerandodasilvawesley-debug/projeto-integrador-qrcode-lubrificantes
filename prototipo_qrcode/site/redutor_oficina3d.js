@@ -370,10 +370,10 @@ function etiqueta(M, imagem) {
   // está de costas para a luz da cena, como acontecia de frente em alguns computadores
   const frente = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, metalness: 0,
     emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.55 });
-  const face = new THREE.PlaneGeometry(38, 38);
-  face.rotateY(Math.PI / 2); // voltada para +X
-  g.add(malha(new THREE.BoxGeometry(0.8, 42, 42), M.zinco, -0.5, 0, 0));
-  g.add(malha(face, frente, 0.05, 0, 0));
+  // deitada na face de cima, como foi colada no redutor da oficina (abaixo da etiqueta que já existia)
+  const face = new THREE.PlaneGeometry(24, 24).rotateX(-Math.PI / 2);
+  g.add(malha(new THREE.BoxGeometry(27, 0.6, 27), M.zinco, 0, -0.3, 0));
+  g.add(malha(face, frente, 0, 0.05, 0));
   return g;
 }
 
@@ -395,7 +395,7 @@ function montar(M, qr) {
   add("nivel", bujao(M, "x", 8), [75, -22, -34], [55, 0, 0], "NIV-02", "face da tampa cega, no meio");
   add("dreno", bujao(M, "x", 6.5), [75, -82, 0], [55, 0, 0], "DRE-01", "face da tampa cega, embaixo");
   add("dreno", bujao(M, "y", 8), [8, -89, 33], [0, -35, 45], "DRE-02", "base do redutor");
-  if (qr) add("etiqueta", etiqueta(M, qr), [76, 62, 33], [90, 0, 30], "QR-01", "face da tampa cega, em cima");
+  if (qr) add("etiqueta", etiqueta(M, qr), [31, 89.3, -42], [0, 45, 0], "QR-01", "face de cima, abaixo da etiqueta já existente");
   // eixo de saída: a coroa e o lado da tampa saem para a frente (+Z), o eixo e o lado de trás para trás
   add("coroa", coroa(M), O, [0, 0, 150], "COR-01", "coroa de bronze, no eixo de saída");
   add("chaveta", grupo(malha(caixa(8, 5, 28), M.parafuso, 0, 37.5, 0)), O, [0, 32, 150], "CHV-01", "chaveta entre a coroa e o eixo de saída");
