@@ -997,6 +997,7 @@
         "Mancha no papel-filtro: halo escuro ou anel de partículas indica sujeira ou oxidação.",
         "Medir as duas amostras na mesma temperatura (ideal: 40 °C) para confirmar a variação."
       ]
-    }
+    },
+    "oculto": true
   }
 }

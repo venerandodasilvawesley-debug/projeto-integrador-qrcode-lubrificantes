@@ -532,7 +532,8 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
   }
 
   function telaInicial(equipamentos) {
-    var itens = Object.keys(equipamentos).map(function (c) {
+    // "oculto": ficha que só abre por link (ex.: o ensaio de aprendizagem do torno), fora da lista
+    var itens = Object.keys(equipamentos).filter(function (c) { return !equipamentos[c].oculto; }).map(function (c) {
       var e = daLubrificacao(equipamentos[c]);
       return '<a class="cartao" href="/e/' + esc(c) + '"><div class="rotulo">' + esc(c) +
         '</div><b>' + esc(e.nome) + '</b><br><span>' + esc(e.modelo) + '</span></a>';
