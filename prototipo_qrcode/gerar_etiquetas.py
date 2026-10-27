@@ -157,7 +157,7 @@ def main():
             partes = [("LUBRIFICAÇÃO", f"{base}/l/{codigo}", faixa_oleo(codigo, lub), lub["nome"]),
                       ("INSPEÇÃO E POP", f"{base}/i/{codigo}", "", e["nome"])]
         else:
-            partes = [("MONITORAMENTO" if e.get("tipo") == "monitoramento" else "LUBRIFICAÇÃO",
+            partes = [({"monitoramento": "MONITORAMENTO", "analise_oleo": "ANÁLISE DO ÓLEO"}.get(e.get("tipo"), "LUBRIFICAÇÃO"),
                        f"{base}/e/{codigo}", faixa_oleo(codigo, lub), lub["nome"])]
         etiqueta = "".join(ETIQUETA.format(svg=qr_svg(url), codigo=html.escape(codigo), titulo=titulo,
                                            nome=html.escape(nome), oleo=oleo) for titulo, url, oleo, nome in partes)

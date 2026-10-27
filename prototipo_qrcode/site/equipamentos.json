@@ -871,5 +871,102 @@
       "Não toque em partes girantes. Para inspecionar o rotor, o acoplamento ou o mancal, desligue e bloqueie (LOTO).",
       "Verificações da sucção (filtro, válvula, nível) podem ser feitas com a bomba em operação, sem abrir a tubulação."
     ]
+  },
+  "TOR-001": {
+    "tipo": "analise_oleo",
+    "nome": "Torno mecânico Veker Eco/Diamant",
+    "modelo": "FW Tecnologia (Veker) · linha Eco/Diamant · nº de série 222.929 · fabricado em 09/2013",
+    "local": "Oficina de mecânica – SENAI Três Lagoas",
+    "alertas": [
+      "Para drenar ou completar o óleo: desligue o torno, retire a chave da placa e bloqueie e etiquete (LOTO).",
+      "Use luvas nitrílicas e óculos de proteção; óleo usado em recipiente identificado, para o rerrefino.",
+      "Complete somente com o óleo indicado abaixo. Não misture com óleo de outra marca ou viscosidade."
+    ],
+    "oleo": {
+      "nome": "Ipiranga Ipitur HLP ISO 68",
+      "base": "Mineral hidráulico antidesgaste (DIN 51524-2 HLP)",
+      "viscosidade": "ISO VG 68",
+      "v40": 70.9,
+      "v100": 9.3,
+      "iv": 105,
+      "densidade20": 0.8644,
+      "fonte": "Boletim técnico Ipiranga Ipitur HLP (valores típicos)"
+    },
+    "analise": {
+      "laboratorio": "Laboratório do SENAI Três Lagoas",
+      "aparelho": "Viscosímetro rotacional digital Marte MVD-8 · rotor SPL1 · 30 rpm",
+      "criterio": {
+        "atencao": 10,
+        "critico": 20
+      },
+      "referencia": {
+        "data": "2026-10-23",
+        "mpas": 145.6,
+        "temp_c": 22.7,
+        "descricao": "Óleo novo, tirado do galão",
+        "foto": "/fotos/tor-ensaio-novo.jpg"
+      },
+      "ensaios": [
+        {
+          "data": "2026-10-26",
+          "amostra": "Óleo usado drenado do torno",
+          "leituras": [
+            [
+              91.4,
+              27.4
+            ],
+            [
+              90.9,
+              27.3
+            ],
+            [
+              90.7,
+              27.2
+            ]
+          ],
+          "aspecto": "Esverdeado e turvo; depósito alaranjado no fundo do béquer",
+          "responsavel": "Equipe do PI",
+          "fotos": [
+            [
+              "/fotos/tor-dreno.jpg",
+              "Dreno do óleo usado (26/10)"
+            ],
+            [
+              "/fotos/tor-ensaio-usado.jpg",
+              "Ensaio do óleo usado"
+            ],
+            [
+              "/fotos/tor-oleo-novo.jpg",
+              "Óleo novo (referência)"
+            ],
+            [
+              "/fotos/tor-ensaio-novo.jpg",
+              "Ensaio do óleo novo (23/10)"
+            ]
+          ]
+        }
+      ],
+      "acoes": {
+        "normal": [
+          "Óleo dentro do esperado. Repetir a análise na próxima inspeção programada."
+        ],
+        "atencao": [
+          "Investigar a contaminação: fluido de corte (óleo verde), água (depósito alaranjado) ou reposição com óleo mais fino.",
+          "Corrigir a entrada do contaminante (retentores, proteções, reposições).",
+          "Programar a troca do óleo e repetir a análise depois."
+        ],
+        "critico": [
+          "Trocar o óleo o quanto antes.",
+          "Antes de pôr o óleo novo, achar e corrigir a causa da contaminação.",
+          "Repetir a análise depois de algumas horas de uso."
+        ]
+      },
+      "testes": [
+        "Crepitação (água): uma gota numa chapa a ~130 °C; se estalar, há água.",
+        "Repouso de 24 h: camadas separadas ou água no fundo indicam contaminação.",
+        "Mancha no papel-filtro: halo escuro ou anel de partículas indica sujeira ou oxidação.",
+        "Medir as duas amostras na mesma temperatura (ideal: 40 °C) para confirmar a variação."
+      ]
+    }
   }
 }
