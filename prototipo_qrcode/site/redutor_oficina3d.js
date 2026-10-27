@@ -166,6 +166,11 @@ function corpo() {
   f.lineTo(w, h - r); f.quadraticCurveTo(w, h, w - r, h);
   f.lineTo(-w + r, h); f.quadraticCurveTo(-w, h, -w, h - r);
   f.lineTo(-w, -h + r); f.quadraticCurveTo(-w, -h, -w + r, -h);
+  // passagem do eixo de saída vazado (centro em y = 18): atravessa a carcaça de lado a lado,
+  // como no redutor real, em que dá para ver a luz do outro lado
+  const passagem = new THREE.Path();
+  passagem.absarc(0, 18, 17.3, 0, 2 * Math.PI, true);
+  f.holes.push(passagem);
   const geo = new THREE.ExtrudeGeometry(f, { depth: 104, bevelEnabled: true, bevelThickness: 3, bevelSize: 3, bevelSegments: 3, curveSegments: 6 });
   geo.translate(0, 0, -52);
   const uv = geo.attributes.uv; // a extrusão mede a textura em milímetros: passa para 0–1
@@ -437,7 +442,7 @@ function montar(M, qr) {
   add("parafusos", parafusosSaida(M), O, [0, 0, 285], "PAR-01 a PAR-06", "parafusos da tampa TMP-01");
   add("rolamentos-saida", rolamento(M, 31, 17, 14, "z"), [0, 18, -40], [0, 0, -105], "ROL-02", "eixo de saída, lado oposto");
   add("retentores", retentor(M, 22, 17, 3, "z", [0, 18, -60.4]), O, [0, 0, -135], "RET-02", "eixo de saída, lado oposto");
-  add("eixo-saida", grupo(malha(noEixo(anel(17, 12, 134), "z"), M.aco, 0, 18, 1.5), malha(caixa(6, 3.4, 134.6), M.furo, 0, 31.2, 1.5)),
+  add("eixo-saida", grupo(malha(noEixo(anel(17, 14.5, 126, 48), "z"), M.aco, 0, 18, 1.5), malha(caixa(6, 2.6, 126.4), M.furo, 0, 33.2, 1.5)),
     O, [0, 0, -340], "EIX-01", "eixo de saída vazado");
   // rosca sem fim: sai por baixo, com os rolamentos correndo para as pontas
   add("rosca", rosca(M), O, [0, -150, 0], "RSF-01", "rosca sem fim / eixo de entrada");
