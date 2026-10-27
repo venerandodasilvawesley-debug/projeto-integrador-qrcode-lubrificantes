@@ -277,7 +277,7 @@ titulo(sl, "A solução: uma etiqueta, uma ficha no celular")
 caixa(sl, 0.6, 1.95, 4.2, 2.0,
       ["Página web: não precisa instalar aplicativo.",
        "Depois do primeiro acesso funciona sem internet.",
-       "Etiqueta plastificada colada em cima do redutor."], tam=16, espaco=10)
+       "Etiqueta de papel colada em cima do redutor, com fita crepe: custo zero no protótipo."], tam=16, espaco=10)
 foto(sl, "qr-lubrificacao-RED-001.png", 0.6, 4.1, w=1.7, nome="QR RED-001")
 caixa(sl, 2.5, 4.35, 2.3, 1.2, [[("ficha-lubrificacao", {"negrito": True})], ".vercel.app/l/RED-001"], tam=13, cor=SUAVE, espaco=0)
 for i, arq in enumerate(["image4.png", "image5.png", "image6.png"]):

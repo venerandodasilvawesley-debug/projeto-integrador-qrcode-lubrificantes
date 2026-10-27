@@ -213,7 +213,7 @@ def main():
         f"{INTERV} intervenções anuais, o ganho é de cerca de {R['ano_g']}{NB}h por ano e por redutor, que, ao custo de "
         f"R$ {br(HORA, 2)} por hora do mecânico, corresponde a aproximadamente R$ {R['rs_ano']} por ano (Tabela 3). O custo de "
         "implantação também é baixo: a página foi publicada em um serviço de hospedagem gratuito, e a etiqueta exige apenas "
-        "impressão, plastificação e fita dupla-face [informar o custo da etiqueta]. Assim, o retorno de um único redutor é "
+        "impressão em papel comum e fita crepe, sem custo para a equipe no protótipo. Assim, o retorno de um único redutor é "
         f"pequeno em valor, mas positivo, e cresce com o número de equipamentos: para 100 equipamentos, o ganho estimado é de "
         f"cerca de R$ {R['rs100']} por ano, sem contar o custo da produção parada quando a busca de informações ocorre com o "
         "equipamento desligado.")
