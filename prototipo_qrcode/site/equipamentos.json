@@ -231,7 +231,7 @@
           }
         ]
       },
-      "analise_oleo": "Sem coleta para laboratório neste projeto. A condição do óleo é acompanhada pelo aspecto do óleo no dreno (cor, transparência e partículas), pela temperatura da carcaça e pelas horas de uso.",
+      "analise_oleo": "Proposta do projeto: análise da viscosidade em laboratório (ver o cartão Análise do óleo). Enquanto não houver ensaio, a condição do óleo é acompanhada pelo aspecto no dreno (cor, transparência e partículas), pela temperatura da carcaça e pelas horas de uso.",
       "passo_troca": [
         {
           "titulo": "Separar o material",
@@ -289,7 +289,33 @@
           "texto": "{descarte}",
           "pecas": []
         }
-      ]
+      ],
+      "analise": {
+        "proposta": true,
+        "proposta_texto": "O óleo deste redutor ainda não foi analisado. A proposta é repetir aqui o ensaio feito no óleo do torno (TOR-001): medir a viscosidade do óleo usado no laboratório e comparar com o óleo novo.",
+        "como": [
+          "Coletar a amostra na troca do óleo, pelo dreno: o redutor tem só 0,87 L, então não se retira óleo só para analisar.",
+          "Medir também o óleo novo, no mesmo aparelho, rotor e rotação, para servir de referência.",
+          "O ISO VG 460 é cerca de 10 vezes mais viscoso que o óleo do torno (≈ 900 mPa·s a 25 °C): escolher rotor e rotação que deixem o torque do viscosímetro entre 10 e 90 %.",
+          "Anotar a temperatura de cada leitura e registrar abaixo: a ficha calcula a variação e o semáforo."
+        ],
+        "laboratorio": "Laboratório do SENAI Três Lagoas",
+        "aparelho": "Viscosímetro rotacional digital Marte MVD-8",
+        "dica_registro": "Use o mesmo aparelho, rotor e rotação em todas as medições.",
+        "criterio": {
+          "atencao": 10,
+          "critico": 20
+        },
+        "oleo_ref": {
+          "nome": "ExxonMobil SHC 634 (ISO VG 460, recomendado no manual WEG)",
+          "v40": 460,
+          "v100": 50.7,
+          "iv": 174,
+          "densidade20": 0.87,
+          "fonte": "Mobil SHC 600 Series – valores típicos; densidade aproximada"
+        },
+        "ensaios": []
+      }
     },
     "inspecao": {
       "modelo3d": "WCR28",

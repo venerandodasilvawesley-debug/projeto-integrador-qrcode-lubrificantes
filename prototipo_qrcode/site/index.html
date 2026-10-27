@@ -687,6 +687,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '</div>' +
       '</section>' +
       (temPontos ? window.PontosOleo.cartao(codigo, e) : '') +
+      (e.analise && window.AnaliseOleo ? '<section class="cartao" id="analise-oleo"></section>' : '') +
       '<details><summary>Mais informações</summary><dl>' +
         '<dt>Modelo</dt><dd>' + esc(e.modelo) + '</dd>' +
         '<dt>Óleos equivalentes (mesma base)</dt><dd>' + esc(e.equivalentes.join("; ")) + '</dd>' +
@@ -726,6 +727,7 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
         '<button class="link" id="csv">Registros deste aparelho (CSV)</button> · ' +
         '<a href="/">Todas as fichas</a></p></div>' +
       '<div id="painel-inspecao" role="tabpanel" hidden></div></main>';
+    if (e.analise && window.AnaliseOleo) window.AnaliseOleo.cartao(document.getElementById("analise-oleo"), codigo, e);
     if (temInspecao) {
       if (!so) document.querySelector("header div").insertAdjacentHTML("afterbegin", '<a class="voltar" href="#">‹ Opções</a>');
       prepararAbas(codigo, cadastro, so);
