@@ -407,7 +407,7 @@ notas(sl, "Hora do mecânico: R$ 3.150/mês (CBO 9113-05, Novo Caged via Portal 
 
 # ---------------- 14. análise do óleo ----------------
 sl = S[13]
-titulo(sl, "Análise do óleo no laboratório", "Óleo do torno Veker Eco/Diamant · viscosímetro rotacional Marte MVD-8")
+titulo(sl, "Análise do óleo no laboratório", "Ensaio de aprendizagem · viscosímetro Marte MVD-8 · prof. João Vitor de Moura Barbosa")
 foto_cortada(sl, "tor-dreno.jpg", 0.6, 2.3, 2.45, 3.6, nome="Foto dreno")
 foto_cortada(sl, "tor-ensaio-usado.jpg", 3.2, 2.3, 2.45, 3.6, nome="Foto ensaio")
 caixa(sl, 0.6, 5.95, 5.05, 0.3, "Dreno do óleo usado (26/10) e ensaio no viscosímetro", tam=11, cor=SUAVE)
@@ -421,7 +421,7 @@ selo = forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, 5.95, 4.75, 5.0, 1.2, AMARELO, rai
 caixa(sl, 6.2, 4.83, 4.6, 1.05, [[("ATENÇÃO · viscosidade −17 %", {"negrito": True, "tam": 20})],
                                  "Óleo afinou e mostra sinais de contaminação (verde, turvo, depósito)."],
       tam=14, cor=ESCURO, ancora=MSO_ANCHOR.MIDDLE, espaco=2)
-notas(sl, "Óleo novo: Ipiranga Ipitur HLP ISO 68 (70,9 cSt a 40 °C). As medições foram levadas à mesma temperatura "
+notas(sl, "Ensaio feito no laboratório do SENAI com o auxílio do prof. João Vitor de Moura Barbosa. Óleo novo: Ipiranga Ipitur HLP ISO 68 (70,9 cSt a 40 °C na ficha; medido ≈ 66 cSt, dentro da faixa do VG 68). As medições foram levadas à mesma temperatura "
           "pela curva do próprio óleo (equação de Walther, ASTM D341). Critério usual: até 10 % normal, 10 a 20 % atenção, "
           "acima de 20 % crítico. Suspeitas: fluido de corte, água (depósito alaranjado) ou reposição com óleo mais fino.")
 

@@ -160,7 +160,7 @@ def main():
     # ---------- 2.2.3 cronometragem ----------
     s = trocar_par(s, "cinco participantes [descrever",
         "Para avaliar o ganho de tempo, foi realizada uma cronometragem em ambiente didático com cinco participantes, "
-        "alunos do SENAI Três Lagoas [confirmar a turma], cada um executando a tarefa pelos dois métodos na oficina de "
+        "alunos da turma TEC.203.PRE.008-TL do curso Técnico em Mecânica do SENAI Três Lagoas, cada um executando a tarefa pelos dois métodos na oficina de "
         "mecânica, junto ao redutor. No método tradicional, o participante consultou a placa de identificação e o manual "
         "da linha coroa e rosca do fabricante, em PDF no celular, e registrou a intervenção em formulário de papel. No método "
         "com QR Code, escaneou a etiqueta impressa, afixada no próprio redutor, leu a ficha e registrou a intervenção no "
