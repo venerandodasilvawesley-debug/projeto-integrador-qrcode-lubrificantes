@@ -307,8 +307,8 @@ notas(sl, "Troca simulada em 14/10/2026: próxima troca prevista para 30/06/2028
 # ---------------- 10. modelo 3D ----------------
 sl = S[9]
 titulo(sl, "Modelo 3D do redutor", "Vista explodida e em corte, com a ficha e o tag de cada peça")
-foto(sl, "image7.png", 0.6, 2.3, h=3.95, nome="Vista explodida")
-foto(sl, "image8.png", 6.05, 2.3, h=3.95, nome="Vista em corte")
+foto(sl, "3d-explodido.png", 0.6, 2.25, h=4.1, nome="Vista explodida")
+foto(sl, "3d-corte.png", 6.2, 2.25, h=4.1, nome="Vista em corte")
 notas(sl, "Tocando no número ou na peça, a ficha mostra nome, material, função, o que inspecionar e falhas comuns, "
           "além do tag (ex.: RED-001-COR-01). Peças internas são ilustrativas e devem ser confirmadas numa desmontagem.")
 
