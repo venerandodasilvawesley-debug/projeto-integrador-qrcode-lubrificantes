@@ -243,7 +243,9 @@ function carcaca(M) {
     p(cil(4.1, 6, "x", 14), M.azulEscuro, -134.5, y, z); // ponta pintada
   }
 
-  // face de cima: placa de identificação (peça "placa") e, no meio, a etiqueta do QR (peça "etiqueta")
+  // face de cima: placa de identificação (peça "placa"), adesivo "Retire o lacre" ao lado do respiro e,
+  // logo acima do adesivo, a etiqueta do QR (peça "etiqueta"), como na foto da oficina
+  p(deitado(34, 27.7), M.adesivo, 3, 89.12, 3);
   return g;
 }
 const deitado = (w, h) => new THREE.PlaneGeometry(w, h).rotateX(-Math.PI / 2);
@@ -396,21 +398,10 @@ function etiqueta(M, imagem) {
   // está de costas para a luz da cena, como acontecia de frente em alguns computadores
   const frente = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, metalness: 0,
     emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.55 });
-  // como na foto da face de cima: etiqueta de papel branca, deitada, logo abaixo da placa vermelha,
-  // com o texto à esquerda e o QR Code à direita
-  const c = document.createElement("canvas");
-  c.width = 512; c.height = 256;
-  const x = c.getContext("2d");
-  x.fillStyle = "#f7f7f4"; x.fillRect(0, 0, 512, 256);
-  x.fillStyle = "#1b1b1b"; x.font = "bold 64px sans-serif"; x.fillText("RED-001", 26, 100);
-  x.font = "bold 30px sans-serif"; x.fillText("LUBRIFICAÇÃO", 28, 150);
-  x.font = "24px sans-serif"; x.fillText("Aponte a câmera", 28, 196);
-  const papel = new THREE.CanvasTexture(c);
-  papel.colorSpace = THREE.SRGBColorSpace;
-  const fundo = new THREE.MeshStandardMaterial({ map: papel, roughness: 0.9, metalness: 0,
-    emissive: 0xffffff, emissiveMap: papel, emissiveIntensity: 0.45 });
-  g.add(malha(new THREE.PlaneGeometry(60, 30).rotateX(-Math.PI / 2), fundo, 0, 0.02, 0));
-  g.add(malha(new THREE.PlaneGeometry(24, 24).rotateX(-Math.PI / 2), frente, 16, 0.06, 0));
+  // etiqueta de papel branca pequena, deitada, com o QR Code no meio (como colada na oficina)
+  const papel = new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.9, metalness: 0 });
+  g.add(malha(new THREE.PlaneGeometry(30, 30).rotateX(-Math.PI / 2), papel, 0, 0.02, 0));
+  g.add(malha(new THREE.PlaneGeometry(25, 25).rotateX(-Math.PI / 2), frente, 0, 0.06, 0));
   return g;
 }
 
@@ -427,12 +418,12 @@ function montar(M, qr) {
   const O = [0, 0, 0];
   add("carcaca", carcaca(M), O, O, "CAR-01", "carcaça");
   add("placa", placa(M), O, [0, 30, 0], "PLC-01", "face de cima, junto ao respiro");
-  add("respiro", respiro(M), [5, 89, 34], [0, 70, 0], "RSP-01", "face de cima, na borda, abaixo da etiqueta do QR");
+  add("respiro", respiro(M), [5, 89, 34], [0, 70, 0], "RSP-01", "face de cima, junto ao adesivo \"Retire o lacre\"");
   add("nivel", bujao(M, "x", 9), [75, 68, 0], [55, 0, 0], "NIV-01", "face da tampa cega, em cima");
   add("nivel", bujao(M, "x", 8), [75, -22, -34], [55, 0, 0], "NIV-02", "face da tampa cega, no meio");
   add("dreno", bujao(M, "x", 6.5), [75, -82, 0], [55, 0, 0], "DRE-01", "face da tampa cega, embaixo");
   add("dreno", bujao(M, "y", 8), [8, -89, 33], [0, -35, 45], "DRE-02", "base do redutor");
-  if (qr) add("etiqueta", etiqueta(M, qr), [4, 89.2, 6], [0, 45, 0], "QR-01", "face de cima, no meio, abaixo da placa de identificação");
+  if (qr) add("etiqueta", etiqueta(M, qr), [-29, 89.2, 4], [0, 45, 0], "QR-01", "face de cima, logo acima do adesivo \"Retire o lacre\"");
   // eixo de saída: a coroa e o lado da tampa saem para a frente (+Z), o eixo e o lado de trás para trás
   add("coroa", coroa(M), O, [0, 0, 150], "COR-01", "coroa de bronze, no eixo de saída");
   add("chaveta", grupo(malha(caixa(8, 5, 28), M.parafuso, 0, 37.5, 0)), O, [0, 32, 150], "CHV-01", "chaveta entre a coroa e o eixo de saída");
