@@ -15,7 +15,7 @@ ODT = Path(__file__).with_name("Projeto_Integrador_QRCode_Lubrificantes.odt")
 NB = " "
 
 # ---------- dados da cronometragem (tempo total, em segundos) ----------
-TRAD = [514.64, 643.84, 726.26, 654.55, 646.28]
+TRAD = [503.27, 643.84, 726.26, 654.55, 646.28]
 QR = [213.21, 180.08, 141.18, 178.34, 177.94]
 HORA = 14.32
 INTERV = 12

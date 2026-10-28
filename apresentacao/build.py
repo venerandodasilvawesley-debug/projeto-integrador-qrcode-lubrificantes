@@ -335,7 +335,7 @@ notas(sl, "Mesma ordem de serviço para todos; cronômetro do celular. A aplica�
 sl = S[11]
 titulo(sl, "Resultados", "Tempo total por participante, em minutos")
 nomes = ["Felipe", "Bruno", "Maria Eduarda", "Simone", "Elis"]
-trad = [514.64, 643.84, 726.26, 654.55, 646.28]
+trad = [503.27, 643.84, 726.26, 654.55, 646.28]
 qr = [213.21, 180.08, 141.18, 178.34, 177.94]
 cd = CategoryChartData()
 cd.categories = nomes
