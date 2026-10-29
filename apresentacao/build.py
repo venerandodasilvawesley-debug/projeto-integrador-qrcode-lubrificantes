@@ -310,7 +310,9 @@ titulo(sl, "Modelo 3D do redutor", "Vista explodida e em corte, com a ficha e o 
 foto(sl, "3d-explodido.png", 0.6, 2.25, h=4.1, nome="Vista explodida")
 foto(sl, "3d-corte.png", 6.2, 2.25, h=4.1, nome="Vista em corte")
 notas(sl, "Tocando no número ou na peça, a ficha mostra nome, material, função, o que inspecionar e falhas comuns, "
-          "além do tag (ex.: RED-001-COR-01). Peças internas são ilustrativas e devem ser confirmadas numa desmontagem.")
+          "além do tag (ex.: RED-001-COR-01). Peças internas são ilustrativas e devem ser confirmadas numa desmontagem. "
+          "Na vista em corte aparece o óleo no nível certo, até o bujão do meio (NIV-02): a rosca fica mergulhada e a "
+          "coroa molha embaixo e leva o óleo para o engrenamento.")
 
 # ---------------- 11. cronometragem ----------------
 sl = S[10]
@@ -432,7 +434,7 @@ foto(sl, "tela-tor-topo.jpg", 0.6, 1.9, h=4.4, nome="Tela TOR-001")
 caixa(sl, 3.7, 1.95, 7.2, 2.6,
       [[("TOR-001 (torno): ", {"negrito": True, "cor": AZUL}),
         ("o QR mostra a situação do óleo com semáforo, o que fazer, as fotos do ensaio e o histórico. "
-         "Quem medir de novo digita a viscosidade e a temperatura, e a ficha calcula a variação sozinha.", {})],
+         "Quem lança o resultado é o laboratório, no SAP: a ficha puxa de lá e calcula a variação. O mecânico só consulta.", {})],
        [("RED-001 (redutor): ", {"negrito": True, "cor": AZUL}),
         ("o mesmo cartão entra como proposta: o óleo VG 460 ainda não foi analisado. "
          "A amostra será coletada na troca, porque o redutor tem só 0,87 L.", {})]], tam=16, espaco=12)

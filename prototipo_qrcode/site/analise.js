@@ -217,6 +217,8 @@
       var el = document.getElementById("analise");
       el.innerHTML = conteudo(codigo, e, todos, msg);
       ligar(el, codigo, function (m) { desenhar(m); window.scrollTo(0, 0); });
+      var b = el.querySelector('[data-an="docsap"]');
+      if (b && window.DocSap && ult) b.onclick = function () { docSap({ codigo: codigo, e: e, ult: ult }); };
     }
     desenhar();
   }

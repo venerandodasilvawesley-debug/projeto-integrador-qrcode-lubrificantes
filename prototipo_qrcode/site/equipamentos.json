@@ -924,6 +924,7 @@
       "fonte": "Boletim técnico Ipiranga Ipitur HLP (valores típicos)"
     },
     "analise": {
+      "fonte": "sap",
       "laboratorio": "Laboratório do SENAI Três Lagoas",
       "aparelho": "Viscosímetro rotacional digital Marte MVD-8 · rotor SPL1 · 30 rpm",
       "criterio": {
