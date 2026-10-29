@@ -153,7 +153,7 @@
           bCorte.setAttribute("aria-pressed", String(sim));
           visor.corte(sim);
           caixa.classList.toggle("explodido", sim || visor.explosao > 0.05);
-          if (sim) { if (atual >= 0) escolher(atual); visor.explodir(0, true); texto.innerHTML = "Por dentro: a coroa de bronze, a rosca sem fim, os rolamentos e os eixos. Toque num número para ver a ficha."; }
+          if (sim) { if (atual >= 0) escolher(atual); visor.explodir(0, true); texto.innerHTML = "Por dentro: a coroa de bronze, a rosca sem fim, os rolamentos, os eixos e o óleo no nível certo (até o bujão do meio): a rosca fica mergulhada e a coroa molha embaixo. Toque num número para ver a ficha."; }
           visor.vistaInicial(true, null);
         };
         document.getElementById("pontos-b-vista").onclick = function () { visor.vistaInicial(true, null); };

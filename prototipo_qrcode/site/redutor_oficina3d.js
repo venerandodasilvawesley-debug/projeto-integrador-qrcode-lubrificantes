@@ -446,12 +446,30 @@ function montar(M, qr) {
   return L;
 }
 
+// Óleo no nível certo: banho que enche o fundo da carcaça até a borda de baixo do furo do bujão do meio
+// (NIV-02, y = -22, rosca r 8 → y = -30). A rosca sem fim fica toda mergulhada e a coroa molha a parte de baixo.
+// Paredes internas aproximadas (carcaça de ferro fundido com ~8 mm de parede).
+const NIVEL_OLEO = -30;
+function oleo() {
+  const fundo = -70, alt = NIVEL_OLEO - fundo;
+  const g = new THREE.Group();
+  const banho = new THREE.MeshStandardMaterial({ color: 0xe2a63c, roughness: 0.15, metalness: 0,
+    transparent: true, opacity: 0.42, depthWrite: false, side: THREE.DoubleSide });
+  g.add(malha(caixa(124, alt, 82), banho, 0, fundo + alt / 2, 0));
+  // superfície do óleo um pouco mais forte, para o nível ficar bem marcado
+  const sup = new THREE.MeshStandardMaterial({ color: 0xf0bb55, roughness: 0.05, metalness: 0,
+    transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide });
+  g.add(malha(deitado(124, 82), sup, 0, NIVEL_OLEO, 0));
+  g.renderOrder = 1;
+  return g;
+}
+
 // opcoes.qr = endereço da imagem do QR Code da ficha; sem ela, o modelo fica sem a etiqueta
 export function criarVisualizador(caixaEl, opcoes) {
   const qr = opcoes && opcoes.qr;
   return criarBase(caixaEl, opcoes, {
     pecas: qr ? PECAS : PECAS.filter((p) => p.id !== "etiqueta"),
-    montar: (M) => montar(M, qr), materiais,
+    montar: (M) => montar(M, qr), materiais, oleo,
     casca: ["carcaca", "placa", "tampas", "parafusos", "retentores", "nivel", "dreno", "respiro", "etiqueta"]
   });
 }

@@ -493,6 +493,11 @@ export function criarVisualizador(caixa, opcoes, modelo) {
     });
   }
 
+  // óleo dentro da carcaça (modelo.oleo, opcional): aparece só na vista em corte, com o conjunto montado,
+  // no quarto aberto (o resto fica atrás das paredes). Fica fora de `malhas`: não é peça, não recebe toque nem destaque.
+  const oleo = modelo && modelo.oleo ? modelo.oleo() : null;
+  if (oleo) { oleo.visible = false; conjunto.add(oleo); }
+
   // Mostra só uma peça (todas as unidades dela) e aproxima a câmera.
   function isolar(id) {
     isolada = id || null;
@@ -679,6 +684,7 @@ export function criarVisualizador(caixa, opcoes, modelo) {
       if (camera.position.distanceTo(camAlvo.pos) < 0.5) camAlvo = null;
     }
     controles.update();
+    if (oleo) oleo.visible = corte && explosao < 0.1 && !isolada;
     atualizarMateriais(agora);
     render.render(cena, camera);
     atualizarBaloes();
