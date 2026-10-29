@@ -60,6 +60,7 @@
   }
 
   // conteúdo do cartão: última análise (ou "sem análise"), histórico e formulário de nova análise
+  // (sem formulário quando o laudo vem do SAP: analise.fonte = "sap")
   // demo: última análise de outro equipamento, usada como ensaio de aprendizagem enquanto este não tem a sua
   function conteudo(codigo, e, todos, msg, demo) {
     var a = e.analise, o = oleoDe(e), ult = todos[todos.length - 1], ref = a.referencia;
@@ -108,6 +109,13 @@
             sinal(q.variacao) + '</td><td><span class="chip ' + z.cls + '">' + z.chip + '</span></td></tr>';
         }).join("") + '</table>';
     }
+    // fonte "sap": o laudo é lançado pelo laboratório no SAP e a ficha só mostra; o mecânico não digita nada
+    if (a.fonte === "sap") {
+      var mostrada = ult ? { codigo: codigo, e: e, ult: ult } : demo;
+      return h + '<p class="dica" style="margin-top:10px"><b>Quem preenche é o laboratório.</b> O resultado é lançado no SAP ' +
+        '(documento de medição, IK11) e a ficha puxa de lá sozinha: o mecânico só consulta.</p>' +
+        (mostrada ? '<button type="button" class="link" data-an="docsap">Ver o documento no SAP</button>' : '');
+    }
     h += '<details class="nova-analise"><summary>Registrar ' + (todos.length ? 'nova análise' : 'a primeira análise') + '</summary>' +
       '<label>Data<input type="date" data-an="data"></label>' +
       '<div class="duplo"><label>Viscosidade (mPa·s)<input type="text" inputmode="decimal" data-an="mpas" maxlength="7"></label>' +
@@ -121,6 +129,7 @@
   // liga o formulário de nova análise dentro de el; depois de salvar chama redesenhar(msg)
   function ligar(el, codigo, redesenhar) {
     function q(n) { return el.querySelector('[data-an="' + n + '"]'); }
+    if (!q("salvar")) return;
     var hoje = new Date();
     q("data").value = hoje.getFullYear() + "-" + String(hoje.getMonth() + 1).padStart(2, "0") + "-" + String(hoje.getDate()).padStart(2, "0");
     q("salvar").onclick = function () {
@@ -139,6 +148,23 @@
     };
   }
 
+  // documento de medição do laudo, como o laboratório lançaria no SAP (simulação)
+  function docSap(m) {
+    var r = avaliar(m.e, m.ult), t = Date.parse(m.ult.data + "T12:00:00");
+    window.DocSap("Documento de medição " + (window.SapPM ? window.SapPM.numero("medicao", t) : "") + " (IK11)", "PM", [
+      ["Lançado por", m.e.analise.laboratorio || "Laboratório"],
+      ["Equipamento", m.codigo],
+      ["Ponto de medição", m.codigo + "-VISC · viscosidade do óleo"],
+      ["Data da coleta", data(m.ult.data)],
+      ["Amostra", m.ult.amostra],
+      ["Leitura", fmt(r.media) + " mPa·s a " + fmt(r.temp) + " °C"],
+      ["Variação × óleo novo", sinal(r.variacao)],
+      ["Avaliação", NIVEL[r.nivel].chip],
+      ["Aspecto", m.ult.aspecto],
+      ["Aparelho", m.e.analise.aparelho]
+    ]);
+  }
+
   // cartão embutido na ficha de lubrificação (redutor)
   function cartao(el, codigo, e) {
     var demo = null;
@@ -146,6 +172,10 @@
       var todos = analises(codigo, e);
       el.innerHTML = conteudo(codigo, e, todos, msg, todos.length ? null : demo);
       ligar(el, codigo, desenhar);
+      var b = el.querySelector('[data-an="docsap"]');
+      if (b && window.DocSap) b.onclick = function () {
+        docSap(todos.length ? { codigo: codigo, e: e, ult: todos[todos.length - 1] } : demo);
+      };
     }
     desenhar();
     // sem análise própria: mostra o ensaio de aprendizagem (equipamento indicado em analise.demonstracao)

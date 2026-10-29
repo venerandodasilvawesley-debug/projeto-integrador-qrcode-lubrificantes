@@ -292,12 +292,13 @@
       ],
       "analise": {
         "proposta": true,
-        "proposta_texto": "O óleo deste redutor ainda não foi analisado: a amostra será coletada na próxima troca e o resultado aparecerá aqui.",
+        "proposta_texto": "O óleo deste redutor ainda não foi analisado: a amostra será coletada na próxima troca e o resultado aparecerá aqui, puxado do SAP.",
+        "fonte": "sap",
         "como": [
-          "Coletar a amostra na troca do óleo, pelo dreno: o redutor tem só 0,87 L, então não se retira óleo só para analisar.",
-          "Medir também o óleo novo, no mesmo aparelho, rotor e rotação, para servir de referência.",
-          "O ISO VG 460 é cerca de 10 vezes mais viscoso que o óleo do torno (≈ 900 mPa·s a 25 °C): escolher rotor e rotação que deixem o torque do viscosímetro entre 10 e 90 %.",
-          "Anotar a temperatura de cada leitura e registrar abaixo: a ficha calcula a variação e o semáforo."
+          "Mecânico: na troca do óleo, coletar a amostra pelo dreno e mandar ao laboratório identificada com a tag RED-001 (o redutor tem só 0,87 L, então não se retira óleo só para analisar).",
+          "Laboratório: medir também o óleo novo, no mesmo aparelho, rotor e rotação, para servir de referência.",
+          "Laboratório: o ISO VG 460 é cerca de 10 vezes mais viscoso que o óleo do torno (≈ 900 mPa·s a 25 °C): escolher rotor e rotação que deixem o torque do viscosímetro entre 10 e 90 %.",
+          "Laboratório: lançar o resultado e a temperatura de cada leitura no SAP (documento de medição, IK11). A ficha puxa do SAP e calcula a variação e o semáforo."
         ],
         "laboratorio": "Laboratório do SENAI Três Lagoas",
         "aparelho": "Viscosímetro rotacional digital Marte MVD-8",
