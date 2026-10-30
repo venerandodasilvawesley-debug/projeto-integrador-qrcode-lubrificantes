@@ -5,7 +5,7 @@
 // rosca sem fim na direção X (flange do motor em -X, tampa cega em +X), base para baixo.
 // A posição dos bujões segue a marcação feita pela equipe no redutor.
 import * as THREE from "./vendor/three.module.min.js";
-import { criarVisualizador as criarBase, anel, noEixo, malha, rolamento } from "./redutor3d.js";
+import { criarVisualizador as criarBase, materiais as materiaisBase, anel, noEixo, malha, rolamento } from "./redutor3d.js";
 
 // Peças com número de balão e ficha (mesmo formato do modelo da Inspeção). "interna" = fica dentro da carcaça.
 // Sem o manual de peças do fabricante, as peças internas seguem o arranjo usual de um redutor coroa e rosca
@@ -461,6 +461,13 @@ function oleo() {
     transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide });
   g.add(malha(deitado(124, 82), sup, 0, NIVEL_OLEO, 0));
   g.renderOrder = 1;
+  return g;
+}
+
+// redutor montado, como grupo solto, para usar em outra cena (cenario.html)
+export function criarModelo(qr) {
+  const g = new THREE.Group();
+  montar(Object.assign(materiaisBase(), materiais()), qr).forEach((o) => g.add(o));
   return g;
 }
 

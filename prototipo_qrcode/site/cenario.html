@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cenário 3D – lubrificação com QR Code</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#20262b;color:#16202a;font-family:"Noto Sans",Roboto,Arial,sans-serif}
+#cena{position:fixed;inset:0;touch-action:none}
+#cena canvas{display:block}
+.topo{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
+.selo{background:#627c42;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;font-size:15px;line-height:1.25;box-shadow:0 2px 8px #0005}
+.selo small{display:block;font-weight:400;font-size:12px;opacity:.9}
+.topo a,.topo button{pointer-events:auto}
+.acoes{display:flex;gap:6px}
+.bt{border:0;border-radius:10px;background:#fff;color:#4a5e31;font:700 14px/1 inherit;font-family:inherit;padding:10px 12px;min-height:40px;cursor:pointer;text-decoration:none;box-shadow:0 2px 8px #0005;display:inline-flex;align-items:center}
+.painel{position:fixed;left:12px;bottom:12px;width:min(460px,calc(100vw - 24px));background:#fffffff2;border-radius:14px;padding:12px 14px;box-shadow:0 4px 16px #0006}
+.passo{font-size:12px;font-weight:700;color:#4a5e31;letter-spacing:.04em;text-transform:uppercase}
+.painel h1{font-size:20px;line-height:1.2;margin:2px 0 4px}
+.painel p{margin:0 0 10px;font-size:15px;line-height:1.35}
+.nav{display:flex;align-items:center;gap:6px}
+.nav .bt{background:#4a5e31;color:#fff;box-shadow:none}
+.nav .bt:disabled{opacity:.4;cursor:default}
+.pontos{display:flex;gap:5px;margin-left:auto}
+.pontos i{width:9px;height:9px;border-radius:50%;background:#c9d2bb}
+.pontos i.on{background:#4a5e31}
+.fone{position:fixed;right:16px;top:50%;transform:translateY(-50%);height:min(74vh,600px);aspect-ratio:9/18.5;background:#111;border-radius:30px;padding:9px;box-shadow:0 8px 30px #0008;transition:opacity .35s,transform .35s}
+.fone[hidden]{display:block;opacity:0;transform:translateY(-50%) translateX(40px);pointer-events:none}
+.tela{height:100%;border-radius:22px;overflow:hidden;background:#eef1f3;display:flex;flex-direction:column;font-size:clamp(11px,1.75vh,14px);line-height:1.3}
+.cab{background:#627c42;color:#fff;padding:1.1em .9em .7em;font-weight:700;font-size:1.1em}
+.cab small{display:block;font-weight:400;font-size:.8em}
+.corpo{padding:.6em;display:flex;flex-direction:column;gap:.5em;overflow:hidden;flex:1}
+.c{background:#fff;border-radius:.7em;padding:.55em .7em}
+.c b.g{font-size:1.5em;display:block;line-height:1.15}
+.rot{font-size:.72em;font-weight:700;color:#5b6875;letter-spacing:.05em;text-transform:uppercase;display:block}
+.ama{background:#f2b705}.ver{background:#2f9e5b;color:#fff}.seg{background:#fdf0cc;border-left:.35em solid #e2a400}
+.ok{background:#2f9e5b;color:#fff;font-weight:700;text-align:center;padding:.7em;border-radius:.7em}
+.cam{flex:1;background:#14181c;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1em;padding:1em;text-align:center}
+.mira{position:relative;width:62%;aspect-ratio:1;display:grid;place-items:center}
+.mira img{width:88%;background:#fff;padding:4%;border-radius:4%}
+.mira:before,.mira:after{content:"";position:absolute;inset:0;border:3px solid #7fe08f;border-radius:10px;clip-path:polygon(0 0,28% 0,28% 6%,6% 6%,6% 28%,0 28%,0 72%,6% 72%,6% 94%,28% 94%,28% 100%,0 100%,0 72%,100% 72%,100% 100%,72% 100%,72% 94%,94% 94%,94% 72%,100% 72%,100% 28%,94% 28%,94% 6%,72% 6%,72% 0,100% 0,100% 28%,0 28%)}
+.gal{width:58%;aspect-ratio:1;border-radius:12px;background:#fff;border:.5em solid #e8791c;color:#16202a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;padding:.4em}
+.lit{font-size:3em;font-weight:800;line-height:1}
+.nota{position:fixed;right:12px;bottom:12px;color:#fff;font-size:11px;opacity:.75;text-shadow:0 1px 2px #000}
+@media (max-width:720px),(max-height:500px){
+  .fone{right:10px;top:70px;transform:none;height:min(46vh,380px)}
+  .fone[hidden]{transform:translateX(40px)}
+  .painel h1{font-size:17px}.painel p{font-size:13.5px}
+  .nota{display:none}
+}
+</style>
+</head>
+<body>
+<div id="cena"></div>
+<div class="topo">
+  <div class="selo">Fábrica · rota do lubrificador<small>Redutor RED-001 · esteira de casca para a caldeira</small></div>
+  <div class="acoes"><a class="bt" href="/l/RED-001">Ficha real</a><button class="bt" id="b-tela" type="button">Tela cheia</button></div>
+</div>
+<div class="fone" id="fone" hidden><div class="tela" id="tela"></div></div>
+<section class="painel" aria-live="polite">
+  <div class="passo" id="p-num"></div>
+  <h1 id="p-tit"></h1>
+  <p id="p-txt"></p>
+  <div class="nav">
+    <button class="bt" id="b-ant" type="button">◀</button>
+    <button class="bt" id="b-play" type="button">Pausar</button>
+    <button class="bt" id="b-prox" type="button">▶</button>
+    <div class="pontos" id="pontos"></div>
+  </div>
+</section>
+<div class="nota">Cenário ilustrativo · fábrica fictícia · transporte de casca para a caldeira</div>
+<script type="module" src="/cenario3d.js"></script>
+</body>
+</html>
