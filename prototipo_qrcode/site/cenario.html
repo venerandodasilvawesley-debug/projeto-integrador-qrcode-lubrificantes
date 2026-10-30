@@ -14,7 +14,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#20262b;color:#16202a;
 .selo small{display:block;font-weight:400;font-size:12px;opacity:.9}
 .topo a,.topo button{pointer-events:auto}
 .acoes{display:flex;gap:6px}
-.bt{border:0;border-radius:10px;background:#fff;color:#4a5e31;font:700 14px/1 inherit;font-family:inherit;padding:10px 12px;min-height:40px;cursor:pointer;text-decoration:none;box-shadow:0 2px 8px #0005;display:inline-flex;align-items:center}
+.bt{border:0;border-radius:10px;background:#fff;color:#4a5e31;font-weight:700;font-size:14px;line-height:1;font-family:inherit;padding:10px 12px;min-height:40px;cursor:pointer;text-decoration:none;box-shadow:0 2px 8px #0005;display:inline-flex;align-items:center}
 .painel{position:fixed;left:12px;bottom:12px;width:min(460px,calc(100vw - 24px));background:#fffffff2;border-radius:14px;padding:12px 14px;box-shadow:0 4px 16px #0006}
 .passo{font-size:12px;font-weight:700;color:#4a5e31;letter-spacing:.04em;text-transform:uppercase}
 .painel h1{font-size:20px;line-height:1.2;margin:2px 0 4px}
@@ -46,6 +46,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#20262b;color:#16202a;
 @media (max-width:720px),(max-height:500px){
   .fone{right:10px;top:70px;transform:none;height:min(46vh,380px)}
   .fone[hidden]{transform:translateX(40px)}
+  .tela{font-size:9.5px}
+  .cab{padding:.9em .8em .5em}
   .painel h1{font-size:17px}.painel p{font-size:13.5px}
   .nota{display:none}
 }

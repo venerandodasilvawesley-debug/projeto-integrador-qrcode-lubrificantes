@@ -19,15 +19,17 @@ const render = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer
 render.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 render.shadowMap.enabled = true;
 render.shadowMap.type = THREE.PCFSoftShadowMap;
+render.toneMapping = THREE.ACESFilmicToneMapping;
+render.toneMappingExposure = 1.05;
 caixaEl.appendChild(render.domElement);
 
-cena.add(new THREE.HemisphereLight(0xffffff, 0x8a8f94, 1.7));
-const sol = new THREE.DirectionalLight(0xfff4e0, 2.1);
+cena.add(new THREE.HemisphereLight(0xf2f6ff, 0x77706a, 2.3));
+const sol = new THREE.DirectionalLight(0xfff0d8, 2.8);
 sol.position.set(-5000, 11000, 7000);
 sol.target.position.set(0, 0, 500);
 sol.castShadow = true;
 sol.shadow.mapSize.set(2048, 2048);
-Object.assign(sol.shadow.camera, { left: -9000, right: 7000, top: 7000, bottom: -5000, near: 1000, far: 26000 });
+Object.assign(sol.shadow.camera, { left: -11000, right: 9000, top: 8000, bottom: -7000, near: 1000, far: 26000 });
 sol.shadow.bias = -0.0006;
 cena.add(sol, sol.target);
 
@@ -103,7 +105,9 @@ function galpao() {
   // corredor de pedestres, com faixas amarelas
   const amarelo = mat(0xf0c419, 0.6);
   [1000 + 150, 2150].forEach((z) => bloco(cena, 18000, 4, 90, amarelo, -1500, 3, z, true));
-  [3350, 1850].forEach((x) => bloco(cena, 90, 4, 1000, amarelo, x + 1200, 3, 1650, true));
+  // área de acesso à manutenção, pintada em volta do redutor
+  bloco(cena, 1500, 4, 70, amarelo, 2100, 3, 760, true);
+  [1350, 2850].forEach((x) => bloco(cena, 70, 4, 390, amarelo, x, 3, 955, true));
   for (let x = -9500; x < 5000; x += 3000) {
     placaSeta(x);
   }
@@ -126,6 +130,13 @@ function galpao() {
   painel(25000, 9000, -19000, 4500, 1500, Math.PI / 2);
   painel(25000, 9000, 16000, 4500, 1500, -Math.PI / 2);
   bloco(cena, 35000, 900, 12, mat(0xdff2ff, 0.2, 0, { emissive: 0xcfe9ff, emissiveIntensity: 0.9 }), -1500, 6900, -9480, true);  // janelas altas
+
+  const telhado = new THREE.Mesh(new THREE.PlaneGeometry(35000, 25000), mat(0x59626a, 0.9, 0.1));
+  telhado.rotation.x = Math.PI / 2;
+  telhado.position.set(-1500, 8700, 1500);
+  cena.add(telhado);
+  for (let x = -15000; x <= 13000; x += 7000) bloco(cena, 2000, 20, 16000, mat(0xeaf5ff, 0.3, 0, { emissive: 0xdff0ff, emissiveIntensity: 1 }), x, 8680, 0, true);  // telhas translúcidas
+  bloco(cena, 12, 900, 16000, mat(0xdff2ff, 0.2, 0, { emissive: 0xcfe9ff, emissiveIntensity: 0.9 }), -18980, 6900, 0, true);
 
   // pilares, tesouras e luminárias
   const azulAco = mat(0x3f5f7a, 0.55, 0.4), cinzaAco = mat(0x717a82, 0.6, 0.5);
@@ -150,9 +161,20 @@ function galpao() {
   tubo(cena, 60, 26000, mat(0xd1542b, 0.5, 0.3), "x", -3000, 6050, -8700);
   tubo(cena, 75, 26000, mat(0x4f8f4c, 0.5, 0.3), "x", -3000, 5800, -8700);
 
+  const fare = new THREE.InstancedMesh(new THREE.BoxGeometry(90, 8, 26), mat(0x6b4a2e, 1, 0), 170), aj = new THREE.Object3D();
+  for (let i = 0; i < 170; i++) {
+    aj.position.set(-5600 + Math.random() * 7600, 5, (Math.random() < 0.5 ? -1 : 1) * (420 + Math.random() * 420));
+    aj.rotation.y = Math.random() * 3.1;
+    aj.scale.setScalar(0.5 + Math.random());
+    aj.updateMatrix();
+    fare.setMatrixAt(i, aj.matrix);
+  }
+  fare.receiveShadow = true;
+  cena.add(fare);
+
   // segurança na parede e no pilar
-  placaTexto(cena, ["USO OBRIGATÓRIO", "CAPACETE · ÓCULOS · LUVAS"], "#1958a8", "#fff", 2400, 1000, 300, 3000, -9470, 0);
-  placaTexto(cena, ["FÁBRICA DE CELULOSE", "CENÁRIO DIDÁTICO"], "#627c42", "#fff", 5000, 1400, -2800, 4300, -9470, 0);
+  placaTexto(cena, ["USO OBRIGATÓRIO", "CAPACETE · ÓCULOS · LUVAS"], "#1958a8", "#fff", 2600, 1000, -1500, 2600, -9470, 0);
+  placaTexto(cena, ["FÁBRICA DE CELULOSE", "CENÁRIO DIDÁTICO"], "#627c42", "#fff", 5000, 1400, -1500, 4300, -9470, 0);
   const ext = new THREE.Group(); ext.position.set(3950, 0, 2300); cena.add(ext);
   tubo(ext, 85, 520, mat(0xc71f1f, 0.4, 0.2), "y", 0, 950, 0, 20);
   bloco(ext, 340, 340, 12, mat(0xc71f1f, 0.5), 0, 1560, 20, true);
@@ -171,20 +193,46 @@ function caldeira() {
   placaTexto(g, ["CALDEIRA DE BIOMASSA"], "#7d2f1a", "#fff", 4400, 520, 4200, 5400, -2325);
   // porta de inspeção com o fogo da queima
   bloco(g, 1500, 1200, 90, chapa, 4800, 1500, -2370);
-  fogo = bloco(g, 1000, 760, 20, mat(0x331000, 0.6, 0, { emissive: 0xff6a12, emissiveIntensity: 1.6 }), 4800, 1500, -2315, true);
+  const chama = textura(256, 192, (c, l, a) => {
+    const f = c.createLinearGradient(0, a, 0, 0);
+    f.addColorStop(0, "#fff0a0"); f.addColorStop(0.35, "#ffb020"); f.addColorStop(0.7, "#f05a10"); f.addColorStop(1, "#5a1500");
+    c.fillStyle = f; c.fillRect(0, 0, l, a);
+    for (let i = 0; i < 40; i++) {
+      c.fillStyle = `rgba(255,${180 + Math.random() * 70 | 0},60,.5)`;
+      c.beginPath(); const x = Math.random() * l, b = a * (0.3 + Math.random() * 0.5);
+      c.moveTo(x - 16, a); c.quadraticCurveTo(x + 10, b + 30, x, b); c.quadraticCurveTo(x + 22, b + 40, x + 18, a); c.fill();
+    }
+  });
+  fogo = bloco(g, 1000, 760, 20, new THREE.MeshBasicMaterial({ map: chama, toneMapped: false }), 4800, 1500, -2315, true);
+  for (let x = 4400; x <= 5200; x += 200) bloco(g, 34, 780, 26, mat(0x22262a, 0.6, 0.5), x, 1500, -2298, true);
+  luzFogo = new THREE.PointLight(0xff7a20, 1.5, 4200, 0);
+  luzFogo.position.set(4800, 1500, -1800);
+  g.add(luzFogo);
+  // plataforma de acesso com guarda-corpo e escada
+  const am = mat(0xf0c419, 0.5, 0.2);
+  bloco(g, 5600, 60, 800, chapa, 4400, 3400, -1950);
+  for (let x = 1700; x <= 7100; x += 900) bloco(g, 50, 1100, 50, am, x, 3950, -1560);
+  [3700, 4450].forEach((y) => bloco(g, 5450, 40, 40, am, 4400, y, -1560));
+  for (const x of [1700, 7100]) bloco(g, 80, 3400, 80, chapa, x, 1700, -1600);
+  [7270, 7610].forEach((x) => bloco(g, 40, 3500, 40, am, x, 1750, -1800));
+  for (let y = 300; y < 3400; y += 300) bloco(g, 340, 26, 26, am, 7440, y, -1800, true);
+  // manômetros e tubulação de vapor
+  [2300, 2900].forEach((x) => { tubo(g, 150, 40, mat(0x222629, 0.4, 0.5), "z", x, 2500, -2345, 24); tubo(g, 130, 8, mat(0xf4f4ee, 0.5), "z", x, 2500, -2320, 24); bloco(g, 12, 110, 6, mat(0xc71f1f, 0.4), x + 25, 2525, -2312, true); });
+  tubo(g, 110, 3600, mat(0xc9cdd0, 0.4, 0.6), "y", 6900, 5100, -2240);
   // calha: recebe a casca na ponta da esteira e desce até a boca de alimentação
   const c = new THREE.Group(); g.add(c);
   const cx = 2190, ini = new THREE.Vector3(cx, 860, 0), fimC = new THREE.Vector3(cx, 620, -2350);
   const comp = ini.distanceTo(fimC);
   const calha = bloco(c, 640, 420, comp, chapa, cx, (ini.y + fimC.y) / 2, ini.z / 2 + fimC.z / 2);
   calha.rotation.x = Math.atan2(ini.y - fimC.y, comp) * -1;
+  [-500, -1000, -1500, -2000].forEach((z) => bloco(c, 660, 30, 60, mat(0x4a545d, 0.6, 0.4), cx, 860 + z * 0.102 + 214, z, true));
   bloco(c, 760, 760, 760, chapa, cx, 900, -60);
   [-700, -1500].forEach((z) => bloco(c, 90, 700, 90, chapa, cx, 350, z));
   bloco(c, 900, 900, 300, vermelho, cx, 640, -2400);
 }
 
 // ---------- esteira, redutor, painel e carrinho ----------
-let correia, tambores = [], cascas, cascaX = [], fogo;
+let correia, tambores = [], cascas, cascaX = [], fogo, luzFogo, leito;
 let redutor, respiro, dreno, lacre, luzVerde, luzVermelha, cadeado;
 function esteira() {
   const X0 = -5000, X1 = 2000, Y = 900, L = X1 - X0, g = new THREE.Group();
@@ -225,23 +273,68 @@ function esteira() {
     [-430, 430].forEach((z) => bloco(g, c, h, 16, capela, x, Y + 120 + h / 2, z));
   });
   placaTexto(g, ["TRANSPORTADOR DE CASCA"], "#2f6d4e", "#fff", 2600, 130, -2000, Y + 22, 462);
-  // casca de eucalipto sobre a correia: camada de lascas que anda com a esteira
-  const lasca = new THREE.BoxGeometry(150, 26, 42);
+  // casca de eucalipto: leito contínuo sobre a correia e tiras soltas por cima, de tamanhos diferentes
+  const tx = textura(256, 256, (c, l, a) => {
+    c.fillStyle = "#5e4229"; c.fillRect(0, 0, l, a);
+    for (let i = 0; i < 900; i++) {
+      c.strokeStyle = ["#7c5a3b", "#3f2c1b", "#927052", "#6b4a2e"][i % 4];
+      c.lineWidth = 2 + Math.random() * 3;
+      const x = Math.random() * l, y = Math.random() * a, r = Math.random() * 3.1, t = 14 + Math.random() * 34;
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(r) * t, y + Math.sin(r) * t); c.stroke();
+    }
+  }, 22, 3);
+  leito = bloco(g, L - 700, 38, 640, mat(0xffffff, 1, 0, { map: tx }), (X0 + X1) / 2 + 100, Y + R_TAMBOR + 18, 0, true);
+  leito.receiveShadow = true;
   const tonsCasca = [0x6b4a2e, 0x8a6240, 0x57402c, 0x9c7a55];
-  cascas = new THREE.InstancedMesh(lasca, mat(0xffffff, 0.95, 0), N_CASCA);
+  cascas = new THREE.InstancedMesh(new THREE.BoxGeometry(170, 16, 46), mat(0xffffff, 0.95, 0), N_CASCA);
   const cor = new THREE.Color();
   for (let i = 0; i < N_CASCA; i++) {
-    cascaX.push({ x: X0 + 300 + Math.random() * 6500, z: (Math.random() - 0.5) * 620, y: Y + R_TAMBOR + 14 + Math.random() * 70, a: Math.random() * 3.1, b: (Math.random() - 0.5) * 0.5 });
+    cascaX.push({ x: X0 + 300 + Math.random() * 6500, z: (Math.random() - 0.5) * 600, y: Y + R_TAMBOR + 42 + Math.random() * 42,
+      a: Math.random() * 3.1, b: (Math.random() - 0.5) * 0.45, e: [0.4 + Math.random() * 1.2, 0.7 + Math.random() * 0.8, 0.5 + Math.random() * 1.1] });
     cascas.setColorAt(i, cor.set(tonsCasca[i % 4]));
   }
   cascas.castShadow = true;
   cascas.frustumCulled = false;
   g.add(cascas);
-  // pilha de casca do pátio, antes da esteira
-  const monte = new THREE.Mesh(new THREE.ConeGeometry(2100, 1700, 9, 3), mat(0x6e4e32, 1, 0, { flatShading: true }));
-  monte.position.set(-6900, 850, 0);
+
+  // pilha de casca do pátio, moega e correia inclinada que alimenta a esteira
+  const pg = new THREE.IcosahedronGeometry(1, 5), pp = pg.attributes.position;
+  for (let i = 0; i < pp.count; i++) {
+    const x = pp.getX(i), y = Math.max(0, pp.getY(i)), z = pp.getZ(i);
+    const n = 1 + 0.07 * Math.sin(x * 9 + z * 5) + 0.05 * Math.sin(z * 14 - x * 6);
+    pp.setXYZ(i, x * 2500 * n, y * y * 1900 * n, z * 2500 * n);
+  }
+  pg.computeVertexNormals();
+  const monte = new THREE.Mesh(pg, mat(0xffffff, 1, 0, { map: tx.clone(), flatShading: true }));
+  monte.material.map.repeat.set(5, 5);
+  monte.position.set(-9000, 0, -600);
   sombra(monte, true);
   cena.add(monte);
+  const moega = bloco(g, 1700, 900, 1500, mat(0x8b9198, 0.6, 0.35), -5650, 2730, 0);
+  const funilC = new THREE.Mesh(new THREE.CylinderGeometry(1050, 480, 800, 4, 1, true).rotateY(Math.PI / 4), mat(0x7b828a, 0.6, 0.35, { side: THREE.DoubleSide }));
+  funilC.position.set(-4600, 2330, 0); sombra(funilC); g.add(funilC);
+  const ini = new THREE.Vector3(-8500, 900, -300), fim = new THREE.Vector3(-5600, 3050, 0), v = fim.clone().sub(ini), compr = v.length();
+  const incl = new THREE.Group(); incl.position.copy(ini).addScaledVector(v, 0.5); incl.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), v.normalize()); g.add(incl);
+  bloco(incl, compr, 90, 700, tinta, 0, 0, 0);
+  bloco(incl, compr - 100, 34, 560, mat(0x5e4229, 1, 0), 0, 58, 0, true);
+  [-7600, -6600].forEach((x, i) => bloco(g, 110, 1600 + i * 900, 110, aco, x, (1600 + i * 900) / 2, -180));
+
+  // proteção das partes móveis (NR-12): tela nas pontas e cabo de emergência ao longo da esteira
+  const grade = textura(128, 128, (c, l) => { c.clearRect(0, 0, l, l); c.strokeStyle = "#e0b512"; c.lineWidth = 9; for (let i = 0; i <= l; i += 42) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, l); c.moveTo(0, i); c.lineTo(l, i); c.stroke(); } }, 1, 1);
+  const tela = (w, h, x, y, z, ry) => {
+    const t = grade.clone(); t.repeat.set(w / 90, h / 90); t.needsUpdate = true;
+    const o = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat(0xffffff, 0.5, 0.2, { map: t, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide }));
+    o.position.set(x, y, z); o.rotation.y = ry || 0; g.add(o);
+  };
+  tela(480, 300, 1690, 900, 462); tela(480, 300, 1690, 900, -462);
+  tela(960, 340, 2150, 900, 0, Math.PI / 2);
+  tela(960, 340, X0 - 140, 900, 0, Math.PI / 2);
+  [-462, 462].forEach((z) => tela(420, 300, X0 + 90, 900, z));
+  const vermelho = mat(0xd42020, 0.5, 0.2), am = mat(0xf0c419, 0.5, 0.2);
+  tubo(g, 6, 5800, vermelho, "x", -1650, 1120, 520);
+  for (let x = -4500; x <= 1200; x += 1900) tubo(g, 22, 1120, am, "y", x, 560, 520, 12);
+  bloco(g, 110, 170, 90, am, 1260, 1130, 520);
+  bloco(g, 40, 40, 40, vermelho, 1260, 1240, 520, true);
 
   // redutor real do site, com o QR da ficha na face de cima
   redutor = criarModelo(QR);
@@ -264,6 +357,9 @@ function esteira() {
   tubo(motor, 110, 12, mm, "x", -8, 0, 0, 30);
   tubo(motor, 96, 60, mat(0x2b3138, 0.6, 0.3), "x", -325, 0, 0, 30);
   bloco(motor, 110, 80, 110, mm, -170, 130, 0);
+  tubo(motor, 12, 40, mat(0x22262a, 0.6), "z", -170, 130, 66, 12);
+  for (let r = 22; r <= 88; r += 22) tubo(motor, r, 3, mat(0x15181b, 0.5, 0.3), "x", -357, 0, 0, 24, r - 5);
+  placaTexto(motor, ["MOTOR 1,75 kW", "1750 rpm"], "#d9dde0", "#222", 90, 44, -150, 40, 96);
   bloco(cena, 60, yR - 190, 60, suporte, POS_RED.x - 300, (yR - 190) / 2, POS_RED.z);
 
   // painel de comando, no pilar ao lado do corredor
@@ -293,14 +389,14 @@ function esteira() {
   });
   carrinho = k;
   // balde para o óleo usado, embaixo do dreno
-  balde = new THREE.Group(); balde.position.set(POS_RED.x + 95, 0, POS_RED.z); cena.add(balde);
+  balde = new THREE.Group(); balde.position.copy(POS_BALDE); cena.add(balde);
   tubo(balde, 150, 300, mat(0x2f3338, 0.6, 0.3, { side: THREE.DoubleSide }), "y", 0, 150, 0, 24, 175);
   nivelBalde = tubo(balde, 150, 6, mat(0x3a2a12, 0.25, 0.1), "y", 0, 20, 0, 24);
   balde.visible = false;
 
   // jatos de óleo
-  jatoDreno = tubo(cena, 7, 1, mat(0x3a2a12, 0.2, 0.1), "y", POS_RED.x + 95, 0, POS_RED.z, 10);
-  jatoEnche = tubo(cena, 7, 1, mat(0xe2a63c, 0.15, 0.1, { transparent: true, opacity: 0.85 }), "y", 0, 0, 0, 10);
+  jatoDreno = tubo(cena, 11, 1, mat(0x3a2a12, 0.2, 0.1), "y", POS_RED.x + 95, 0, POS_RED.z, 10);
+  jatoEnche = tubo(cena, 10, 1, mat(0xe2a63c, 0.15, 0.1, { transparent: true, opacity: 0.85 }), "y", 0, 0, 0, 10);
   jatoDreno.visible = jatoEnche.visible = false;
   funil = new THREE.Group();
   funil.position.copy(POS_RED).add(new THREE.Vector3(5, 110, 34));
@@ -321,55 +417,73 @@ function criaGalao(cor) {
 }
 
 // ---------- lubrificador ----------
-const L = { raiz: new THREE.Group(), j: {}, ang: { bd: 0, bdc: 0, be: 0, bec: 0, cx: 0, cn: 0, y: 0, cab: 0 } };
+const L = { raiz: new THREE.Group(), j: {}, ang: { bd: 0, bdc: 0, be: 0, bec: 0, cx: 0, cn: 0, y: 0, cab: 0, ab: 0 } };
 function lubrificador() {
-  const uni = mat(0x2a4f7a, 0.8), refl = mat(0xd8dde0, 0.3, 0.3, { emissive: 0x777777 }), pele = mat(0xc99a78, 0.7);
-  const bota = mat(0x1d1f22, 0.7), luva = mat(0x2d6ea8, 0.7), cap = mat(0xf0c419, 0.4, 0.1);
+  const uni = mat(0x2a4f7a, 0.8), refl = mat(0xd8dde0, 0.3, 0.3, { emissive: 0x666666 }), pele = mat(0xc99a78, 0.65);
+  const bota = mat(0x1d1f22, 0.7), luva = mat(0x2d6ea8, 0.7), cap = mat(0xf0c419, 0.35, 0.1), couro = mat(0x2b2118, 0.7);
   const r = L.raiz, corpo = new THREE.Group();
   corpo.position.y = 880;
   r.add(corpo);
   L.j.corpo = corpo;
-  const seg = (pai, r1, c, m, r2) => { const o = tubo(pai, r1, c, m, "y", 0, -c / 2, 0, 14, r2 ?? r1); return o; };
+  const esfera = (pai, raio, m, x, y, z, ex, ey, ez) => { const o = sombra(new THREE.Mesh(new THREE.SphereGeometry(raio, 18, 14), m)); o.position.set(x, y, z); o.scale.set(ex || 1, ey || 1, ez || 1); pai.add(o); return o; };
+  const seg = (pai, r1, c, m, r2) => tubo(pai, r1, c, m, "y", 0, -c / 2, 0, 16, r2 ?? r1);
   const junta = (pai, x, y) => { const g = new THREE.Group(); g.position.set(x, y, 0); pai.add(g); return g; };
-  [["pe", -105], ["pd", 105]].forEach(([n, x]) => {
+  [["pe", -100], ["pd", 100]].forEach(([n, x]) => {
     const cx = junta(corpo, x, 0); L.j[n] = cx;
-    seg(cx, 72, 420, uni, 85);
+    esfera(cx, 92, uni, 0, 0, 0);
+    seg(cx, 70, 420, uni, 88);
     const j = junta(cx, 0, -420); L.j[n + "c"] = j;
-    seg(j, 58, 400, uni, 70);
-    bloco(j, 150, 22, 16, refl, 0, -170, 0, true); 
-    bloco(j, 120, 70, 270, bota, 0, -425, 45);
+    esfera(j, 70, uni, 0, 0, 0);
+    seg(j, 54, 390, uni, 68);
+    tubo(j, 66, 36, refl, "y", 0, -210, 0, 16, 62);
+    tubo(j, 62, 110, bota, "y", 0, -370, 0, 16, 62);
+    esfera(j, 66, bota, 0, -420, 55, 1, 0.62, 1.75);
+    bloco(j, 120, 16, 280, couro, 0, -452, 45, true);
   });
-  bloco(corpo, 360, 560, 220, uni, 0, 290, 0);
-  [130, 380].forEach((y) => { bloco(corpo, 366, 40, 226, refl, 0, y, 0, true); });
-  placaTexto(corpo, ["LUBRIFICAÇÃO"], "#2a4f7a", "#fff", 260, 50, 0, 470, -112, Math.PI);
-  tubo(corpo, 62, 70, pele, "y", 0, 605, 0, 14);
+  const tronco = sombra(new THREE.Mesh(new THREE.CapsuleGeometry(176, 300, 8, 20), uni));
+  tronco.position.y = 290; tronco.scale.z = 0.66; corpo.add(tronco);
+  esfera(corpo, 170, uni, 0, 40, 0, 1, 0.6, 0.72);
+  [150, 390].forEach((y) => { const b = tubo(corpo, y > 300 ? 178 : 180, 42, refl, "y", 0, y, 0, 28); b.scale.z = 0.67; b.castShadow = false; });
+  const cinto = tubo(corpo, 176, 46, couro, "y", 0, 75, 0, 28); cinto.scale.z = 0.7;
+  bloco(corpo, 110, 130, 50, couro, 150, 10, 90);          // bolsa de ferramentas
+  tubo(corpo, 12, 170, mat(0xc3c9cf, 0.3, 0.8), "y", 150, 110, 118, 8);
+  placaTexto(corpo, ["LUBRIFICAÇÃO"], "#2a4f7a", "#fff", 250, 46, 0, 285, -120, Math.PI);
+  placaTexto(corpo, ["RED-001"], "#fff", "#2a4f7a", 90, 34, -90, 450, 116);
+  tubo(corpo, 58, 80, pele, "y", 0, 605, 0, 14);
+  tubo(corpo, 76, 34, uni, "y", 0, 582, 0, 16, 66);
   const cab = junta(corpo, 0, 640); L.j.cab = cab;
-  const cabeca = new THREE.Mesh(new THREE.SphereGeometry(105, 20, 16), pele); cabeca.position.y = 85; sombra(cabeca); cab.add(cabeca);
-  const capacete = new THREE.Mesh(new THREE.SphereGeometry(120, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), cap); capacete.position.y = 105; sombra(capacete); cab.add(capacete);
-  bloco(cab, 170, 14, 70, cap, 0, 112, 120, true);
-  bloco(cab, 170, 40, 20, mat(0x1b2730, 0.2, 0.3), 0, 95, 102, true);
-  [["be", -220], ["bd", 220]].forEach(([n, x]) => {
-    const o = junta(corpo, x, 540); L.j[n] = o;
-    seg(o, 56, 310, uni, 64);
-    const c = junta(o, 0, -310); L.j[n + "c"] = c;
-    seg(c, 44, 280, uni, 54);
-    const m = new THREE.Mesh(new THREE.SphereGeometry(58, 12, 10), luva); m.position.y = -305; sombra(m); c.add(m);
+  esfera(cab, 104, pele, 0, 85, 0, 0.94, 1.1, 1);
+  esfera(cab, 16, pele, 0, 72, 104, 0.8, 1, 1.1);
+  esfera(cab, 20, pele, -100, 80, 0, 0.5, 1, 0.8); esfera(cab, 20, pele, 100, 80, 0, 0.5, 1, 0.8);
+  bloco(cab, 180, 34, 18, mat(0x16222b, 0.15, 0.4), 0, 100, 94, true);
+  bloco(cab, 60, 8, 14, pele, 0, 34, 95, true);
+  const capacete = sombra(new THREE.Mesh(new THREE.SphereGeometry(120, 22, 12, 0, Math.PI * 2, 0, Math.PI / 2), cap)); capacete.position.y = 118; capacete.scale.y = 0.9; cab.add(capacete);
+  const aba = tubo(cab, 128, 12, cap, "y", 0, 118, 8, 26, 124); aba.scale.z = 1.1;
+  bloco(cab, 30, 18, 210, cap, 0, 222, 0, true);
+  [["be", -212], ["bd", 212]].forEach(([n, x]) => {
+    const o = junta(corpo, x, 530); L.j[n] = o;
+    esfera(o, 74, uni, 0, 0, 0);
+    seg(o, 52, 300, uni, 66);
+    const c = junta(o, 0, -300); L.j[n + "c"] = c;
+    esfera(c, 54, uni, 0, 0, 0);
+    seg(c, 42, 270, uni, 52);
+    const m = esfera(c, 52, luva, 0, -300, 0, 0.9, 1.15, 0.8);
     L.j[n + "m"] = m;
   });
   celular = new THREE.Group(); celular.position.set(0, -320, 55); celular.rotation.x = Math.PI / 2 - 0.4; L.j.bdc.add(celular);
   bloco(celular, 80, 12, 160, mat(0x15181b, 0.4, 0.3), 0, 0, 0, true);
-  bloco(celular, 70, 2, 148, mat(0x9fe0a8, 0.4, 0, { emissive: 0x7fe08f, emissiveIntensity: 1 }), 0, 7, 0, true);
+  bloco(celular, 70, 2, 148, new THREE.MeshBasicMaterial({ color: 0x9fe0a8 }), 0, 7, 0, true);
   cena.add(r);
 }
 let celular;
 // ângulos de cada pose: braços (bd/be), antebraços (bdc/bec), coxa, canela, queda do corpo, cabeça
 const POSES = {
-  pe: { bd: -0.05, bdc: -0.1, be: 0.05, bec: -0.1, cx: 0, cn: 0, y: 0, cab: 0 },
-  celular: { bd: -0.55, bdc: -1.0, be: 0.05, bec: -0.15, cx: 0, cn: 0, y: 0, cab: 0.45 },
-  ler: { bd: -1.0, bdc: -0.45, be: 0.05, bec: -0.15, cx: 0, cn: 0, y: 0, cab: 0.55 },
-  painel: { bd: -1.35, bdc: -0.25, be: 0.05, bec: -0.15, cx: 0, cn: 0, y: 0, cab: 0.1 },
-  agachado: { bd: -0.8, bdc: -0.7, be: -0.7, bec: -0.8, cx: -1.3, cn: 1.7, y: -335, cab: 0.3 },
-  despeja: { bd: -1.5, bdc: -0.35, be: -1.5, bec: -0.5, cx: 0, cn: 0, y: 0, cab: 0.5 }
+  pe: { bd: -0.05, bdc: -0.1, be: 0.05, bec: -0.1, cx: 0, cn: 0, y: 0, cab: 0, ab: 0 },
+  celular: { bd: -0.55, bdc: -1.0, be: 0.05, bec: -0.15, cx: 0, cn: 0, y: 0, cab: 0.45, ab: 0 },
+  ler: { bd: -1.0, bdc: -0.45, be: 0.05, bec: -0.15, cx: 0, cn: 0, y: 0, cab: 0.55, ab: 0 },
+  painel: { bd: -1.05, bdc: -0.3, be: 0.05, bec: -0.15, cx: 0, cn: 0, y: 0, cab: 0.15, ab: 0 },
+  agachado: { bd: -0.8, bdc: -0.7, be: -0.7, bec: -0.8, cx: -1.3, cn: 1.7, y: -335, cab: 0.3, ab: 0 },
+  despeja: { bd: -0.95, bdc: -0.55, be: -0.95, bec: -0.55, cx: 0, cn: 0, y: 0, cab: 0.5, ab: 0.2 }
 };
 
 // ---------- telas do celular (mesmos dados da ficha do RED-001) ----------
@@ -401,26 +515,26 @@ const E = {};   // estado da cena
 function estadoInicial() {
   Object.assign(E, { esteira: 1, lacre: false, balde: false, nivel: 0, drena: false, enche: false, litros: 0, galaoMao: false, funil: false, tampa: true });
 }
-const NA_FRENTE = [2000, 1020], NO_PAINEL = [3300, 1760], NO_DRENO = [2520, 560], NO_CARRINHO = [3300, 830];
+const NA_FRENTE = [2000, 1020], NO_PAINEL = [3300, 1760], NO_DRENO = [2720, 560], NO_CARRINHO = [3300, 830], NO_RESPIRO = [1880, 960];
 const PASSOS = [
   { tit: "A fábrica", txt: "A casca de eucalipto vai pela esteira até a queima na caldeira. Quem aciona a esteira é o redutor RED-001. A máquina está rodando e a etiqueta de QR Code fica na face de cima do redutor.",
     cam: [[-7200, 4300, 7100], [900, 500, -900]], ini: [-8500, 1650], olha: 0, pose: "pe", dur: 5 },
   { tit: "Rota do lubrificador", txt: "O lubrificador segue pelo corredor com o celular. Não precisa ir até a sala de manutenção nem levar o manual.",
     rota: [[-3000, 1650], [1500, 1650], NA_FRENTE], olha: Math.PI, pose: "celular", seguir: [-2600, 1700, 4300], dur: 0.8 },
   { tit: "Lê o QR Code", txt: "Junto ao redutor, ele aponta a câmera para a etiqueta. Não precisa instalar aplicativo.",
-    cam: [[3500, 1950, 1050], [2120, 1000, 760]], pose: "ler", tela: "qr", raio: true, dur: 4.5, beep: 3 },
+    cam: [[3500, 1950, 1050], [2120, 1000, 760]], pose: "ler", tela: "qr", raio: true, dur: 7, beep: 3.2, cam2: [[2300, 1400, 830], [1985, 1000, 590]] },
   { tit: "A ficha abre na hora", txt: "Óleo, volume, pontos e segurança na mesma tela. A vida útil mostra que está na hora de programar a troca.",
     cam: [[3900, 2100, 2300], [2100, 1000, 800]], pose: "celular", tela: "ficha", dur: 6 },
   { tit: "Desliga e bloqueia (LOTO)", txt: "Para abrir o redutor, ele desliga no painel, tranca com cadeado e coloca a etiqueta. A esteira para. Sem isso, nada de abrir bujão.",
     rota: [[2800, 1500], NO_PAINEL], olha: 0, pose: "painel", cam: [[1300, 2000, 700], [3200, 1200, 1950]], tela: "loto", dur: 3.5,
     ao() { E.esteira = 0; E.lacre = true; } },
-  { tit: "Drena o óleo usado", txt: "Com o redutor bloqueado, ele tira o bujão de dreno e observa cor, transparência e partículas do óleo que sai.",
-    rota: [[2900, 1100], NO_DRENO], olha: -Math.PI / 2, pose: "agachado", cam: [[2450, 1300, 2900], [2420, 420, 560]], tela: "dreno", dur: 5,
-    antes() { E.balde = true; }, ao() { E.drena = true; }, fim() { E.drena = false; E.nivel = 1; } },
+  { tit: "Drena o óleo usado", txt: "Com o redutor bloqueado e o balde embaixo, ele tira o bujão de dreno e observa cor, transparência e partículas do óleo que sai.",
+    rota: [[2900, 1100], NO_DRENO], olha: -Math.PI / 2, pose: "agachado", cam: [[3050, 1650, 3200], [2400, 560, 560]], tela: "dreno", dur: 5,
+    drena: true, antes() { E.balde = true; }, ao() { E.drena = true; }, fim() { E.drena = false; E.nivel = 1; } },
   { tit: "Confere o galão", txt: "Ele lê o QR do galão. Se for o óleo errado, a ficha não deixa salvar. Aqui é o laranja, OLE-04 (código e cor de exemplo).",
     rota: [NO_CARRINHO], olha: Math.PI, pose: "ler", cam: [[5500, 1800, 1000], [3450, 800, 560]], tela: "galao", dur: 3.5, beep: 1.2 },
   { tit: "Abastece pelo respiro", txt: "Bujão de dreno fechado, ele enche pelo respiro até os 0,87 L, sem misturar óleos. O nível é conferido no bujão do meio.",
-    rota: [[2700, 1200], NA_FRENTE], olha: Math.PI, pose: "despeja", cam: [[3600, 2000, 1350], [2130, 1100, 760]], tela: "enche", dur: 6,
+    rota: [[2700, 1200], NO_RESPIRO], olha: Math.PI, pose: "despeja", cam: [[3350, 1800, 640], [1960, 1060, 720]], tela: "enche", dur: 6,
     antes() { E.galaoMao = true; E.tampa = false; E.funil = true; }, ao() { E.enche = true; }, fim() { E.enche = false; E.litros = 0.87; E.galaoMao = false; E.funil = false; E.tampa = true; } },
   { tit: "Registra e libera", txt: "O registro é salvo em poucos toques, a contagem da vida útil recomeça e, na proposta, os documentos vão para o SAP. O bloqueio é retirado e a esteira volta.",
     cam: [[-3400, 2700, 6000], [800, 950, 600]], pose: "celular", tela: "registro", dur: 7,
@@ -428,7 +542,7 @@ const PASSOS = [
 ];
 
 // ---------- controle ----------
-let atual = -1, tocando = true, rota = [], espera = 0, avancar = 0, chegou = false, seguir = null, camAlvo = null, heading = 0, poseAlvo = POSES.pe, passoT = 0, beepEm = -1;
+let atual = -1, tocando = true, rota = [], espera = 0, avancar = 0, chegou = false, seguir = null, camAlvo = null, heading = 0, poseAlvo = POSES.pe, passoT = 0, beepEm = -1, cam2Em = -1, livre = false;
 const $ = (id) => document.getElementById(id);
 const pontos = PASSOS.map(() => { const i = document.createElement("i"); $("pontos").appendChild(i); return i; });
 
@@ -465,7 +579,8 @@ function ir(n, instantaneo) {
   L.raiz.position.set(p[0], 0, p[1]);
   heading = h;
   const s = PASSOS[n];
-  atual = n; rota = (s.rota || []).map((q) => q.slice()); chegou = false; passoT = 0; espera = 0; beepEm = -1;
+  balde.position.copy(POS_BALDE);
+  atual = n; rota = (s.rota || []).map((q) => q.slice()); chegou = false; passoT = 0; espera = 0; beepEm = -1; cam2Em = -1; livre = false;
   avancar = s.dur;
   seguir = s.seguir || null;
   poseAlvo = rota.length ? POSES.pe : POSES[s.pose];
@@ -484,6 +599,7 @@ function ir(n, instantaneo) {
     if (s.cam) { camera.position.copy(camAlvo.pos); controles.target.copy(camAlvo.alvo); camAlvo = null; }
     Object.keys(POSES.pe).forEach((k) => { L.ang[k] = POSES[s.pose][k]; });
     chegada(s);
+    if (s.cam2) { cam2Em = -1; camera.position.set(...s.cam2[0]); controles.target.set(...s.cam2[1]); camAlvo = null; }
     if (s.tela === "enche") { E.litros = 0.6; mostrarLitros(); }
   }
 }
@@ -493,6 +609,7 @@ function chegada(s) {
   if (s.tela) telaCel(s.tela);
   if (s.ao) s.ao();
   if (s.beep != null) beepEm = s.beep;
+  if (s.cam2) cam2Em = 1.3;
 }
 function mostrarLitros() { const el = $("litros"); if (el) el.textContent = E.litros.toFixed(2).replace(".", ","); }
 
@@ -514,6 +631,7 @@ function atualizar(dt, t) {
     avancar -= dt;
     if (avancar <= 0 && atual < PASSOS.length - 1) ir(atual + 1);
   }
+  if (cam2Em >= 0) { cam2Em -= dt; if (cam2Em < 0 && !livre) camAlvo = { pos: new THREE.Vector3(...s.cam2[0]), alvo: new THREE.Vector3(...s.cam2[1]) }; }
   if (beepEm >= 0) { beepEm -= dt; if (beepEm < 0) { bipe(); } }
 
   // lubrificador
@@ -531,6 +649,7 @@ function atualizar(dt, t) {
   j.be.rotation.x = a.be - (rota.length ? anda * 0.45 : 0);
   j.bec.rotation.x = a.bec;
   j.cab.rotation.x = a.cab;
+  j.bd.rotation.z = a.ab; j.be.rotation.z = -a.ab;
   celular.visible = s.pose !== "despeja";
 
   // esteira
@@ -538,14 +657,16 @@ function atualizar(dt, t) {
   velEsteira += (alvo - velEsteira) * (1 - Math.exp(-dt * 2.2));
   const dx = VEL_ESTEIRA * velEsteira * dt;
   correia.material[2].map.offset.x -= dx / 7000 * 26;
+  leito.material.map.offset.x -= dx / 6300 * 22;
   tambores.forEach((d) => { d.rotation.z -= dx / R_TAMBOR; });
   cascaX.forEach((c, i) => {
     c.x += dx; if (c.x > 1800) c.x -= 6500;
-    aux.position.set(c.x, c.y, c.z); aux.rotation.set(0, c.a, c.b); aux.updateMatrix();
+    aux.position.set(c.x, c.y, c.z); aux.rotation.set(0, c.a, c.b); aux.scale.set(c.e[0], c.e[1], c.e[2]); aux.updateMatrix();
     cascas.setMatrixAt(i, aux.matrix);
   });
   cascas.instanceMatrix.needsUpdate = true;
-  fogo.material.emissiveIntensity = 1.5 + 0.5 * Math.sin(t * 9) * Math.sin(t * 3.3);
+  luzFogo.intensity = 1.5 + 0.5 * Math.sin(t * 9) * Math.sin(t * 3.3);
+  fogo.material.map.offset.x = Math.sin(t * 2) * 0.03;
 
   // painel, bloqueio e óleo
   cadeado.visible = E.lacre;
@@ -577,13 +698,24 @@ function atualizar(dt, t) {
   if (naMao && galao.parent !== cena) cena.add(galao);
   if (!naMao && galao.parent === cena) { carrinho.add(galao); galao.position.set(0, 732, 0); galao.rotation.set(0, 0, 0); }
   if (naMao) {
-    const m = j.bdm.getWorldPosition(new THREE.Vector3());
-    if (chegou) { galao.position.set(POS_RED.x - 50, POS_RED.y + 215, POS_RED.z + 30); galao.rotation.z = -1.05; }
-    else { galao.position.set(m.x, m.y - 270, m.z); galao.rotation.z = 0; }
+    if (chegou) {
+      // bico do galão (44; 278) inclinado fica logo acima do funil
+      const k2 = 1 - Math.exp(-dt * 4);
+      galao.position.lerp(aux.position.set(POS_RED.x - 258, POS_RED.y + 160, POS_RED.z + 34), k2);
+      galao.rotation.z += (-1.05 - galao.rotation.z) * k2;
+    } else {
+      const m = j.bdm.getWorldPosition(new THREE.Vector3());
+      galao.position.set(m.x, m.y - 265, m.z);
+      galao.rotation.z = 0;
+    }
+  }
+  if (E.balde) {
+    if (s.drena && !chegou) { const m = j.bem.getWorldPosition(new THREE.Vector3()); balde.position.set(m.x, m.y - 320, m.z); }
+    else balde.position.lerp(POS_BALDE, 1 - Math.exp(-dt * 5));
   }
   jatoEnche.visible = E.enche;
   if (E.enche) {
-    const topo = POS_RED.y + 245, base = POS_RED.y + 200;
+    const topo = POS_RED.y + 258, base = POS_RED.y + 185;
     jatoEnche.position.set(funil.position.x, (topo + base) / 2, funil.position.z);
     jatoEnche.scale.y = topo - base;
     E.litros = Math.min(0.87, E.litros + 0.87 * dt / (PASSOS[atual].dur * 0.9));
@@ -606,6 +738,7 @@ function atualizar(dt, t) {
 }
 let velEsteira = 1, raio;
 const aux = new THREE.Object3D();
+const POS_BALDE = new THREE.Vector3(POS_RED.x + 95, 0, POS_RED.z);
 
 // ---------- início ----------
 function tamanho() {
@@ -628,7 +761,7 @@ cena.add(raio);
 window.addEventListener("resize", tamanho);
 tamanho();
 
-controles.addEventListener("start", () => { camAlvo = null; seguir = null; });
+controles.addEventListener("start", () => { camAlvo = null; seguir = null; livre = true; });
 $("b-ant").onclick = () => ir(atual - 1);
 $("b-prox").onclick = () => ir(atual + 1);
 $("b-play").onclick = () => {
