@@ -124,204 +124,6 @@
     "limite_carcaca_c": 75,
     "aviso_temperatura": "Carcaça acima de 75 °C indica óleo acima do limite de 90 °C.",
     "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005).",
-    "lubrificacao": {
-      "nome": "Redutor coroa e rosca WEG-Cestari (redutor da oficina)",
-      "modelo": "Linha Magma M, tamanho 06 · código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
-      "local": "Oficina de mecânica do SENAI Três Lagoas",
-      "posicao": "vertical",
-      "tag_oleo": "OLE-04",
-      "cor_oleo": {
-        "nome": "Laranja",
-        "hex": "#ef6c00"
-      },
-      "lubrificante": "Óleo sintético PAO (CLP PAO)",
-      "padrao_fabrica": "óleo sintético CLP PAO",
-      "viscosidade": "ISO VG 460",
-      "equivalentes": [
-        "ExxonMobil SHC 634",
-        "Shell Omala S4 GX 460",
-        "Klübersynth EG4-460",
-        "(sintéticos ISO VG 460 recomendados no manual WEG-Cestari, seção 6.6; o manual cita também Klüber Syntheso D460 EP e Lubrax Syntesis Gear 0-460: conferir se a base é PAO antes de usar)"
-      ],
-      "volume_ml": 870,
-      "data_ultima_troca": "2026-10-14",
-      "volumes_por_posicao": "0,87 L (870 mL), conforme o manual da linha coroa e rosca WEG-Cestari, seção 6.2 (Magma M, tamanho 06 simples). O manual informa que esse volume vale para todas as posições de trabalho.",
-      "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível pelo bujão do meio da face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
-      "pontos_oleo": {
-        "titulo": "Enchimento, nível e dreno · redutor da oficina",
-        "modelo": "/redutor_oficina3d.js",
-        "qr": "/fotos/qr-lubrificacao-RED-001.png",
-        "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: na posição de montagem adotada (vertical, placa para cima), o nível é conferido pelo bujão do meio da face da tampa cega.",
-        "pontos": [
-          {
-            "tags": [
-              "RSP-01"
-            ],
-            "nome": "Enchimento",
-            "sub": "respiro, em cima",
-            "texto": "É por aqui que entra o óleo. Retire o respiro de latão e abasteça por este furo. Recoloque o respiro limpo e desobstruído e, antes de ligar, confira se o lacre do respiro foi retirado (adesivo \"Retire o lacre\").",
-            "vista": [
-              0.45,
-              1,
-              0.9
-            ],
-            "fotos": [
-              {
-                "src": "/fotos/red-enchimento.jpg",
-                "legenda": "Face de cima: respiro de latão, ao lado da placa."
-              }
-            ]
-          },
-          {
-            "tags": [
-              "NIV-02"
-            ],
-            "nome": "Nível",
-            "sub": "bujão do meio",
-            "texto": "Não há visor: no Complemento ou na Troca, com o redutor parado e bloqueado, retire o bujão de nível e confira se o óleo chega ao furo. Nesta posição de montagem, o bujão de nível é o do meio da face da tampa cega (o de cima não é usado). Na inspeção visual não se abre o bujão.",
-            "vista": [
-              1,
-              0.3,
-              0.5
-            ],
-            "fotos": [
-              {
-                "src": "/fotos/red-nivel-dreno.jpg",
-                "legenda": "Face da tampa cega: bujão de nível (no meio) e, embaixo, o de dreno."
-              }
-            ]
-          },
-          {
-            "tags": [
-              "DRE-01",
-              "DRE-02"
-            ],
-            "nome": "Dreno",
-            "sub": "bujões de baixo",
-            "texto": "Por aqui escoa o óleo usado: bujão mais baixo da face da tampa cega e bujão da base. Coloque o recipiente embaixo, retire primeiro o respiro e depois o bujão de dreno.",
-            "vista": [
-              1,
-              -0.75,
-              0.75
-            ],
-            "fotos": [
-              {
-                "src": "/fotos/red-nivel-dreno.jpg",
-                "legenda": "Dreno: o bujão mais baixo da face da tampa cega (no meio fica o de nível)."
-              },
-              {
-                "src": "/fotos/red-dreno-base.jpg",
-                "legenda": "Bujão da base (parte de baixo do redutor)."
-              }
-            ]
-          },
-          {
-            "tags": [
-              "QR-01"
-            ],
-            "nome": "QR Code",
-            "sub": "etiqueta",
-            "sem_brilho": true,
-            "texto": "É a etiqueta desta ficha: o mecânico aponta o celular para ela, junto ao redutor, e a ficha de lubrificação abre. No redutor da oficina ela foi colada em cima, logo acima do adesivo amarelo \"Retire o lacre\", ao lado do respiro. No modelo é o QR Code de verdade: aproxime com dois dedos para ver.",
-            "vista": [
-              -0.3,
-              1,
-              0.5
-            ]
-          }
-        ]
-      },
-      "analise_oleo": "Proposta do projeto: análise da viscosidade em laboratório (ver o cartão Análise do óleo). Enquanto não houver ensaio, a condição do óleo é acompanhada pelo aspecto no dreno (cor, transparência e partículas), pela temperatura da carcaça e pelas horas de uso.",
-      "passo_troca": [
-        {
-          "titulo": "Separar o material",
-          "texto": "Pegue no almoxarifado o galão {cor} (tag {tag}): {oleo}. Leve também um recipiente identificado para o óleo usado, panos limpos e os EPIs: {epis}.",
-          "pecas": []
-        },
-        {
-          "titulo": "Desligar e bloquear",
-          "texto": "Desligue o equipamento, bloqueie e etiquete (LOTO). Espere a carcaça esfriar até poder ser tocada com segurança.",
-          "pecas": []
-        },
-        {
-          "titulo": "Limpar em volta dos bujões",
-          "texto": "Limpe a carcaça ao redor do respiro e dos bujões de nível e de dreno antes de abrir, para não entrar sujeira no redutor.",
-          "pecas": [],
-          "foto": "/fotos/red-nivel-dreno.jpg"
-        },
-        {
-          "titulo": "Drenar o óleo usado",
-          "texto": "Coloque o recipiente sob o bujão de dreno. Retire o respiro (o ar entra e o óleo escorre melhor) e depois o bujão de dreno, o mais baixo. Deixe escorrer até parar de pingar.",
-          "pecas": [],
-          "foto": "/fotos/red-nivel-dreno.jpg"
-        },
-        {
-          "titulo": "Olhar o óleo que saiu",
-          "texto": "Observe o óleo usado: leitoso indica água; brilho dourado indica desgaste da coroa de bronze; partículas de aço indicam desgaste dos rolamentos ou da rosca. Se achar algo, anote na observação do registro.",
-          "pecas": []
-        },
-        {
-          "titulo": "Fechar o dreno",
-          "texto": "Limpe o bujão de dreno, confira a vedação (troque se estiver danificada) e recoloque o bujão.",
-          "pecas": [],
-          "foto": "/fotos/red-nivel-dreno.jpg"
-        },
-        {
-          "titulo": "Conferir o galão",
-          "texto": "Leia o QR Code do galão antes de abrir. A ficha diz se é o óleo certo para este redutor.",
-          "pecas": [],
-          "tipo": "galao"
-        },
-        {
-          "titulo": "Abastecer",
-          "texto": "Abasteça pelo furo do respiro (enchimento): {dose}. Com o redutor parado, confira o nível pelo bujão de nível.",
-          "pecas": [],
-          "foto": "/fotos/red-enchimento.jpg"
-        },
-        {
-          "titulo": "Fechar e testar",
-          "texto": "Recoloque o bujão de nível e o respiro limpo e desobstruído, com o lacre retirado. Limpe a carcaça, retire o bloqueio e ligue o equipamento. Confira se não há vazamento nos bujões e retentores e se o ruído está normal.",
-          "pecas": [],
-          "foto": "/fotos/red-enchimento.jpg"
-        },
-        {
-          "titulo": "Descartar o óleo usado",
-          "texto": "{descarte}",
-          "pecas": []
-        }
-      ],
-      "analise": {
-        "proposta": true,
-        "proposta_texto": "O óleo deste redutor ainda não foi analisado: a amostra será coletada na próxima troca e o resultado aparecerá aqui, puxado do SAP.",
-        "fonte": "sap",
-        "como": [
-          "Mecânico: na troca do óleo, coletar a amostra pelo dreno e mandar ao laboratório identificada com a tag RED-001 (o redutor tem só 0,87 L, então não se retira óleo só para analisar).",
-          "Laboratório: medir também o óleo novo, no mesmo aparelho, rotor e rotação, para servir de referência.",
-          "Laboratório: o ISO VG 460 é cerca de 10 vezes mais viscoso que o óleo do torno (≈ 900 mPa·s a 25 °C): escolher rotor e rotação que deixem o torque do viscosímetro entre 10 e 90 %.",
-          "Laboratório: lançar o resultado e a temperatura de cada leitura no SAP (documento de medição, IK11). A ficha puxa do SAP e calcula a variação e o semáforo."
-        ],
-        "laboratorio": "Laboratório do SENAI Três Lagoas",
-        "aparelho": "Viscosímetro rotacional digital Marte MVD-8",
-        "dica_registro": "Use o mesmo aparelho, rotor e rotação em todas as medições.",
-        "criterio": {
-          "atencao": 10,
-          "critico": 20
-        },
-        "oleo_ref": {
-          "nome": "ExxonMobil SHC 634 (ISO VG 460, recomendado no manual WEG)",
-          "v40": 460,
-          "v100": 50.7,
-          "iv": 174,
-          "densidade20": 0.87,
-          "fonte": "Mobil SHC 600 Series – valores típicos; densidade aproximada"
-        },
-        "ensaios": [],
-        "demonstracao": {
-          "codigo": "TOR-001",
-          "texto": "Ensaio de aprendizagem: a equipe fez a análise no laboratório do SENAI com o óleo usado de um torno da oficina, para dominar o método. O óleo deste redutor será analisado na próxima troca."
-        }
-      }
-    },
     "inspecao": {
       "modelo3d": "WCR28",
       "ficha_tecnica": [
@@ -830,6 +632,233 @@
           "nivel_oleo": "11.5",
           "carcaca": "11.4"
         }
+      }
+    },
+    "lubrificacao_em": "RED-002"
+  },
+  "RED-002": {
+    "nome": "Redutor coroa e rosca WEG-Cestari (redutor da oficina)",
+    "modelo": "Linha Magma M, tamanho 06 · código M0612802V0D001 · série 818100 · redução 1:25 (1.750 → 70 rpm) · ano 2018",
+    "local": "Oficina de mecânica do SENAI Três Lagoas",
+    "posicao": "vertical",
+    "lubrificante": "Óleo sintético PAO (CLP PAO)",
+    "padrao_fabrica": "óleo sintético CLP PAO",
+    "tag_oleo": "OLE-04",
+    "cor_oleo": {
+      "nome": "Laranja",
+      "hex": "#ef6c00"
+    },
+    "equivalentes": [
+      "ExxonMobil SHC 634",
+      "Shell Omala S4 GX 460",
+      "Klübersynth EG4-460",
+      "(sintéticos ISO VG 460 recomendados no manual WEG-Cestari, seção 6.6; o manual cita também Klüber Syntheso D460 EP e Lubrax Syntesis Gear 0-460: conferir se a base é PAO antes de usar)"
+    ],
+    "viscosidade": "ISO VG 460",
+    "volume_ml": 870,
+    "volumes_por_posicao": "0,87 L (870 mL), conforme o manual da linha coroa e rosca WEG-Cestari, seção 6.2 (Magma M, tamanho 06 simples). O manual informa que esse volume vale para todas as posições de trabalho.",
+    "pontos": "Enchimento pelo respiro de latão, na face de cima. Nível pelo bujão do meio da face da tampa cega (não há visor). Dreno pelo bujão mais baixo dessa face e pelo bujão da base.",
+    "vida_util_oleo": [
+      {
+        "temp_c": 80,
+        "horas": 15000
+      },
+      {
+        "temp_c": 85,
+        "horas": 10000
+      },
+      {
+        "temp_c": 90,
+        "horas": 7500
+      }
+    ],
+    "horimetro": false,
+    "regime": {
+      "h_dia": 24,
+      "dias_semana": 7
+    },
+    "data_ultima_troca": "2026-10-14",
+    "passo_troca": [
+      {
+        "titulo": "Separar o material",
+        "texto": "Pegue no almoxarifado o galão {cor} (tag {tag}): {oleo}. Leve também um recipiente identificado para o óleo usado, panos limpos e os EPIs: {epis}.",
+        "pecas": []
+      },
+      {
+        "titulo": "Desligar e bloquear",
+        "texto": "Desligue o equipamento, bloqueie e etiquete (LOTO). Espere a carcaça esfriar até poder ser tocada com segurança.",
+        "pecas": []
+      },
+      {
+        "titulo": "Limpar em volta dos bujões",
+        "texto": "Limpe a carcaça ao redor do respiro e dos bujões de nível e de dreno antes de abrir, para não entrar sujeira no redutor.",
+        "pecas": [],
+        "foto": "/fotos/red-nivel-dreno.jpg"
+      },
+      {
+        "titulo": "Drenar o óleo usado",
+        "texto": "Coloque o recipiente sob o bujão de dreno. Retire o respiro (o ar entra e o óleo escorre melhor) e depois o bujão de dreno, o mais baixo. Deixe escorrer até parar de pingar.",
+        "pecas": [],
+        "foto": "/fotos/red-nivel-dreno.jpg"
+      },
+      {
+        "titulo": "Olhar o óleo que saiu",
+        "texto": "Observe o óleo usado: leitoso indica água; brilho dourado indica desgaste da coroa de bronze; partículas de aço indicam desgaste dos rolamentos ou da rosca. Se achar algo, anote na observação do registro.",
+        "pecas": []
+      },
+      {
+        "titulo": "Fechar o dreno",
+        "texto": "Limpe o bujão de dreno, confira a vedação (troque se estiver danificada) e recoloque o bujão.",
+        "pecas": [],
+        "foto": "/fotos/red-nivel-dreno.jpg"
+      },
+      {
+        "titulo": "Conferir o galão",
+        "texto": "Leia o QR Code do galão antes de abrir. A ficha diz se é o óleo certo para este redutor.",
+        "pecas": [],
+        "tipo": "galao"
+      },
+      {
+        "titulo": "Abastecer",
+        "texto": "Abasteça pelo furo do respiro (enchimento): {dose}. Com o redutor parado, confira o nível pelo bujão de nível.",
+        "pecas": [],
+        "foto": "/fotos/red-enchimento.jpg"
+      },
+      {
+        "titulo": "Fechar e testar",
+        "texto": "Recoloque o bujão de nível e o respiro limpo e desobstruído, com o lacre retirado. Limpe a carcaça, retire o bloqueio e ligue o equipamento. Confira se não há vazamento nos bujões e retentores e se o ruído está normal.",
+        "pecas": [],
+        "foto": "/fotos/red-enchimento.jpg"
+      },
+      {
+        "titulo": "Descartar o óleo usado",
+        "texto": "{descarte}",
+        "pecas": []
+      }
+    ],
+    "analise_oleo": "Proposta do projeto: análise da viscosidade em laboratório (ver o cartão Análise do óleo). Enquanto não houver ensaio, a condição do óleo é acompanhada pelo aspecto no dreno (cor, transparência e partículas), pela temperatura da carcaça e pelas horas de uso.",
+    "periodicidade": "Troca conforme a temperatura do óleo: 15.000 h (80 °C); 10.000 h (85 °C); 7.500 h (90 °C). Avaliar o óleo nas primeiras 500 h.",
+    "epis": "Luvas nitrílicas e óculos de proteção",
+    "alertas": [
+      "Bloqueie e etiquete o equipamento (LOTO) antes de intervir.",
+      "Não misturar com óleo mineral nem com sintético PG (poliglicol)."
+    ],
+    "limite_carcaca_c": 75,
+    "aviso_temperatura": "Carcaça acima de 75 °C indica óleo acima do limite de 90 °C.",
+    "descarte": "Recolher o óleo usado em recipiente identificado e destinar ao rerrefino (Resolução CONAMA nº 362/2005).",
+    "pontos_oleo": {
+      "titulo": "Enchimento, nível e dreno · redutor da oficina",
+      "modelo": "/redutor_oficina3d.js",
+      "qr": "/fotos/qr-lubrificacao-RED-002.png",
+      "nota": "Modelo 3D simplificado do redutor da oficina (WEG-Cestari, série 818100, redução 1:25). Pontos marcados pela equipe no próprio redutor. Não há visor de nível: na posição de montagem adotada (vertical, placa para cima), o nível é conferido pelo bujão do meio da face da tampa cega.",
+      "pontos": [
+        {
+          "tags": [
+            "RSP-01"
+          ],
+          "nome": "Enchimento",
+          "sub": "respiro, em cima",
+          "texto": "É por aqui que entra o óleo. Retire o respiro de latão e abasteça por este furo. Recoloque o respiro limpo e desobstruído e, antes de ligar, confira se o lacre do respiro foi retirado (adesivo \"Retire o lacre\").",
+          "vista": [
+            0.45,
+            1,
+            0.9
+          ],
+          "fotos": [
+            {
+              "src": "/fotos/red-enchimento.jpg",
+              "legenda": "Face de cima: respiro de latão, ao lado da placa."
+            }
+          ]
+        },
+        {
+          "tags": [
+            "NIV-02"
+          ],
+          "nome": "Nível",
+          "sub": "bujão do meio",
+          "texto": "Não há visor: no Complemento ou na Troca, com o redutor parado e bloqueado, retire o bujão de nível e confira se o óleo chega ao furo. Nesta posição de montagem, o bujão de nível é o do meio da face da tampa cega (o de cima não é usado). Na inspeção visual não se abre o bujão.",
+          "vista": [
+            1,
+            0.3,
+            0.5
+          ],
+          "fotos": [
+            {
+              "src": "/fotos/red-nivel-dreno.jpg",
+              "legenda": "Face da tampa cega: bujão de nível (no meio) e, embaixo, o de dreno."
+            }
+          ]
+        },
+        {
+          "tags": [
+            "DRE-01",
+            "DRE-02"
+          ],
+          "nome": "Dreno",
+          "sub": "bujões de baixo",
+          "texto": "Por aqui escoa o óleo usado: bujão mais baixo da face da tampa cega e bujão da base. Coloque o recipiente embaixo, retire primeiro o respiro e depois o bujão de dreno.",
+          "vista": [
+            1,
+            -0.75,
+            0.75
+          ],
+          "fotos": [
+            {
+              "src": "/fotos/red-nivel-dreno.jpg",
+              "legenda": "Dreno: o bujão mais baixo da face da tampa cega (no meio fica o de nível)."
+            },
+            {
+              "src": "/fotos/red-dreno-base.jpg",
+              "legenda": "Bujão da base (parte de baixo do redutor)."
+            }
+          ]
+        },
+        {
+          "tags": [
+            "QR-01"
+          ],
+          "nome": "QR Code",
+          "sub": "etiqueta",
+          "sem_brilho": true,
+          "texto": "É a etiqueta desta ficha: o mecânico aponta o celular para ela, junto ao redutor, e a ficha de lubrificação abre. No redutor da oficina ela foi colada em cima, logo acima do adesivo amarelo \"Retire o lacre\", ao lado do respiro. No modelo é o QR Code de verdade: aproxime com dois dedos para ver.",
+          "vista": [
+            -0.3,
+            1,
+            0.5
+          ]
+        }
+      ]
+    },
+    "analise": {
+      "proposta": true,
+      "proposta_texto": "O óleo deste redutor ainda não foi analisado: a amostra será coletada na próxima troca e o resultado aparecerá aqui, puxado do SAP.",
+      "fonte": "sap",
+      "como": [
+        "Mecânico: na troca do óleo, coletar a amostra pelo dreno e mandar ao laboratório identificada com a tag RED-002 (o redutor tem só 0,87 L, então não se retira óleo só para analisar).",
+        "Laboratório: medir também o óleo novo, no mesmo aparelho, rotor e rotação, para servir de referência.",
+        "Laboratório: o ISO VG 460 é cerca de 10 vezes mais viscoso que o óleo do torno (≈ 900 mPa·s a 25 °C): escolher rotor e rotação que deixem o torque do viscosímetro entre 10 e 90 %.",
+        "Laboratório: lançar o resultado e a temperatura de cada leitura no SAP (documento de medição, IK11). A ficha puxa do SAP e calcula a variação e o semáforo."
+      ],
+      "laboratorio": "Laboratório do SENAI Três Lagoas",
+      "aparelho": "Viscosímetro rotacional digital Marte MVD-8",
+      "dica_registro": "Use o mesmo aparelho, rotor e rotação em todas as medições.",
+      "criterio": {
+        "atencao": 10,
+        "critico": 20
+      },
+      "oleo_ref": {
+        "nome": "ExxonMobil SHC 634 (ISO VG 460, recomendado no manual WEG)",
+        "v40": 460,
+        "v100": 50.7,
+        "iv": 174,
+        "densidade20": 0.87,
+        "fonte": "Mobil SHC 600 Series – valores típicos; densidade aproximada"
+      },
+      "ensaios": [],
+      "demonstracao": {
+        "codigo": "TOR-001",
+        "texto": "Ensaio de aprendizagem: a equipe fez a análise no laboratório do SENAI com o óleo usado de um torno da oficina, para dominar o método. O óleo deste redutor será analisado na próxima troca."
       }
     }
   },

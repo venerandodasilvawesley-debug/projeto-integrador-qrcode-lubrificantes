@@ -1124,7 +1124,23 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     });
   }
 
+  // Registros de lubrificação feitos neste aparelho antes da separação passam de RED-001 para RED-002.
+  function migrarRed002() {
+    try {
+      if (localStorage.getItem("migrou_red002")) return;
+      var regs = lerRegistros(), vida = localStorage.getItem("vida_oleo_RED-001");
+      regs.forEach(function (r) { if (r.codigo === "RED-001") r.codigo = "RED-002"; });
+      gravarRegistros(regs);
+      if (vida) { localStorage.setItem("vida_oleo_RED-002", vida); localStorage.removeItem("vida_oleo_RED-001"); }
+      var sap = JSON.parse(localStorage.getItem("sap_registros")) || [];
+      sap.forEach(function (d) { if (d.codigo === "RED-001" && d.origem !== "inspecao") d.codigo = "RED-002"; });
+      localStorage.setItem("sap_registros", JSON.stringify(sap));
+      localStorage.setItem("migrou_red002", "1");
+    } catch (err) {}
+  }
+
   function iniciar(equipamentos) {
+    migrarRed002();
     var g = location.pathname.match(/^\/g\/(OLE-\d{2})\/?$/i);
     if (g && window.Galao) return telaGalao(g[1].toUpperCase(), equipamentos);
     // /e/ = ficha com as duas páginas; /l/ = QR Code só da lubrificação; /i/ = QR Code só da inspeção
@@ -1132,6 +1148,11 @@ a.voltar{float:right;margin-left:10px;color:#fff;font-weight:700;font-size:.9rem
     if (!m) return telaInicial(equipamentos);
     var codigo = m[2].toUpperCase(), so = { l: "lubrificacao", i: "inspecao" }[m[1]] || "";
     if (!Object.prototype.hasOwnProperty.call(equipamentos, codigo)) return telaNaoEncontrado();
+    // RED-001 ficou só com a Inspeção; a Lubrificação virou RED-002. O QR antigo (/l/RED-001) continua valendo.
+    if (equipamentos[codigo].lubrificacao_em) {
+      if (so === "lubrificacao") return location.replace("/l/" + equipamentos[codigo].lubrificacao_em);
+      so = "inspecao";
+    }
     if (equipamentos[codigo].tipo === "monitoramento" && window.Monitor) return window.Monitor.tela(app, codigo, equipamentos[codigo], cabecalho);
     if (equipamentos[codigo].tipo === "analise_oleo" && window.AnaliseOleo) return window.AnaliseOleo.tela(app, codigo, equipamentos[codigo], cabecalho);
     telaFicha(codigo, equipamentos[codigo], so);

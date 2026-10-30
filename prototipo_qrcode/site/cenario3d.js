@@ -1,11 +1,11 @@
-// Cenário 3D: um dia de lubrificação na fábrica (fictícia). O lubrificador vai até o redutor RED-001, que aciona
+// Cenário 3D: um dia de lubrificação na fábrica (fictícia). O lubrificador vai até o redutor RED-002, que aciona
 // a esteira que leva casca de eucalipto para a queima na caldeira, lê o QR Code e faz a troca do óleo seguindo a ficha.
 // Tudo em milímetros, como o modelo do redutor. Eixo X = ao longo da esteira, Z = para o corredor.
 import * as THREE from "./vendor/three.module.min.js";
 import { OrbitControls } from "./vendor/OrbitControls.js";
 import { criarModelo } from "./redutor_oficina3d.js";
 
-const QR = "/fotos/qr-lubrificacao-RED-001.png";
+const QR = "/fotos/qr-lubrificacao-RED-002.png";
 const N_CASCA = 420, R_TAMBOR = 120, RPM_SAIDA = 70;  // 70 rpm na saída do redutor, como na placa
 const VEL_ESTEIRA = RPM_SAIDA / 60 * 2 * Math.PI * R_TAMBOR;
 const POS_RED = new THREE.Vector3(2000, 900 - 18, 560);  // saída do redutor alinhada ao tambor
@@ -448,7 +448,7 @@ function lubrificador() {
   bloco(corpo, 110, 130, 50, couro, 150, 10, 90);          // bolsa de ferramentas
   tubo(corpo, 12, 170, mat(0xc3c9cf, 0.3, 0.8), "y", 150, 110, 118, 8);
   placaTexto(corpo, ["LUBRIFICAÇÃO"], "#2a4f7a", "#fff", 250, 46, 0, 285, -120, Math.PI);
-  placaTexto(corpo, ["RED-001"], "#fff", "#2a4f7a", 90, 34, -90, 450, 116);
+  placaTexto(corpo, ["RED-002"], "#fff", "#2a4f7a", 90, 34, -90, 450, 116);
   tubo(corpo, 58, 80, pele, "y", 0, 605, 0, 14);
   tubo(corpo, 76, 34, uni, "y", 0, 582, 0, 16, 66);
   const cab = junta(corpo, 0, 640); L.j.cab = cab;
@@ -486,11 +486,11 @@ const POSES = {
   despeja: { bd: -0.95, bdc: -0.55, be: -0.95, bec: -0.55, cx: 0, cn: 0, y: 0, cab: 0.5, ab: 0.2 }
 };
 
-// ---------- telas do celular (mesmos dados da ficha do RED-001) ----------
+// ---------- telas do celular (mesmos dados da ficha do RED-002) ----------
 const cab = (t, s) => '<div class="cab">' + t + (s ? '<small>' + s + '</small>' : '') + '</div>';
 const TELAS = {
-  qr: '<div class="cam"><div class="mira"><img src="' + QR + '" alt="QR Code do redutor"></div><div>Lendo a etiqueta do RED-001…</div></div>',
-  ficha: cab("RED-001 · Lubrificação", "Redutor WEG-Cestari 1:25") + '<div class="corpo">' +
+  qr: '<div class="cam"><div class="mira"><img src="' + QR + '" alt="QR Code do redutor"></div><div>Lendo a etiqueta do RED-002…</div></div>',
+  ficha: cab("RED-002 · Lubrificação", "Redutor WEG-Cestari 1:25") + '<div class="corpo">' +
     '<div class="c seg"><span class="rot">Segurança</span>Bloqueie (LOTO), luvas e óculos. Não misture óleos.</div>' +
     '<div class="c ama"><span class="rot" style="color:inherit">Vida útil do óleo</span><b>ATENÇÃO</b><br>Últimos 20 %: programar a troca</div>' +
     '<div class="c"><span class="rot">Óleo</span><b class="g">PAO ISO VG 460</b>Não misturar com mineral nem PG</div>' +
@@ -500,8 +500,8 @@ const TELAS = {
     'Desligue no painel, tranque com cadeado e coloque a etiqueta "Não ligue".</div><div class="ok">✓ Equipamento bloqueado</div></div>',
   dreno: cab("Troca · drenar", "Bujão de baixo e bujão da base") + '<div class="corpo"><div class="c"><span class="rot">Observe o óleo retirado</span>' +
     'Cor, transparência e partículas.</div><div class="c"><span class="rot">Destino</span>Recipiente identificado, para o rerrefino.</div></div>',
-  galao: '<div class="cam"><div class="gal"><div style="font-size:.8em">RED-001-OLE-04</div><div style="font-size:1.4em;margin:.2em 0">VG 460</div><div style="font-size:.8em">PAO · laranja</div></div>' +
-    '<div class="ok" style="width:100%">✓ Galão certo para o RED-001</div></div>',
+  galao: '<div class="cam"><div class="gal"><div style="font-size:.8em">RED-002-OLE-04</div><div style="font-size:1.4em;margin:.2em 0">VG 460</div><div style="font-size:.8em">PAO · laranja</div></div>' +
+    '<div class="ok" style="width:100%">✓ Galão certo para o RED-002</div></div>',
   enche: cab("Troca · abastecer", "Pelo respiro, na face de cima") + '<div class="corpo" style="align-items:center;justify-content:center;text-align:center">' +
     '<span class="rot">Volume indicado: 0,87 L</span><div class="lit"><span id="litros">0,00</span> L</div>' +
     '<div class="c" style="width:100%">Confira o nível pelo bujão do meio.</div></div>',
@@ -517,7 +517,7 @@ function estadoInicial() {
 }
 const NA_FRENTE = [2000, 1020], NO_PAINEL = [3300, 1760], NO_DRENO = [2720, 560], NO_CARRINHO = [3300, 830], NO_RESPIRO = [1880, 960];
 const PASSOS = [
-  { tit: "A fábrica", txt: "A casca de eucalipto vai pela esteira até a queima na caldeira. Quem aciona a esteira é o redutor RED-001. A máquina está rodando e a etiqueta de QR Code fica na face de cima do redutor.",
+  { tit: "A fábrica", txt: "A casca de eucalipto vai pela esteira até a queima na caldeira. Quem aciona a esteira é o redutor RED-002. A máquina está rodando e a etiqueta de QR Code fica na face de cima do redutor.",
     cam: [[-7200, 4300, 7100], [900, 500, -900]], ini: [-8500, 1650], olha: 0, pose: "pe", dur: 5 },
   { tit: "Rota do lubrificador", txt: "O lubrificador segue pelo corredor com o celular. Não precisa ir até a sala de manutenção nem levar o manual.",
     rota: [[-3000, 1650], [1500, 1650], NA_FRENTE], olha: Math.PI, pose: "celular", seguir: [-2600, 1700, 4300], dur: 0.8 },

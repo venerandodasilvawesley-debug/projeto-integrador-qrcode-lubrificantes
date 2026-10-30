@@ -153,12 +153,15 @@ def main():
         # com lubrificação e inspeção, cada trabalho tem o seu QR Code: /l/ e /i/
         # a ficha de lubrificação pode ter dados próprios (bloco "lubrificacao"), diferentes dos da inspeção
         lub = {**e, **e.get("lubrificacao", {})}
-        if e.get("inspecao"):
+        if e.get("lubrificacao_em"):  # a lubrificação deste equipamento tem cadastro próprio: aqui só a inspeção
+            partes = [("INSPEÇÃO E POP", f"{base}/i/{codigo}", "", e["nome"])]
+        elif e.get("inspecao"):
             partes = [("LUBRIFICAÇÃO", f"{base}/l/{codigo}", faixa_oleo(codigo, lub), lub["nome"]),
                       ("INSPEÇÃO E POP", f"{base}/i/{codigo}", "", e["nome"])]
         else:
-            partes = [({"monitoramento": "MONITORAMENTO", "analise_oleo": "ANÁLISE DO ÓLEO"}.get(e.get("tipo"), "LUBRIFICAÇÃO"),
-                       f"{base}/e/{codigo}", faixa_oleo(codigo, lub), lub["nome"])]
+            tipo = e.get("tipo")
+            partes = [({"monitoramento": "MONITORAMENTO", "analise_oleo": "ANÁLISE DO ÓLEO"}.get(tipo, "LUBRIFICAÇÃO"),
+                       f"{base}/{'e' if tipo else 'l'}/{codigo}", faixa_oleo(codigo, lub), lub["nome"])]
         etiqueta = "".join(ETIQUETA.format(svg=qr_svg(url), codigo=html.escape(codigo), titulo=titulo,
                                            nome=html.escape(nome), oleo=oleo) for titulo, url, oleo, nome in partes)
         urls = " · ".join(f"<code>{html.escape(p[1])}</code>" for p in partes)

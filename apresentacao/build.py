@@ -278,8 +278,8 @@ caixa(sl, 0.6, 1.95, 4.2, 2.0,
       ["Página web: não precisa instalar aplicativo.",
        "Depois do primeiro acesso funciona sem internet.",
        "Etiqueta de papel colada em cima do redutor, com fita crepe: custo zero no protótipo."], tam=16, espaco=10)
-foto(sl, "qr-lubrificacao-RED-001.png", 0.6, 4.1, w=1.7, nome="QR RED-001")
-caixa(sl, 2.5, 4.35, 2.3, 1.2, [[("ficha-lubrificacao", {"negrito": True})], ".vercel.app/l/RED-001"], tam=13, cor=SUAVE, espaco=0)
+foto(sl, "qr-lubrificacao-RED-002.png", 0.6, 4.1, w=1.7, nome="QR RED-002")
+caixa(sl, 2.5, 4.35, 2.3, 1.2, [[("ficha-lubrificacao", {"negrito": True})], ".vercel.app/l/RED-002"], tam=13, cor=SUAVE, espaco=0)
 for i, arq in enumerate(["image4.png", "image5.png", "image6.png"]):
     foto(sl, arq, 5.0 + i * 2.0, 1.95, h=3.95, nome=f"Tela {i + 1}")
 notas(sl, "Telas: segurança e vida útil do óleo; pontos no modelo 3D com fotos reais; registro em poucos toques. "
@@ -301,7 +301,7 @@ for i, (a, b) in enumerate(fun):
     bolinha(sl, x + 0.25, y + 0.25, 0.5, str(i + 1), cor=LARANJA, tam=16)
     caixa(sl, x + 0.9, y + 0.27, 2.3, 0.5, a, tam=17, cor=AZUL, negrito=True)
     caixa(sl, x + 0.25, y + 0.9, 2.95, 0.75, b, tam=14)
-notas(sl, "Troca simulada em 14/10/2026: próxima troca prevista para 30/06/2028. Tag do óleo RED-001-OLE-04, "
+notas(sl, "Troca simulada em 14/10/2026: próxima troca prevista para 30/06/2028. Tag do óleo RED-002-OLE-04, "
           "galão laranja (código e cor fictícios, de exemplo). A integração com o SAP é só uma proposta mostrada na tela.")
 
 # ---------------- 10. modelo 3D ----------------
@@ -310,7 +310,7 @@ titulo(sl, "Modelo 3D do redutor", "Vista explodida e em corte, com a ficha e o 
 foto(sl, "3d-explodido.png", 0.6, 2.25, h=4.1, nome="Vista explodida")
 foto(sl, "3d-corte.png", 6.2, 2.25, h=4.1, nome="Vista em corte")
 notas(sl, "Tocando no número ou na peça, a ficha mostra nome, material, função, o que inspecionar e falhas comuns, "
-          "além do tag (ex.: RED-001-COR-01). Peças internas são ilustrativas e devem ser confirmadas numa desmontagem. "
+          "além do tag (ex.: RED-002-COR-01). Peças internas são ilustrativas e devem ser confirmadas numa desmontagem. "
           "Na vista em corte aparece o óleo no nível certo, até o bujão do meio (NIV-02): a rosca fica mergulhada e a "
           "coroa molha embaixo e leva o óleo para o engrenamento.")
 
@@ -435,7 +435,7 @@ caixa(sl, 3.7, 1.95, 7.2, 2.6,
       [[("TOR-001 (torno): ", {"negrito": True, "cor": AZUL}),
         ("o QR mostra a situação do óleo com semáforo, o que fazer, as fotos do ensaio e o histórico. "
          "Quem lança o resultado é o laboratório, no SAP: a ficha puxa de lá e calcula a variação. O mecânico só consulta.", {})],
-       [("RED-001 (redutor): ", {"negrito": True, "cor": AZUL}),
+       [("RED-002 (redutor): ", {"negrito": True, "cor": AZUL}),
         ("o mesmo cartão entra como proposta: o óleo VG 460 ainda não foi analisado. "
          "A amostra será coletada na troca, porque o redutor tem só 0,87 L.", {})]], tam=16, espaco=12)
 foto(sl, "qr-tor-001.png", 3.7, 4.55, w=1.5, nome="QR TOR-001")
@@ -482,7 +482,7 @@ notas(sl, "Limitações: cronometragem em ambiente didático; ordem não contrab
 # ---------------- 18. obrigado ----------------
 sl = S[17]
 capa(sl, "OBRIGADO!", "Perguntas?", ["Leia os QR Codes e veja as fichas ao vivo"])
-for i, (arq, rot) in enumerate([("qr-lubrificacao-RED-001.png", "RED-001 · lubrificação"), ("qr-tor-001.png", "TOR-001 · análise do óleo")]):
+for i, (arq, rot) in enumerate([("qr-lubrificacao-RED-002.png", "RED-002 · lubrificação"), ("qr-tor-001.png", "TOR-001 · análise do óleo")]):
     x = 0.98 + i * 2.3
     forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x, 5.6, 1.6, 1.6, BRANCO, raio=0.06)
     foto(sl, arq, x + 0.1, 5.7, w=1.4)
